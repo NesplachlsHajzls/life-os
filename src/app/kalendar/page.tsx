@@ -498,7 +498,8 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
     const map: Record<string, Task[]> = {}
     for (const t of tasks) {
       if (!t.due_date) continue
-      const key = new Date(t.due_date).toDateString()
+      // Use T00:00:00 to force local time parsing (avoid UTC offset shifting the date)
+      const key = new Date(t.due_date + 'T00:00:00').toDateString()
       if (!map[key]) map[key] = []
       map[key].push(t)
     }
@@ -548,8 +549,9 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
               ? <div className="text-[12px] text-gray-300 py-2 text-center">Žádné události</div>
               : (
                 <div className="flex flex-col gap-2">
-                  {evs.map(ev => <EventChip key={ev.id} event={ev} onClick={() => onEventClick(ev)} />)}
+                  {/* Tasks without time → top of day (before timed events) */}
                   {tks.map(t => <TaskChip key={t.id} task={t} onClick={onTaskClick ? () => onTaskClick(t) : undefined} />)}
+                  {evs.map(ev => <EventChip key={ev.id} event={ev} onClick={() => onEventClick(ev)} />)}
                 </div>
               )
             }
