@@ -1,0 +1,147 @@
+'use client'
+
+import { useState } from 'react'
+import { Header } from '@/components/layout/Header'
+import { FinanceTabs } from '@/features/finance/components/FinanceTabs'
+import { useFinance } from '@/features/finance/hooks/useFinance'
+import { useUser } from '@/hooks/useUser'
+import { AddExpenseSheet, AddIncomeSheet } from '@/features/finance/components/AddTransactionSheet'
+import { fmt, mLabel, mKey, todayStr } from '@/features/finance/utils'
+import { FAB } from '@/components/ui/FAB'
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+export default function TransakcePage() {
+  const { user } = useUser()
+  const userId = user?.id ?? DEMO_USER_ID
+
+  const {
+    loading, toast,
+    curMonth, setCurMonth,
+    filtExpenses, filtIncomes,
+    expCats, incCats, wallets,
+    addExpenseManual, addIncomeManual,
+    removeExpense, removeIncome,
+    allMonths,
+  } = useFinance(userId)
+
+  const [showAddExp, setShowAddExp] = useState(false)
+  const [showAddInc, setShowAddInc] = useState(false)
+  const [filter, setFilter]         = useState<'all' | 'exp' | 'inc'>('all')
+
+  // Merge and sort all transactions
+  const allItems = [
+    ...filtExpenses.map(e => ({ ...e, kind: 'exp' as const })),
+    ...filtIncomes.map(i => ({ ...i, kind: 'inc' as const })),
+  ]
+    .filter(item => filter === 'all' || item.kind === filter)
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  // Group by date
+  const grouped: Record<string, typeof allItems> = {}
+  for (const item of allItems) {
+    if (!grouped[item.date]) grouped[item.date] = []
+    grouped[item.date].push(item)
+  }
+
+  return (
+    <>
+      <Header title="Finance 💰" />
+      <FinanceTabs active="Transakce" />
+
+      {/* Month selector */}
+      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-100">
+        <button onClick={() => { const i = allMonths.indexOf(curMonth); if (i > 0) setCurMonth(allMonths[i - 1]) }}
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-lg">‹</button>
+        <span className="text-[13px] font-bold text-gray-700">{mLabel(curMonth)}</span>
+        <button onClick={() => { const i = allMonths.indexOf(curMonth); if (i < allMonths.length - 1) setCurMonth(allMonths[i + 1]) }}
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-lg">›</button>
+      </div>
+
+      {/* Filter chips */}
+      <div className="flex gap-2 px-4 py-2.5 bg-white border-b border-gray-100">
+        {(['all', 'exp', 'inc'] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-colors ${
+              filter === f ? 'bg-[var(--color-primary)] text-white' : 'bg-gray-100 text-gray-500'
+            }`}
+          >
+            {f === 'all' ? 'Vše' : f === 'exp' ? '💸 Výdaje' : '💚 Příjmy'}
+          </button>
+        ))}
+      </div>
+
+      <div className="p-4">
+        {loading && (
+          <div className="text-center py-10 text-gray-400 text-[13px]">Načítám…</div>
+        )}
+
+        {!loading && allItems.length === 0 && (
+          <div className="text-center py-10 text-gray-400 text-[13px]">
+            Žádné záznamy pro {mLabel(curMonth)}.
+          </div>
+        )}
+
+        {Object.entries(grouped).map(([date, items]) => (
+          <div key={date} className="mb-4">
+            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">
+              {date === todayStr()
+                ? '📍 Dnes'
+                : date.slice(5).replace('-', '. ') + '. ' + date.slice(0, 4)}
+            </div>
+            <div className="bg-white rounded-[16px] shadow-card overflow-hidden">
+              {items.map((item, idx) => {
+                const isExp = item.kind === 'exp'
+                const cat = isExp ? (expCats[item.category] ?? { icon: '📦', color: '#94a3b8' }) : null
+                return (
+                  <div
+                    key={item.id}
+                    className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? 'border-b border-gray-100' : ''}`}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-[16px] flex-shrink-0"
+                      style={{ background: isExp ? (cat!.color + '22') : '#22c55e22' }}
+                    >
+                      {isExp ? cat!.icon : '💚'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-semibold truncate">{item.description}</div>
+                      <div className="text-[11px] text-gray-400">{item.category}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[14px] font-bold ${isExp ? 'text-gray-700' : 'text-green-600'}`}>
+                        {isExp ? '−' : '+'}{fmt(item.amount)} Kč
+                      </span>
+                      <button
+                        onClick={() => isExp ? removeExpense(item.id) : removeIncome(item.id)}
+                        className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 text-[14px] transition-colors"
+                      >×</button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+          {toast}
+        </div>
+      )}
+
+      <FAB onClick={() => setShowAddExp(true)} />
+
+      {showAddExp && (
+        <AddExpenseSheet expCats={expCats} wallets={wallets} onSave={addExpenseManual} onClose={() => setShowAddExp(false)} />
+      )}
+      {showAddInc && (
+        <AddIncomeSheet incCats={incCats} onSave={addIncomeManual} onClose={() => setShowAddInc(false)} />
+      )}
+    </>
+  )
+}

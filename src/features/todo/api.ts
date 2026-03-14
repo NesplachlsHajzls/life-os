@@ -1,0 +1,117 @@
+import { supabase } from '@/lib/supabase'
+
+// ── Types ─────────────────────────────────────────────────────────
+
+export interface Task {
+  id: string
+  user_id: string
+  title: string
+  priority: 1 | 2 | 3
+  category: string
+  client_id: string | null
+  due_date: string | null
+  note: string | null
+  url: string | null
+  status: 'open' | 'done'
+  done_at: string | null
+  created_at: string
+}
+
+export interface Routine {
+  id: string
+  user_id: string
+  title: string
+  frequency: 'daily' | 'weekly' | 'monthly'
+  category: string
+}
+
+export interface TodoCategory {
+  id: string
+  name: string
+  icon: string
+  color: string
+}
+
+export interface TodoSettings {
+  user_id: string
+  categories: TodoCategory[]
+}
+
+// ── Default categories ────────────────────────────────────────────
+
+export const DEFAULT_TODO_CATEGORIES: TodoCategory[] = [
+  { id: 'osobni',    name: 'Osobní',    icon: '👤', color: '#3b82f6' },
+  { id: 'prace',     name: 'Práce',     icon: '💼', color: '#8b5cf6' },
+  { id: 'byt',       name: 'Byt',       icon: '🏠', color: '#f59e0b' },
+  { id: 'ostatni',   name: 'Ostatní',   icon: '📦', color: '#94a3b8' },
+]
+
+// ── Tasks ─────────────────────────────────────────────────────────
+
+export async function fetchTasks(userId: string): Promise<Task[]> {
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*')
+    .eq('user_id', userId)
+    .order('priority', { ascending: false })
+    .order('due_date', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as Task[]) ?? []
+}
+
+export async function insertTask(payload: Omit<Task, 'id' | 'created_at'>): Promise<Task> {
+  const { data, error } = await supabase.from('tasks').insert(payload).select().single()
+  if (error) throw new Error(error.message)
+  return data as Task
+}
+
+export async function updateTask(task: Partial<Task> & { id: string }): Promise<void> {
+  const { error } = await supabase.from('tasks').update(task).eq('id', task.id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const { error } = await supabase.from('tasks').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+// ── Routines ──────────────────────────────────────────────────────
+
+export async function fetchRoutines(userId: string): Promise<Routine[]> {
+  const { data, error } = await supabase
+    .from('routines')
+    .select('*')
+    .eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  return (data as Routine[]) ?? []
+}
+
+export async function insertRoutine(payload: Omit<Routine, 'id'>): Promise<Routine> {
+  const { data, error } = await supabase.from('routines').insert(payload).select().single()
+  if (error) throw new Error(error.message)
+  return data as Routine
+}
+
+export async function deleteRoutine(id: string): Promise<void> {
+  const { error } = await supabase.from('routines').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+// ── Settings (categories) ─────────────────────────────────────────
+
+export async function fetchTodoSettings(userId: string): Promise<TodoSettings | null> {
+  const { data } = await supabase
+    .from('todo_settings')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle()
+  return data as TodoSettings | null
+}
+
+export async function saveTodoSettings(userId: string, categories: TodoCategory[]): Promise<void> {
+  const { error } = await supabase
+    .from('todo_settings')
+    .upsert({ user_id: userId, categories }, { onConflict: 'user_id' })
+  if (error) throw new Error(error.message)
+}

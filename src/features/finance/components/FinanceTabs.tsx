@@ -1,0 +1,27 @@
+'use client'
+
+export function FinanceTabs({ active }: { active: string }) {
+  const tabs = [
+    { label: 'Přehled',   href: '/finance' },
+    { label: 'Transakce', href: '/finance/transakce' },
+    { label: 'Peněženky',href: '/finance/penezenky' },
+    { label: 'Opakované', href: '/finance/opakovane' },
+  ]
+  return (
+    <div className="flex gap-1 px-4 py-2 bg-white border-b border-gray-100 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      {tabs.map(t => (
+        <a
+          key={t.href}
+          href={t.href}
+          className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold whitespace-nowrap transition-colors ${
+            active === t.label
+              ? 'bg-[var(--color-primary)] text-white'
+              : 'text-gray-500 hover:bg-gray-100'
+          }`}
+        >
+          {t.label}
+        </a>
+      ))}
+    </div>
+  )
+}

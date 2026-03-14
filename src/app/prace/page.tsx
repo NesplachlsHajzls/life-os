@@ -1,0 +1,327 @@
+'use client'
+
+import { useState, useMemo } from 'react'
+import Link from 'next/link'
+import { Header } from '@/components/layout/Header'
+import { useUser } from '@/hooks/useUser'
+import { usePrace } from '@/features/prace/hooks/usePrace'
+import { CLIENT_COLORS, CLIENT_ICONS, CLIENT_STATUSES, ClientStatus, SUBJECT_TYPES, SubjectType, SUBJECT_TYPE_COLORS, FIRST_MEETING_COLORS } from '@/features/prace/api'
+
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
+
+const STATUS_COLORS: Record<string, string> = {
+  'Potenciální': '#f59e0b',
+  'Aktivní':     '#10b981',
+  'Pozastavený': '#94a3b8',
+  'Ukončený':    '#ef4444',
+}
+
+export default function PracePage() {
+  const { user, loading: authLoading } = useUser()
+  const userId = !authLoading ? (user?.id ?? DEMO_USER_ID) : null
+
+  const { loading, toast, clients, openTasks, dueThisWeek, deals, addClient, getClientOpenTasks } = usePrace(userId)
+
+  const [search,        setSearch]        = useState('')
+  const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>('Vše')
+  const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>('Vše')
+  const [showAdd,      setShowAdd]      = useState(false)
+  const [newName,      setNewName]      = useState('')
+  const [newColor,     setNewColor]     = useState(CLIENT_COLORS[0])
+  const [newIcon,      setNewIcon]      = useState('💼')
+  const [newStatus,    setNewStatus]    = useState<ClientStatus>('Aktivní')
+
+  async function handleAdd() {
+    if (!newName.trim()) return
+    await addClient(newName.trim(), newColor, newIcon, newStatus)
+    setNewName(''); setNewColor(CLIENT_COLORS[0]); setNewIcon('💼'); setNewStatus('Aktivní')
+    setShowAdd(false)
+  }
+
+  const filtered = useMemo(() => {
+    return clients
+      .filter(c => statusFilter === 'Vše' || c.status === statusFilter)
+      .filter(c => subjectFilter === 'Vše' || c.subject_type === subjectFilter)
+      .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))
+  }, [clients, search, statusFilter, subjectFilter])
+
+  const activeDeals = deals.filter(d => d.stage !== 'Uzavřen' && d.stage !== 'Ztracen')
+  const totalDealValue = activeDeals.reduce((sum, d) => sum + (d.value ?? 0), 0)
+
+  return (
+    <>
+      <Header title="💼 Práce" />
+
+      <div className="p-4 lg:p-6">
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+          {[
+            { label: 'Klienti',       value: clients.length,      icon: '👥' },
+            { label: 'Otevřené úkoly',value: openTasks.length,    icon: '📋' },
+            { label: 'Aktivní obchody',value: activeDeals.length, icon: '💰' },
+            { label: 'Tento týden',   value: dueThisWeek.length,  icon: '📅' },
+          ].map(s => (
+            <div key={s.label} className="bg-white rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+              <span className="text-[22px]">{s.icon}</span>
+              <div>
+                <div className="text-[20px] font-extrabold text-gray-900 leading-tight">{s.value}</div>
+                <div className="text-[11px] text-gray-400">{s.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Toolbar */}
+        <div className="flex flex-col gap-3 mb-4">
+          {/* Row 1: Search + Pipeline + Add */}
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[15px]">🔍</span>
+              <input
+                className="w-full bg-white border border-gray-200 rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
+                placeholder="Hledat klienta…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+              />
+            </div>
+            <Link href="/prace/pipeline"
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold border border-gray-200 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap flex-shrink-0"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              📊 Pipeline
+            </Link>
+            <button onClick={() => setShowAdd(true)}
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-bold text-white whitespace-nowrap flex-shrink-0"
+              style={{ background: 'var(--color-primary)' }}>
+              + Přidat
+            </button>
+          </div>
+
+          {/* Row 2: Status filter */}
+          <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Status:</span>
+            {(['Vše', ...CLIENT_STATUSES] as const).map(s => (
+              <button key={s} onClick={() => setStatusFilter(s)}
+                className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
+                style={{
+                  background: statusFilter === s ? (s === 'Vše' ? 'var(--color-primary)' : STATUS_COLORS[s]) : '#f3f4f6',
+                  color: statusFilter === s ? '#fff' : '#6b7280',
+                }}>
+                {s}
+              </button>
+            ))}
+          </div>
+
+          {/* Row 3: Subject type filter */}
+          <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Typ:</span>
+            <button onClick={() => setSubjectFilter('Vše')}
+              className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
+              style={{ background: subjectFilter === 'Vše' ? 'var(--color-primary)' : '#f3f4f6', color: subjectFilter === 'Vše' ? '#fff' : '#6b7280' }}>
+              Vše
+            </button>
+            {SUBJECT_TYPES.map(t => (
+              <button key={t} onClick={() => setSubjectFilter(t)}
+                className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
+                style={{
+                  background: subjectFilter === t ? SUBJECT_TYPE_COLORS[t] : SUBJECT_TYPE_COLORS[t] + '15',
+                  color: subjectFilter === t ? '#fff' : SUBJECT_TYPE_COLORS[t],
+                }}>
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Client list */}
+        {loading ? (
+          <div className="text-center py-12 text-gray-400">Načítám…</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-[40px] mb-2">🔍</div>
+            <p className="text-[14px] font-semibold text-gray-500">{search ? 'Žádný klient nenalezen' : 'Zatím žádní klienti'}</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+            {/* Table header */}
+            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+              <span>Klient</span>
+              <span>Kontakt</span>
+              <span className="text-center">Úkoly</span>
+              <span className="text-center">Obchody</span>
+              <span>Status</span>
+              <span />
+            </div>
+
+            {filtered.map((client, i) => {
+              const openCount  = getClientOpenTasks(client.id).length
+              const dealCount  = deals.filter(d => d.client_id === client.id && d.stage !== 'Uzavřen' && d.stage !== 'Ztracen').length
+              const subjColor  = client.subject_type ? SUBJECT_TYPE_COLORS[client.subject_type] : null
+
+              return (
+                <Link key={client.id} href={`/prace/${client.id}`}
+                  className={`flex lg:grid lg:grid-cols-[2fr_160px_80px_80px_80px_40px] items-center gap-3 lg:gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
+
+                  {/* Name + icon + badges */}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[17px] flex-shrink-0"
+                      style={{ background: client.color + '18', borderLeft: `3px solid ${client.color}` }}>
+                      {client.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[14px] font-bold text-gray-900 truncate">{client.name}</div>
+                      <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                        {client.subject_type && subjColor && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]"
+                            style={{ background: subjColor + '18', color: subjColor }}>
+                            {client.subject_type}
+                          </span>
+                        )}
+                        {client.is_prague && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px] bg-sky-50 text-sky-600">
+                            🏙️ Praha
+                          </span>
+                        )}
+                        {!client.subject_type && !client.is_prague && client.address && (
+                          <span className="text-[11px] text-gray-400 truncate hidden lg:block">{client.address}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact info */}
+                  <div className="hidden lg:block min-w-0">
+                    {client.phone && <div className="text-[12px] text-gray-600 truncate">📞 {client.phone}</div>}
+                    {client.email && <div className="text-[12px] text-gray-400 truncate">✉️ {client.email}</div>}
+                    {!client.phone && !client.email && <span className="text-[12px] text-gray-300">—</span>}
+                  </div>
+
+                  {/* Open tasks */}
+                  <div className="hidden lg:flex justify-center">
+                    {openCount > 0
+                      ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{openCount}</span>
+                      : <span className="text-[12px] text-gray-300">—</span>}
+                  </div>
+
+                  {/* Active deals */}
+                  <div className="hidden lg:flex justify-center">
+                    {dealCount > 0
+                      ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">{dealCount}</span>
+                      : <span className="text-[12px] text-gray-300">—</span>}
+                  </div>
+
+                  {/* Status + first meeting dot */}
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: STATUS_COLORS[client.status] + '18', color: STATUS_COLORS[client.status] }}>
+                      {client.status}
+                    </span>
+                    {client.first_meeting_status && (
+                      <span
+                        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                        style={{ background: FIRST_MEETING_COLORS[client.first_meeting_status] }}
+                        title={client.first_meeting_status === 'done' ? 'Byl jsem' : client.first_meeting_status === 'scheduled' ? 'Čeká mě' : 'Ještě ne'}
+                      />
+                    )}
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="hidden lg:flex justify-center text-gray-300 text-[16px]">→</div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Count */}
+        {!loading && filtered.length > 0 && (
+          <p className="text-[12px] text-gray-400 text-center mt-3">
+            {filtered.length} z {clients.length} klientů
+          </p>
+        )}
+      </div>
+
+      {/* Add client modal */}
+      {showAdd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
+          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-[18px] font-extrabold text-gray-900">👥 Nový klient</h2>
+              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+            </div>
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Název *</label>
+                <input className="w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
+                  value={newName} onChange={e => setNewName(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                  placeholder="Název firmy nebo klienta" autoFocus />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Status</label>
+                <div className="flex gap-2 flex-wrap">
+                  {CLIENT_STATUSES.map(s => (
+                    <button key={s} onClick={() => setNewStatus(s)}
+                      className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
+                      style={{ background: newStatus === s ? STATUS_COLORS[s] : STATUS_COLORS[s] + '15', color: newStatus === s ? '#fff' : STATUS_COLORS[s] }}>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Ikona</label>
+                <div className="flex flex-wrap gap-2">
+                  {CLIENT_ICONS.map(icon => (
+                    <button key={icon} onClick={() => setNewIcon(icon)}
+                      className="w-9 h-9 rounded-[10px] text-[18px] flex items-center justify-center transition-all"
+                      style={{ background: newIcon === icon ? newColor + '20' : '#f3f4f6', border: `2px solid ${newIcon === icon ? newColor : 'transparent'}` }}>
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Barva</label>
+                <div className="flex gap-2 flex-wrap">
+                  {CLIENT_COLORS.map(color => (
+                    <button key={color} onClick={() => setNewColor(color)}
+                      className="w-7 h-7 rounded-full transition-all"
+                      style={{ background: color, border: '2px solid white', outline: newColor === color ? `3px solid ${color}` : 'none', outlineOffset: 2 }} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="flex items-center gap-3 p-3 rounded-[12px]" style={{ background: newColor + '10' }}>
+                <div className="w-8 h-8 rounded-[8px] flex items-center justify-center text-[16px]" style={{ background: newColor + '20' }}>{newIcon}</div>
+                <span className="text-[14px] font-bold" style={{ color: newColor }}>{newName || 'Náhled klienta'}</span>
+                <span className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: STATUS_COLORS[newStatus] + '20', color: STATUS_COLORS[newStatus] }}>{newStatus}</span>
+              </div>
+
+              <div className="flex gap-3">
+                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={handleAdd} disabled={!newName.trim()}
+                  className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
+                  style={{ background: newColor }}>Přidat klienta</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+          {toast}
+        </div>
+      )}
+    </>
+  )
+}
