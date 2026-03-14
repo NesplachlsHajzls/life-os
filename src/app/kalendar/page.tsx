@@ -472,13 +472,14 @@ function WeekStrip({ weekStart, events, onDayClick }: {
 
 // ── WeekView ──────────────────────────────────────────────────────
 
-function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick }: {
+function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, highlightDay }: {
   weekStart: Date
   events: CalendarEvent[]
   tasks: Task[]
   onDayClick: (d: Date) => void
   onEventClick: (ev: CalendarEvent) => void
   onTaskClick?: (task: Task) => void
+  highlightDay?: string | null
 }) {
   const today = new Date()
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -512,6 +513,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
 
   return (
     <div className="p-4 flex flex-col gap-0">
+      <style>{`@keyframes calFlash{0%{background:transparent}20%{background:rgba(59,130,246,0.12)}60%{background:rgba(59,130,246,0.08)}100%{background:transparent}}`}</style>
       {visibleDays.length === 0 && (
         <div className="text-center py-12 text-gray-400">
           <div className="text-3xl mb-2">📭</div>
@@ -522,12 +524,17 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
         const isToday = isSameDay(day, today)
         const evs = eventsByDay[day.toDateString()] ?? []
         const tks = tasksByDay[day.toDateString()] ?? []
+        const dayIso = day.toISOString().split('T')[0]
+        const isHighlight = highlightDay === dayIso
         const label = isToday
           ? `📍 ${CZ_DAYS_FULL[day.getDay()]} ${day.getDate()}. ${CZ_MONTHS[day.getMonth()]} — dnes`
           : `${CZ_DAYS_FULL[day.getDay()]} ${day.getDate()}. ${CZ_MONTHS[day.getMonth()]}`
 
         return (
-          <div key={day.toDateString()}>
+          <div
+            key={day.toDateString()}
+            style={isHighlight ? { animation: 'calFlash 1.4s ease-out', borderRadius: 12 } : undefined}
+          >
             {di > 0 && <div className="h-px bg-gray-100 my-4" />}
             <div className="flex items-center justify-between mb-2">
               <div className={`text-[11px] font-bold uppercase tracking-wide ${isToday ? 'text-[var(--color-primary)]' : 'text-gray-400'}`}>
@@ -555,10 +562,10 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
 
 // ── MonthView ─────────────────────────────────────────────────────
 
-function MonthView({ month, events, onDayClick, onEventClick }: {
+function MonthView({ month, events, onNavigateToDay, onEventClick }: {
   month: Date
   events: CalendarEvent[]
-  onDayClick: (d: Date) => void
+  onNavigateToDay: (d: Date) => void
   onEventClick: (ev: CalendarEvent) => void
 }) {
   const today = new Date()
@@ -598,7 +605,7 @@ function MonthView({ month, events, onDayClick, onEventClick }: {
           return (
             <div
               key={day.toDateString()}
-              onClick={() => isCurrentMonth && onDayClick(day)}
+              onClick={() => isCurrentMonth && onNavigateToDay(day)}
               className={`min-h-[64px] rounded-xl p-1.5 transition-colors ${
                 isCurrentMonth ? 'cursor-pointer hover:bg-gray-50' : 'opacity-25 pointer-events-none'
               }`}
@@ -654,6 +661,7 @@ export default function KalendarPage() {
   const [editingCalTask, setEditingCalTask] = useState<Task | null>(null)
   const [calCategories, setCalCategories]  = useState<TodoCategory[]>(DEFAULT_TODO_CATEGORIES)
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
+  const [highlightDay, setHighlightDay]    = useState<string | null>(null)
 
   const weekStart = startOfWeek(currentDate)
   const weekEnd   = addDays(weekStart, 6)
@@ -691,6 +699,13 @@ export default function KalendarPage() {
 
   useEffect(() => { load() }, [load])
 
+  // Refresh tasks when user switches back to this tab (e.g. after editing in todo)
+  useEffect(() => {
+    function onVisible() { if (document.visibilityState === 'visible') load() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [load])
+
   // Load task categories and clients for edit modal
   useEffect(() => {
     if (!userId) return
@@ -719,6 +734,15 @@ export default function KalendarPage() {
   function handleDayClick(day: Date) {
     setAddDate(day)
     setShowAdd(true)
+  }
+
+  function handleMonthDayClick(day: Date) {
+    // Switch to week view, navigate to the clicked day, then flash highlight
+    setView('week')
+    setCurrent(day)
+    const dayIso = day.toISOString().split('T')[0]
+    setHighlightDay(dayIso)
+    setTimeout(() => setHighlightDay(null), 1600)
   }
 
   async function handleDeleteEvent(id: string) {
@@ -811,12 +835,13 @@ export default function KalendarPage() {
             onDayClick={handleDayClick}
             onEventClick={setDetail}
             onTaskClick={setEditingCalTask}
+            highlightDay={highlightDay}
           />
         ) : (
           <MonthView
             month={currentDate}
             events={events}
-            onDayClick={handleDayClick}
+            onNavigateToDay={handleMonthDayClick}
             onEventClick={setDetail}
           />
         )}

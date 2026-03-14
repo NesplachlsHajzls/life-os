@@ -154,12 +154,13 @@ export function formatDueDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00')
   const today = new Date(); today.setHours(0,0,0,0)
   const diff = Math.round((date.getTime() - today.getTime()) / 86400000)
+  const DAY = ['Ne','Po','Út','St','Čt','Pá','So']
+  const d = date.getDate()
+  const m = date.getMonth() + 1
   if (diff === 0) return 'Dnes'
   if (diff === 1) return 'Zítra'
   if (diff === -1) return 'Včera'
-  if (diff < 0) return `Před ${Math.abs(diff)} dny`
-  if (diff < 7) return ['Ne','Po','Út','St','Čt','Pá','So'][date.getDay()]
-  return `${date.getDate()}.${date.getMonth()+1}.`
+  return `${DAY[date.getDay()]} ${d}. ${m}.`
 }
 
 export function isDueSoon(dateStr: string): boolean {
