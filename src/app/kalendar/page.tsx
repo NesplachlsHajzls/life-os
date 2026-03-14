@@ -562,9 +562,10 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
 
 // ── MonthView ─────────────────────────────────────────────────────
 
-function MonthView({ month, events, onNavigateToDay, onEventClick }: {
+function MonthView({ month, events, tasks, onNavigateToDay, onEventClick }: {
   month: Date
   events: CalendarEvent[]
+  tasks: Task[]
   onNavigateToDay: (d: Date) => void
   onEventClick: (ev: CalendarEvent) => void
 }) {
@@ -587,6 +588,17 @@ function MonthView({ month, events, onNavigateToDay, onEventClick }: {
     return map
   }, [events])
 
+  const tasksByDay = useMemo(() => {
+    const map: Record<string, Task[]> = {}
+    for (const t of tasks) {
+      if (!t.due_date) continue
+      const key = new Date(t.due_date + 'T00:00:00').toDateString()
+      if (!map[key]) map[key] = []
+      map[key].push(t)
+    }
+    return map
+  }, [tasks])
+
   const dayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']
 
   return (
@@ -601,6 +613,14 @@ function MonthView({ month, events, onNavigateToDay, onEventClick }: {
           const isCurrentMonth = day.getMonth() === month.getMonth()
           const isToday = isSameDay(day, today)
           const evs = eventsByDay[day.toDateString()] ?? []
+          const tks = tasksByDay[day.toDateString()] ?? []
+          const totalItems = evs.length + tks.length
+
+          // Show up to 2 items total (events first, then tasks)
+          const shownEvs = evs.slice(0, 2)
+          const remainingSlots = 2 - shownEvs.length
+          const shownTks = tks.slice(0, remainingSlots)
+          const overflow = totalItems - shownEvs.length - shownTks.length
 
           return (
             <div
@@ -616,7 +636,7 @@ function MonthView({ month, events, onNavigateToDay, onEventClick }: {
                 {day.getDate()}
               </div>
               <div className="flex flex-col gap-0.5">
-                {evs.slice(0, 2).map(ev => {
+                {shownEvs.map(ev => {
                   const c = CATEGORY_COLORS[ev.category]
                   return (
                     <div
@@ -628,8 +648,17 @@ function MonthView({ month, events, onNavigateToDay, onEventClick }: {
                     </div>
                   )
                 })}
-                {evs.length > 2 && (
-                  <div className="text-[9px] text-gray-400 text-center">+{evs.length - 2}</div>
+                {shownTks.map(t => (
+                  <div
+                    key={t.id}
+                    onClick={e => e.stopPropagation()}
+                    className="text-[9px] font-semibold px-1 py-0.5 rounded truncate bg-indigo-50 text-indigo-500"
+                  >
+                    ✅ {t.title}
+                  </div>
+                ))}
+                {overflow > 0 && (
+                  <div className="text-[9px] text-gray-400 text-center">+{overflow}</div>
                 )}
               </div>
             </div>
@@ -841,6 +870,7 @@ export default function KalendarPage() {
           <MonthView
             month={currentDate}
             events={events}
+            tasks={tasks}
             onNavigateToDay={handleMonthDayClick}
             onEventClick={setDetail}
           />
