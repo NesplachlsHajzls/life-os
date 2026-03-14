@@ -44,7 +44,16 @@ export function AddTaskSheet({
 
   const [title,        setTitle]       = useState(existingTask?.title ?? '')
   const [priority,     setPriority]    = useState<1 | 2 | 3>(existingTask?.priority ?? 2)
-  const [category,     setCategory]    = useState(existingTask?.category ?? defaultCategory ?? categories[0]?.name ?? 'Osobní')
+  const [category,     setCategory]    = useState(() => {
+    // Normalize stored category (e.g. 'prace' → 'Práce') for legacy tasks
+    const raw = existingTask?.category ?? defaultCategory ?? categories[0]?.name ?? 'Osobní'
+    const matched = categories.find(c =>
+      c.name === raw ||
+      c.name.toLowerCase() === raw.toLowerCase() ||
+      c.id === raw.toLowerCase()
+    )
+    return matched?.name ?? raw
+  })
   const [dueDate,      setDueDate]     = useState(existingTask?.due_date ?? '')
   const [note,         setNote]        = useState(existingTask?.note ?? '')
   const [url,          setUrl]         = useState(existingTask?.url ?? '')

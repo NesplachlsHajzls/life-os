@@ -15,7 +15,12 @@ interface TaskItemProps {
 export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clientsMap }: TaskItemProps) {
   const done = task.status === 'done'
   const priority = PRIORITY_DOTS[task.priority as 1|2|3] ?? PRIORITY_DOTS[2]
-  const cat = categories.find(c => c.name === task.category)
+  // Match by name (exact), name (case-insensitive), or id — handles legacy 'prace' vs 'Práce'
+  const cat = categories.find(c =>
+    c.name === task.category ||
+    c.name.toLowerCase() === task.category?.toLowerCase() ||
+    c.id === task.category?.toLowerCase()
+  )
   const overdue = task.due_date && !done && isDueSoon(task.due_date) && task.due_date < new Date().toISOString().slice(0, 10)
   const clientName = task.client_id && clientsMap ? clientsMap[task.client_id] : null
 
