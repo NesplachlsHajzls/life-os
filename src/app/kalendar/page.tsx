@@ -249,7 +249,8 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
     }
     return '10:00'
   })
-  const [isRecurring, setIsRecurring] = useState(prefill?.is_recurring ?? false)
+  // Duplicates are always one-time — never inherit recurring status from original
+  const [isRecurring, setIsRecurring] = useState(isDuplicate ? false : (prefill?.is_recurring ?? false))
   const [recType, setRecType]         = useState<RecurrenceType>(prefill?.recurrence_type ?? 'weekly')
   const [recInterval, setRecInterval] = useState(prefill?.recurrence_interval ?? 1)
   const [saving, setSaving]           = useState(false)
@@ -551,11 +552,9 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
     return map
   }, [tasks])
 
-  const visibleDays = days.filter(d => {
-    const evs = eventsByDay[d.toDateString()] ?? []
-    const tks = tasksByDay[d.toDateString()] ?? []
-    return evs.length > 0 || tks.length > 0 || isSameDay(d, today)
-  })
+  // Show ALL 7 days so navigating to a week always shows every day,
+  // even if events haven't loaded yet or the day is empty
+  const visibleDays = days
 
   return (
     <div className="p-4 flex flex-col gap-0">
@@ -721,7 +720,12 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick }: {
                   </div>
                 ))}
                 {overflow > 0 && (
-                  <div className="text-[9px] text-gray-400 text-center">+{overflow}</div>
+                  <button
+                    onClick={e => { e.stopPropagation(); onNavigateToDay(day) }}
+                    className="text-[9px] text-[var(--color-primary)] font-bold text-center w-full hover:underline"
+                  >
+                    +{overflow} další
+                  </button>
                 )}
               </div>
             </div>
@@ -772,11 +776,10 @@ export default function KalendarPage() {
 
   const load = useCallback(async (silent = false) => {
     if (!userId) return
-    if (!silent) {
-      setLoading(true)
-      setEvents([])
-      setTasks([])
-    }
+    // Always clear stale data — even on silent reload — so ghost items never linger
+    setEvents([])
+    setTasks([])
+    if (!silent) setLoading(true)
     try {
       const [rawEvents, rawTasks] = await Promise.all([
         fetchEventsInRange(userId, rangeStart.toISOString(), rangeEnd.toISOString()),
