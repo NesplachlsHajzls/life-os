@@ -67,22 +67,23 @@ function fmtDateInput(d: Date): string {
 
 // ── EventChip ─────────────────────────────────────────────────────
 
-function EventChip({ event, onClick, onComplete }: {
+function EventChip({ event, onClick, onComplete, isCompleted }: {
   event: CalendarEvent
   onClick?: () => void
   onComplete?: () => void
+  isCompleted?: boolean
 }) {
   const c = CATEGORY_COLORS[event.category]
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border} flex items-center gap-2`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border} flex items-center gap-2 ${isCompleted ? 'opacity-55' : ''}`}
     >
       <div className="flex-1 min-w-0">
         <div className={`text-[10px] font-bold uppercase tracking-wide ${c.text}`}>
           {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
         </div>
-        <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
+        <div className={`text-[13px] font-semibold text-gray-800 mt-0.5 truncate ${isCompleted ? 'line-through' : ''}`}>
           {event.emoji && <span className="mr-1">{event.emoji}</span>}
           {event.title}
           {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
@@ -90,10 +91,16 @@ function EventChip({ event, onClick, onComplete }: {
       </div>
       {onComplete && (
         <button
-          onClick={e => { e.stopPropagation(); onComplete() }}
-          className="w-5 h-5 rounded-full border-2 border-gray-300 hover:border-green-400 hover:bg-green-50 flex-shrink-0 transition-colors"
+          onClick={e => { e.stopPropagation(); if (!isCompleted) onComplete() }}
+          className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all flex items-center justify-center ${
+            isCompleted
+              ? 'bg-green-400 border-green-400'
+              : 'border-gray-300 hover:border-green-400 hover:bg-green-50'
+          }`}
           aria-label="Dokončit"
-        />
+        >
+          {isCompleted && <span className="text-[9px] text-white font-bold leading-none">✓</span>}
+        </button>
       )}
     </div>
   )
@@ -101,10 +108,11 @@ function EventChip({ event, onClick, onComplete }: {
 
 // ── TaskChip ──────────────────────────────────────────────────────
 
-function TaskChip({ task, onClick, onComplete }: {
+function TaskChip({ task, onClick, onComplete, isCompleted }: {
   task: Task
   onClick?: () => void
   onComplete?: () => void
+  isCompleted?: boolean
 }) {
   const isWork = task.category === 'prace' || !!task.client_id
   const borderColor = isWork ? 'border-indigo-400' : 'border-gray-300'
@@ -112,22 +120,28 @@ function TaskChip({ task, onClick, onComplete }: {
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2 ${isCompleted ? 'opacity-55' : ''}`}
     >
       <div className="flex-1 min-w-0">
         <div className={`text-[10px] font-bold uppercase tracking-wide ${isWork ? 'text-indigo-400' : 'text-gray-400'}`}>
           ✅ Úkol{isWork ? ' · práce' : ''}
         </div>
-        <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
+        <div className={`text-[13px] font-semibold text-gray-700 mt-0.5 truncate ${isCompleted ? 'line-through' : ''}`}>
           {task.title}
         </div>
       </div>
       {onComplete && (
         <button
-          onClick={e => { e.stopPropagation(); onComplete() }}
-          className="w-5 h-5 rounded-full border-2 border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100 flex-shrink-0 transition-colors"
+          onClick={e => { e.stopPropagation(); if (!isCompleted) onComplete() }}
+          className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all flex items-center justify-center ${
+            isCompleted
+              ? 'bg-indigo-400 border-indigo-400'
+              : 'border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100'
+          }`}
           aria-label="Dokončit úkol"
-        />
+        >
+          {isCompleted && <span className="text-[9px] text-white font-bold leading-none">✓</span>}
+        </button>
       )}
     </div>
   )
@@ -496,7 +510,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
 
 // ── WeekView ──────────────────────────────────────────────────────
 
-function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, highlightDay }: {
+function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, highlightDay }: {
   weekStart: Date
   events: CalendarEvent[]
   tasks: Task[]
@@ -505,6 +519,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
   onTaskClick?: (task: Task) => void
   onEventComplete?: (ev: CalendarEvent) => void
   onTaskComplete?: (task: Task) => void
+  completedIds?: Set<string>
   highlightDay?: string | null
 }) {
   const today = new Date()
@@ -582,6 +597,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                       task={t}
                       onClick={onTaskClick ? () => onTaskClick(t) : undefined}
                       onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
+                      isCompleted={completedIds?.has(t.id)}
                     />
                   ))}
                   {evs.map(ev => (
@@ -590,6 +606,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                       event={ev}
                       onClick={() => onEventClick(ev)}
                       onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
+                      isCompleted={completedIds?.has(ev.id)}
                     />
                   ))}
                 </div>
@@ -733,6 +750,7 @@ export default function KalendarPage() {
   const [calCategories, setCalCategories]  = useState<TodoCategory[]>(DEFAULT_TODO_CATEGORIES)
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
   const [highlightDay, setHighlightDay]    = useState<string | null>(null)
+  const [completedIds, setCompletedIds]    = useState<Set<string>>(new Set())
   const lastSaveRef = useRef<number>(0)
 
   const weekStart = startOfWeek(currentDate)
@@ -855,18 +873,18 @@ export default function KalendarPage() {
     }
   }
 
-  async function handleCompleteEvent(event: CalendarEvent) {
-    const baseId = event.id.split('_')[0]
-    await deleteEvent(baseId)
-    lastSaveRef.current = Date.now()
-    setDetail(null)
-    load(true)
+  // Visually mark an event as done — no DB change (events have no done state),
+  // item stays in calendar, just gets strikethrough + filled tick
+  function handleCompleteEvent(event: CalendarEvent) {
+    setCompletedIds(prev => new Set([...prev, event.id]))
   }
 
+  // Visually mark a task as done + sync to todo DB in background.
+  // Item stays visible in calendar for the rest of the session.
   async function handleCompleteTask(task: Task) {
+    setCompletedIds(prev => new Set([...prev, task.id]))
     await updateTask({ ...task, status: 'done' })
-    lastSaveRef.current = Date.now()
-    load(true)
+    // No load() — task stays visible with checked style until next natural reload
   }
 
   function handleOpenEdit(ev: CalendarEvent) {
@@ -930,6 +948,7 @@ export default function KalendarPage() {
             onTaskClick={setEditingCalTask}
             onEventComplete={handleCompleteEvent}
             onTaskComplete={handleCompleteTask}
+            completedIds={completedIds}
             highlightDay={highlightDay}
           />
         ) : (
