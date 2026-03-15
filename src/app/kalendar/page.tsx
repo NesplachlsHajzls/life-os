@@ -67,43 +67,68 @@ function fmtDateInput(d: Date): string {
 
 // ── EventChip ─────────────────────────────────────────────────────
 
-function EventChip({ event, onClick }: { event: CalendarEvent; onClick?: () => void }) {
+function EventChip({ event, onClick, onComplete }: {
+  event: CalendarEvent
+  onClick?: () => void
+  onComplete?: () => void
+}) {
   const c = CATEGORY_COLORS[event.category]
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border}`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border} flex items-center gap-2`}
     >
-      <div className={`text-[10px] font-bold uppercase tracking-wide ${c.text}`}>
-        {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
+      <div className="flex-1 min-w-0">
+        <div className={`text-[10px] font-bold uppercase tracking-wide ${c.text}`}>
+          {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
+        </div>
+        <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
+          {event.emoji && <span className="mr-1">{event.emoji}</span>}
+          {event.title}
+          {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
+        </div>
       </div>
-      <div className="text-[13px] font-semibold text-gray-800 mt-0.5">
-        {event.emoji && <span className="mr-1">{event.emoji}</span>}
-        {event.title}
-        {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
-      </div>
+      {onComplete && (
+        <button
+          onClick={e => { e.stopPropagation(); onComplete() }}
+          className="w-5 h-5 rounded-full border-2 border-gray-300 hover:border-green-400 hover:bg-green-50 flex-shrink-0 transition-colors"
+          aria-label="Dokončit"
+        />
+      )}
     </div>
   )
 }
 
 // ── TaskChip ──────────────────────────────────────────────────────
 
-function TaskChip({ task, onClick }: { task: Task; onClick?: () => void }) {
+function TaskChip({ task, onClick, onComplete }: {
+  task: Task
+  onClick?: () => void
+  onComplete?: () => void
+}) {
   const isWork = task.category === 'prace' || !!task.client_id
-  // Work tasks: indigo left border; personal: gray
   const borderColor = isWork ? 'border-indigo-400' : 'border-gray-300'
   const bgColor     = isWork ? 'bg-indigo-50'      : 'bg-gray-50'
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2`}
     >
-      <div className={`text-[10px] font-bold uppercase tracking-wide ${isWork ? 'text-indigo-400' : 'text-gray-400'}`}>
-        ✅ Úkol{isWork ? ' · práce' : ''}
+      <div className="flex-1 min-w-0">
+        <div className={`text-[10px] font-bold uppercase tracking-wide ${isWork ? 'text-indigo-400' : 'text-gray-400'}`}>
+          ✅ Úkol{isWork ? ' · práce' : ''}
+        </div>
+        <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
+          {task.title}
+        </div>
       </div>
-      <div className="text-[13px] font-semibold text-gray-700 mt-0.5">
-        {task.title}
-      </div>
+      {onComplete && (
+        <button
+          onClick={e => { e.stopPropagation(); onComplete() }}
+          className="w-5 h-5 rounded-full border-2 border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100 flex-shrink-0 transition-colors"
+          aria-label="Dokončit úkol"
+        />
+      )}
     </div>
   )
 }
@@ -270,7 +295,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden" onClick={e => e.stopPropagation()}>
         <div className="p-5 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-[16px] font-bold">{modalTitle}</h2>
           <button onClick={onClose} className="text-gray-400 text-lg">✕</button>
@@ -329,7 +354,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
           {/* Date */}
           <div>
             <label className={labelCls}>Datum</label>
-            <input type="date" className={fieldCls} value={date} onChange={e => setDate(e.target.value)} />
+            <input type="date" className={`${fieldCls} min-w-0 max-w-full`} value={date} onChange={e => setDate(e.target.value)} />
           </div>
 
           {/* All day toggle */}
@@ -471,13 +496,15 @@ function WeekStrip({ weekStart, events, onDayClick }: {
 
 // ── WeekView ──────────────────────────────────────────────────────
 
-function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, highlightDay }: {
+function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, highlightDay }: {
   weekStart: Date
   events: CalendarEvent[]
   tasks: Task[]
   onDayClick: (d: Date) => void
   onEventClick: (ev: CalendarEvent) => void
   onTaskClick?: (task: Task) => void
+  onEventComplete?: (ev: CalendarEvent) => void
+  onTaskComplete?: (task: Task) => void
   highlightDay?: string | null
 }) {
   const today = new Date()
@@ -549,8 +576,22 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
               : (
                 <div className="flex flex-col gap-2">
                   {/* Tasks without time → top of day (before timed events) */}
-                  {tks.map(t => <TaskChip key={t.id} task={t} onClick={onTaskClick ? () => onTaskClick(t) : undefined} />)}
-                  {evs.map(ev => <EventChip key={ev.id} event={ev} onClick={() => onEventClick(ev)} />)}
+                  {tks.map(t => (
+                    <TaskChip
+                      key={t.id}
+                      task={t}
+                      onClick={onTaskClick ? () => onTaskClick(t) : undefined}
+                      onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
+                    />
+                  ))}
+                  {evs.map(ev => (
+                    <EventChip
+                      key={ev.id}
+                      event={ev}
+                      onClick={() => onEventClick(ev)}
+                      onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
+                    />
+                  ))}
                 </div>
               )
             }
@@ -787,17 +828,44 @@ export default function KalendarPage() {
     load(true)
   }
 
-  function handleEventSaved(_ev: CalendarEvent) {
+  function handleEventSaved(ev: CalendarEvent) {
     lastSaveRef.current = Date.now()
     setShowAdd(false)
     setDupEvent(null)
-    load(true)
+    // If the saved event is outside the current range (e.g. duplicate to another week),
+    // navigate there so it's visible — load() fires automatically via useEffect
+    const evDate = new Date(ev.start_datetime)
+    if (evDate < rangeStart || evDate > rangeEnd) {
+      setCurrent(evDate)
+    } else {
+      load(true)
+    }
   }
 
-  function handleEventUpdated(_updated: CalendarEvent) {
+  function handleEventUpdated(updated: CalendarEvent) {
     lastSaveRef.current = Date.now()
     setEditEvent(null)
     setDetail(null)
+    // Navigate to updated event's date if it moved outside the current range
+    const evDate = new Date(updated.start_datetime)
+    if (evDate < rangeStart || evDate > rangeEnd) {
+      setCurrent(evDate)
+    } else {
+      load(true)
+    }
+  }
+
+  async function handleCompleteEvent(event: CalendarEvent) {
+    const baseId = event.id.split('_')[0]
+    await deleteEvent(baseId)
+    lastSaveRef.current = Date.now()
+    setDetail(null)
+    load(true)
+  }
+
+  async function handleCompleteTask(task: Task) {
+    await updateTask({ ...task, status: 'done' })
+    lastSaveRef.current = Date.now()
     load(true)
   }
 
@@ -860,6 +928,8 @@ export default function KalendarPage() {
             onDayClick={handleDayClick}
             onEventClick={setDetail}
             onTaskClick={setEditingCalTask}
+            onEventComplete={handleCompleteEvent}
+            onTaskComplete={handleCompleteTask}
             highlightDay={highlightDay}
           />
         ) : (
