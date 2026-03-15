@@ -758,17 +758,22 @@ export default function KalendarPage() {
   const lastSaveRef = useRef<number>(0)
 
   const weekStart = startOfWeek(currentDate)
-  // endOfDay so Sunday events at any time of day are included in the fetch range
   const weekEnd   = endOfDay(addDays(weekStart, 6))
 
-  const rangeStart = view === 'week' ? weekStart : startOfMonth(currentDate)
-  const rangeEnd   = view === 'week' ? weekEnd   : endOfMonth(currentDate)
+  // ── Single shared fetch range: always the full calendar month ──────────────
+  // Both week view and month view read from the SAME state so there are no
+  // "two memories". Week view already filters client-side by day key, so it
+  // only renders events that fall in the visible 7 days.
+  const rangeStart = startOfWeek(startOfMonth(currentDate))   // Mon of first displayed week
+  const rangeEnd   = endOfDay(addDays(                        // Sun of last displayed week
+    startOfWeek(endOfMonth(currentDate)),
+    6,
+  ))
 
   const load = useCallback(async (silent = false) => {
     if (!userId) return
     if (!silent) {
       setLoading(true)
-      // Clear stale data immediately so month/week view never shows ghost items
       setEvents([])
       setTasks([])
     }
@@ -778,7 +783,6 @@ export default function KalendarPage() {
         fetchTasks(userId),
       ])
 
-      // Expand recurring events — show ALL events (no tab filter)
       const expanded: CalendarEvent[] = []
       for (const ev of rawEvents) {
         if (ev.is_recurring) {
@@ -788,14 +792,12 @@ export default function KalendarPage() {
         }
       }
       setEvents(expanded)
-
-      // Tasks with due_date only — show ALL
       setTasks(rawTasks.filter(t => t.status === 'open' && !!t.due_date))
     } finally {
       setLoading(false)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, view, currentDate])
+  }, [userId, currentDate])   // 'view' removed — range no longer depends on it
 
   useEffect(() => { load() }, [load])
 
