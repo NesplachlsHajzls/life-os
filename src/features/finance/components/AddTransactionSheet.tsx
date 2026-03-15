@@ -59,7 +59,7 @@ export function AddExpenseSheet({ expCats, wallets, onSave, onClose }: AddExpens
 
         <div>
           <label className={labelCls}>Popis</label>
-          <input className={fieldCls} value={desc} onChange={e => setDesc(e.target.value)} placeholder="oběd, taxi, netflix..." autoFocus />
+          <input className={fieldCls} value={desc} onChange={e => setDesc(e.target.value)} placeholder="oběd, taxi, netflix..." />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -166,7 +166,7 @@ export function AddIncomeSheet({ incCats, onSave, onClose }: AddIncomeSheetProps
 
         <div>
           <label className={labelCls}>Popis</label>
-          <input className={fieldCls} value={desc} onChange={e => setDesc(e.target.value)} placeholder="výplata, faktura..." autoFocus />
+          <input className={fieldCls} value={desc} onChange={e => setDesc(e.target.value)} placeholder="výplata, faktura..." />
         </div>
 
         <div className="grid grid-cols-2 gap-3">

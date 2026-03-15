@@ -9,10 +9,18 @@ interface SheetProps {
 }
 
 export function Sheet({ title, onClose, children }: SheetProps) {
-  // Prevent body scroll when sheet is open
+  // Lock body scroll without losing scroll position (fixes iOS jump on close)
   useEffect(() => {
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
+    const scrollY = window.scrollY
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+    return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, scrollY)
+    }
   }, [])
 
   return (

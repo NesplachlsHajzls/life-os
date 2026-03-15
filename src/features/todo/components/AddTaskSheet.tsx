@@ -132,7 +132,6 @@ export function AddTaskSheet({
           onChange={e => setTitle(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleSave()}
           placeholder="Co je potřeba udělat..."
-          autoFocus
         />
       </div>
 

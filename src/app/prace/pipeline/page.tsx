@@ -193,7 +193,7 @@ export default function PipelinePage() {
             <div className="flex flex-col gap-4">
               <div>
                 <label className={labelCls}>Název obchodu *</label>
-                <input className={fieldCls} value={fTitle} onChange={e => setFTitle(e.target.value)} placeholder="Název projektu nebo zakázky" autoFocus />
+                <input className={fieldCls} value={fTitle} onChange={e => setFTitle(e.target.value)} placeholder="Název projektu nebo zakázky" />
               </div>
               <div className="relative">
                 <label className={labelCls}>Klient *</label>

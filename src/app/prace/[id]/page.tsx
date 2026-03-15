@@ -653,7 +653,7 @@ export default function ClientPage() {
                   <div className="flex gap-2">
                     <input className="flex-1 bg-gray-50 border rounded-[10px] px-3 py-2 text-[13px] outline-none" style={{ borderColor: clientColor }}
                       placeholder="Napiš úkol… (p2, zítra, …)" value={quickInput} onChange={e => setQuickInput(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(); if (e.key === 'Escape') setShowQuickAdd(false) }} autoFocus />
+                      onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(); if (e.key === 'Escape') setShowQuickAdd(false) }}/>
                     <button onClick={handleQuickAdd} className="px-4 py-2 rounded-[10px] text-white text-[13px] font-bold" style={{ background: clientColor }}>+</button>
                     <button onClick={() => setShowQuickAdd(false)} className="px-3 py-2 rounded-[10px] border border-gray-200 text-gray-400">✕</button>
                   </div>
@@ -839,7 +839,7 @@ export default function ClientPage() {
                 <label className={labelCls}>Název schůzky *</label>
                 <input className={fieldCls} value={mTitle} onChange={e => setMTitle(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAddMeeting()}
-                  placeholder="Např. Prezentace nabídky, Podpis smlouvy…" autoFocus />
+                  placeholder="Např. Prezentace nabídky, Podpis smlouvy…"/>
               </div>
               <div>
                 <label className={labelCls}>Datum</label>
@@ -871,7 +871,7 @@ export default function ClientPage() {
               <button onClick={() => setShowAddContact(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
-              <div><label className={labelCls}>Jméno *</label><input className={fieldCls} value={cName} onChange={e => setCName(e.target.value)} placeholder="Jméno a příjmení" autoFocus /></div>
+              <div><label className={labelCls}>Jméno *</label><input className={fieldCls} value={cName} onChange={e => setCName(e.target.value)} placeholder="Jméno a příjmení"/></div>
               <div><label className={labelCls}>Funkce / Role</label><input className={fieldCls} value={cRole} onChange={e => setCRole(e.target.value)} placeholder="CEO, Obchodní ředitel…" /></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className={labelCls}>Telefon</label><input className={fieldCls} value={cPhone} onChange={e => setCPhone(e.target.value)} placeholder="+420…" /></div>
@@ -913,7 +913,7 @@ export default function ClientPage() {
                   ))}
                 </div>
               </div>
-              <div><label className={labelCls}>Popis *</label><input className={fieldCls} value={aTitle} onChange={e => setATitle(e.target.value)} placeholder="Co se řešilo…" autoFocus /></div>
+              <div><label className={labelCls}>Popis *</label><input className={fieldCls} value={aTitle} onChange={e => setATitle(e.target.value)} placeholder="Co se řešilo…"/></div>
               <div><label className={labelCls}>Podrobnosti</label><textarea className={fieldCls + ' resize-none'} rows={2} value={aDesc} onChange={e => setADesc(e.target.value)} placeholder="Volitelné podrobnosti…" /></div>
               <div><label className={labelCls}>Datum a čas</label><input className={fieldCls} type="datetime-local" value={aDate} onChange={e => setADate(e.target.value)} /></div>
               <div className="flex gap-3 pt-1">
@@ -935,7 +935,7 @@ export default function ClientPage() {
               <button onClick={() => setShowAddDeal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
-              <div><label className={labelCls}>Název *</label><input className={fieldCls} value={dTitle} onChange={e => setDTitle(e.target.value)} placeholder="Název zakázky nebo projektu" autoFocus /></div>
+              <div><label className={labelCls}>Název *</label><input className={fieldCls} value={dTitle} onChange={e => setDTitle(e.target.value)} placeholder="Název zakázky nebo projektu"/></div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className={labelCls}>Hodnota (CZK)</label><input className={fieldCls} type="number" value={dValue} onChange={e => setDValue(e.target.value)} placeholder="0" /></div>
                 <div><label className={labelCls}>Pravděpodobnost %</label><input className={fieldCls} type="number" min="0" max="100" value={dProb} onChange={e => setDProb(e.target.value)} /></div>
@@ -979,7 +979,7 @@ export default function ClientPage() {
               <div>
                 <label className={labelCls}>Název *</label>
                 <input className={fieldCls} value={tTitle} onChange={e => setTTitle(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSaveTask()} autoFocus />
+                  onKeyDown={e => e.key === 'Enter' && handleSaveTask()}/>
               </div>
               <div>
                 <label className={labelCls}>Priorita</label>
@@ -1031,7 +1031,7 @@ export default function ClientPage() {
               {/* Základní info */}
               <div>
                 <label className={labelCls}>Název klienta *</label>
-                <input className={fieldCls} value={eName} onChange={e => setEName(e.target.value)} placeholder="Název firmy…" autoFocus />
+                <input className={fieldCls} value={eName} onChange={e => setEName(e.target.value)} placeholder="Název firmy…"/>
               </div>
 
               {/* Status */}

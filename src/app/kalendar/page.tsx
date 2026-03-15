@@ -292,7 +292,6 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                 placeholder="Název události…"
                 value={title}
                 onChange={e => setTitle(e.target.value)}
-                autoFocus
               />
             </div>
             {showEmojis && (
