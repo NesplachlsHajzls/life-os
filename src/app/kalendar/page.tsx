@@ -57,6 +57,10 @@ function endOfMonth(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59)
 }
 
+function endOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999)
+}
+
 function fmtTime(iso: string): string {
   return new Date(iso).toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })
 }
@@ -754,7 +758,8 @@ export default function KalendarPage() {
   const lastSaveRef = useRef<number>(0)
 
   const weekStart = startOfWeek(currentDate)
-  const weekEnd   = addDays(weekStart, 6)
+  // endOfDay so Sunday events at any time of day are included in the fetch range
+  const weekEnd   = endOfDay(addDays(weekStart, 6))
 
   const rangeStart = view === 'week' ? weekStart : startOfMonth(currentDate)
   const rangeEnd   = view === 'week' ? weekEnd   : endOfMonth(currentDate)
