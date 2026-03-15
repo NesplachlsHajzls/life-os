@@ -77,13 +77,13 @@ function EventChip({ event, onClick, onComplete, isCompleted }: {
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border} flex items-center gap-2 ${isCompleted ? 'opacity-55' : ''}`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border} flex items-center gap-2`}
     >
       <div className="flex-1 min-w-0">
         <div className={`text-[10px] font-bold uppercase tracking-wide ${c.text}`}>
           {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
         </div>
-        <div className={`text-[13px] font-semibold text-gray-800 mt-0.5 truncate ${isCompleted ? 'line-through' : ''}`}>
+        <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
           {event.emoji && <span className="mr-1">{event.emoji}</span>}
           {event.title}
           {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
@@ -91,7 +91,7 @@ function EventChip({ event, onClick, onComplete, isCompleted }: {
       </div>
       {onComplete && (
         <button
-          onClick={e => { e.stopPropagation(); if (!isCompleted) onComplete() }}
+          onClick={e => { e.stopPropagation(); onComplete() }}
           className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all flex items-center justify-center ${
             isCompleted
               ? 'bg-green-400 border-green-400'
@@ -120,19 +120,19 @@ function TaskChip({ task, onClick, onComplete, isCompleted }: {
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2 ${isCompleted ? 'opacity-55' : ''}`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2`}
     >
       <div className="flex-1 min-w-0">
         <div className={`text-[10px] font-bold uppercase tracking-wide ${isWork ? 'text-indigo-400' : 'text-gray-400'}`}>
           ✅ Úkol{isWork ? ' · práce' : ''}
         </div>
-        <div className={`text-[13px] font-semibold text-gray-700 mt-0.5 truncate ${isCompleted ? 'line-through' : ''}`}>
+        <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
           {task.title}
         </div>
       </div>
       {onComplete && (
         <button
-          onClick={e => { e.stopPropagation(); if (!isCompleted) onComplete() }}
+          onClick={e => { e.stopPropagation(); onComplete() }}
           className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all flex items-center justify-center ${
             isCompleted
               ? 'bg-indigo-400 border-indigo-400'
@@ -761,7 +761,12 @@ export default function KalendarPage() {
 
   const load = useCallback(async (silent = false) => {
     if (!userId) return
-    if (!silent) setLoading(true)
+    if (!silent) {
+      setLoading(true)
+      // Clear stale data immediately so month/week view never shows ghost items
+      setEvents([])
+      setTasks([])
+    }
     try {
       const [rawEvents, rawTasks] = await Promise.all([
         fetchEventsInRange(userId, rangeStart.toISOString(), rangeEnd.toISOString()),
@@ -873,18 +878,23 @@ export default function KalendarPage() {
     }
   }
 
-  // Visually mark an event as done — no DB change (events have no done state),
-  // item stays in calendar, just gets strikethrough + filled tick
+  // Pure visual toggle — no DB changes, no removal from list
   function handleCompleteEvent(event: CalendarEvent) {
-    setCompletedIds(prev => new Set([...prev, event.id]))
+    setCompletedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(event.id)) next.delete(event.id)
+      else next.add(event.id)
+      return next
+    })
   }
 
-  // Visually mark a task as done + sync to todo DB in background.
-  // Item stays visible in calendar for the rest of the session.
-  async function handleCompleteTask(task: Task) {
-    setCompletedIds(prev => new Set([...prev, task.id]))
-    await updateTask({ ...task, status: 'done' })
-    // No load() — task stays visible with checked style until next natural reload
+  function handleCompleteTask(task: Task) {
+    setCompletedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(task.id)) next.delete(task.id)
+      else next.add(task.id)
+      return next
+    })
   }
 
   function handleOpenEdit(ev: CalendarEvent) {

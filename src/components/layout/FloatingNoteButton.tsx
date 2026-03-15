@@ -31,8 +31,8 @@ export function FloatingNoteButton() {
     }
   }, [userId, loading, router])
 
-  // Nezobrazovat na stránkách s poznámkami (tam je tlačítko přímo)
-  if (pathname.startsWith('/poznamky') || pathname === '/login') return null
+  // Zobrazit pouze na dashboardu — na ostatních stránkách má každá sekce vlastní tlačítko přidání
+  if (pathname !== '/') return null
 
   return (
     <button
