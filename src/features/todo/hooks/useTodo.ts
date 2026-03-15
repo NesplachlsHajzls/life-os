@@ -4,10 +4,12 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   fetchTasks, insertTask, updateTask, deleteTask,
   fetchRoutines, insertRoutine, deleteRoutine,
-  fetchTodoSettings, saveTodoSettings,
-  Task, Routine, TodoCategory, DEFAULT_TODO_CATEGORIES,
+  Task, Routine, TodoCategory,
 } from '../api'
 import { parseTaskInput } from '../utils'
+import { DEFAULT_CATEGORIES, fetchCategories, saveCategories as saveCategories_api } from '@/features/categories/api'
+
+const DEFAULT_TODO_CATEGORIES = DEFAULT_CATEGORIES
 
 export function useTodo(userId: string) {
   const [tasks,      setTasks]      = useState<Task[]>([])
@@ -28,12 +30,12 @@ export function useTodo(userId: string) {
     Promise.all([
       fetchTasks(userId),
       fetchRoutines(userId),
-      fetchTodoSettings(userId),
-    ]).then(([t, r, s]) => {
+      fetchCategories(userId),
+    ]).then(([t, r, cats]) => {
       if (cancelled) return
       setTasks(t)
       setRoutines(r)
-      if (s?.categories?.length) setCategories(s.categories)
+      if (cats.length) setCategories(cats)
       setLoading(false)
     }).catch(() => setLoading(false))
     return () => { cancelled = true }
@@ -113,10 +115,10 @@ export function useTodo(userId: string) {
     setRoutines(prev => prev.filter(r => r.id !== id))
   }, [])
 
-  // ── Categories ───────────────────────────────────────────────────
+  // ── Categories (sdílené přes celou appku) ────────────────────────
   const saveCategories = useCallback(async (cats: TodoCategory[]) => {
     setCategories(cats)
-    await saveTodoSettings(userId, cats)
+    await saveCategories_api(userId, cats)
     showToast('✅ Kategorie uloženy')
   }, [userId])
 

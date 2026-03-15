@@ -1,4 +1,9 @@
 import { supabase } from '@/lib/supabase'
+import { AppCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
+
+// TodoCategory = AppCategory (zpětná kompatibilita)
+export type TodoCategory = AppCategory
+export { DEFAULT_CATEGORIES as DEFAULT_TODO_CATEGORIES }
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -25,26 +30,10 @@ export interface Routine {
   category: string
 }
 
-export interface TodoCategory {
-  id: string
-  name: string
-  icon: string
-  color: string
-}
-
 export interface TodoSettings {
   user_id: string
   categories: TodoCategory[]
 }
-
-// ── Default categories ────────────────────────────────────────────
-
-export const DEFAULT_TODO_CATEGORIES: TodoCategory[] = [
-  { id: 'osobni',    name: 'Osobní',    icon: '👤', color: '#3b82f6' },
-  { id: 'prace',     name: 'Práce',     icon: '💼', color: '#8b5cf6' },
-  { id: 'byt',       name: 'Byt',       icon: '🏠', color: '#f59e0b' },
-  { id: 'ostatni',   name: 'Ostatní',   icon: '📦', color: '#94a3b8' },
-]
 
 // ── Tasks ─────────────────────────────────────────────────────────
 

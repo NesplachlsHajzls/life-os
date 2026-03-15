@@ -2,7 +2,8 @@ import { supabase } from '@/lib/supabase'
 
 // ── Types ─────────────────────────────────────────────────────────
 
-export type EventCategory = 'personal' | 'work' | 'sport' | 'deadline' | 'finance'
+// EventCategory je nyní volný string — odpovídá AppCategory.id (nebo legacy hodnoty)
+export type EventCategory = string
 
 export type RecurrenceType = 'daily' | 'weekly' | 'monthly' | 'yearly'
 
@@ -25,20 +26,47 @@ export interface CalendarEvent {
   created_at: string
 }
 
-export const CATEGORY_COLORS: Record<EventCategory, { bg: string; border: string; text: string }> = {
-  personal:  { bg: 'bg-orange-50',  border: 'border-orange-400', text: 'text-orange-600' },
-  work:      { bg: 'bg-indigo-50',  border: 'border-indigo-500', text: 'text-indigo-600' },
-  sport:     { bg: 'bg-green-50',   border: 'border-green-500',  text: 'text-green-600'  },
-  deadline:  { bg: 'bg-red-50',     border: 'border-red-400',    text: 'text-red-600'    },
-  finance:   { bg: 'bg-yellow-50',  border: 'border-yellow-500', text: 'text-yellow-700' },
+import { AppCategory, findCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
+
+// Zpětná kompatibilita — statické barvy pro staré hodnoty, nahrazeno dynamickými kategoriemi
+export const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+  personal:  { bg: '#3b82f618', border: '#3b82f6', text: '#3b82f6' },
+  work:      { bg: '#8b5cf618', border: '#8b5cf6', text: '#8b5cf6' },
+  sport:     { bg: '#22c55e18', border: '#22c55e', text: '#22c55e' },
+  deadline:  { bg: '#ef444418', border: '#ef4444', text: '#ef4444' },
+  finance:   { bg: '#f59e0b18', border: '#f59e0b', text: '#f59e0b' },
 }
 
-export const CATEGORY_LABELS: Record<EventCategory, string> = {
+export const CATEGORY_LABELS: Record<string, string> = {
   personal: 'Osobní',
   work:     'Práce',
   sport:    'Sport',
   deadline: 'Deadline',
   finance:  'Finance',
+}
+
+/** Dynamické barvy z AppCategory (inline styly, ne Tailwind třídy) */
+export function getCategoryInlineStyle(
+  categoryId: string,
+  cats: AppCategory[] = DEFAULT_CATEGORIES
+): { background: string; borderColor: string; color: string } {
+  const cat = findCategory(categoryId, cats)
+  const color = cat?.color ?? '#94a3b8'
+  return {
+    background:  color + '18',
+    borderColor: color,
+    color:       color,
+  }
+}
+
+/** Vrátí název kategorie */
+export function getCategoryLabel(categoryId: string, cats: AppCategory[] = DEFAULT_CATEGORIES): string {
+  return findCategory(categoryId, cats)?.name ?? categoryId
+}
+
+/** Vrátí ikonu kategorie */
+export function getCategoryIcon(categoryId: string, cats: AppCategory[] = DEFAULT_CATEGORIES): string {
+  return findCategory(categoryId, cats)?.icon ?? '📅'
 }
 
 export const RECURRENCE_LABELS: Record<RecurrenceType, string> = {

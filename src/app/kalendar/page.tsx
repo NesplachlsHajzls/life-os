@@ -7,19 +7,21 @@ import {
   CalendarEvent,
   EventCategory,
   RecurrenceType,
-  CATEGORY_COLORS,
-  CATEGORY_LABELS,
   RECURRENCE_LABELS,
   EVENT_EMOJIS,
+  getCategoryLabel,
+  getCategoryInlineStyle,
   fetchEventsInRange,
   insertEvent,
   updateEvent,
   deleteEvent,
   expandRecurring,
 } from '@/features/calendar/api'
-import { fetchTasks, updateTask, Task, TodoCategory, fetchTodoSettings, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
+import { fetchTasks, updateTask, Task } from '@/features/todo/api'
 import { fetchClients } from '@/features/prace/api'
 import { AddTaskSheet } from '@/features/todo/components/AddTaskSheet'
+import { AppCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
+import { fetchCategories } from '@/features/categories/api'
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -71,20 +73,22 @@ function fmtDateInput(d: Date): string {
 
 // ── EventChip ─────────────────────────────────────────────────────
 
-function EventChip({ event, onClick, onComplete, isCompleted }: {
+function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DEFAULT_CATEGORIES }: {
   event: CalendarEvent
   onClick?: () => void
   onComplete?: () => void
   isCompleted?: boolean
+  appCategories?: AppCategory[]
 }) {
-  const c = CATEGORY_COLORS[event.category]
+  const style = getCategoryInlineStyle(event.category, appCategories)
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity ${c.bg} ${c.border} flex items-center gap-2`}
+      className="rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-2"
+      style={{ background: style.background, borderColor: style.borderColor }}
     >
       <div className="flex-1 min-w-0">
-        <div className={`text-[10px] font-bold uppercase tracking-wide ${c.text}`}>
+        <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
           {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
         </div>
         <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
@@ -112,22 +116,23 @@ function EventChip({ event, onClick, onComplete, isCompleted }: {
 
 // ── TaskChip ──────────────────────────────────────────────────────
 
-function TaskChip({ task, onClick, onComplete, isCompleted }: {
+function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFAULT_CATEGORIES }: {
   task: Task
   onClick?: () => void
   onComplete?: () => void
   isCompleted?: boolean
+  appCategories?: AppCategory[]
 }) {
+  const style = getCategoryInlineStyle(task.category ?? 'osobni', appCategories)
   const isWork = task.category === 'prace' || !!task.client_id
-  const borderColor = isWork ? 'border-indigo-400' : 'border-gray-300'
-  const bgColor     = isWork ? 'bg-indigo-50'      : 'bg-gray-50'
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl px-3 py-2 border-l-[3px] ${bgColor} ${borderColor} ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2`}
+      className={`rounded-xl px-3 py-2 border-l-[3px] ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2`}
+      style={{ background: style.background, borderColor: style.borderColor }}
     >
       <div className="flex-1 min-w-0">
-        <div className={`text-[10px] font-bold uppercase tracking-wide ${isWork ? 'text-indigo-400' : 'text-gray-400'}`}>
+        <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
           ✅ Úkol{isWork ? ' · práce' : ''}
         </div>
         <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
@@ -139,8 +144,8 @@ function TaskChip({ task, onClick, onComplete, isCompleted }: {
           onClick={e => { e.stopPropagation(); onComplete() }}
           className={`w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all flex items-center justify-center ${
             isCompleted
-              ? 'bg-indigo-400 border-indigo-400'
-              : 'border-indigo-300 hover:border-indigo-500 hover:bg-indigo-100'
+              ? 'bg-green-400 border-green-400'
+              : 'border-gray-300 hover:border-green-400 hover:bg-green-50'
           }`}
           aria-label="Dokončit úkol"
         >
@@ -153,22 +158,24 @@ function TaskChip({ task, onClick, onComplete, isCompleted }: {
 
 // ── EventDetailModal ──────────────────────────────────────────────
 
-function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate }: {
+function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate, appCategories = DEFAULT_CATEGORIES }: {
   event: CalendarEvent
   onClose: () => void
   onDelete: (id: string) => void
   onEdit: (event: CalendarEvent) => void
   onDuplicate: (event: CalendarEvent) => void
+  appCategories?: AppCategory[]
 }) {
-  const c = CATEGORY_COLORS[event.category]
+  const style = getCategoryInlineStyle(event.category, appCategories)
+  const label = getCategoryLabel(event.category, appCategories)
   const baseId = event.id.split('_')[0]
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-3">
-          <span className={`text-[11px] font-bold uppercase px-2 py-0.5 rounded-full ${c.bg} ${c.text}`}>
-            {CATEGORY_LABELS[event.category]}
+          <span className="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full" style={{ background: style.background, color: style.color }}>
+            {label}
           </span>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
         </div>
@@ -215,7 +222,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate }: {
 
 // ── AddEventModal ─────────────────────────────────────────────────
 
-function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate, onSave, onUpdate, onClose }: {
+function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate, onSave, onUpdate, onClose, appCategories = DEFAULT_CATEGORIES }: {
   defaultDate: Date
   isWork: boolean
   userId: string
@@ -224,13 +231,14 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
   onSave: (ev: CalendarEvent) => void
   onUpdate?: (ev: CalendarEvent) => void
   onClose: () => void
+  appCategories?: AppCategory[]
 }) {
   const prefill = existingEvent
 
   const [title, setTitle]             = useState(prefill?.title ?? '')
   const [emoji, setEmoji]             = useState(prefill?.emoji ?? '📅')
   const [description, setDesc]        = useState(prefill?.description ?? '')
-  const [category, setCategory]       = useState<EventCategory>(prefill?.category ?? (isWork ? 'work' : 'personal'))
+  const [category, setCategory]       = useState<EventCategory>(prefill?.category ?? (isWork ? 'prace' : (appCategories[0]?.id ?? 'osobni')))
   const [isAllDay, setIsAllDay]       = useState(prefill?.is_all_day ?? false)
   const [date, setDate]               = useState(
     prefill ? fmtDateInput(new Date(prefill.start_datetime)) : fmtDateInput(defaultDate)
@@ -258,10 +266,6 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
 
   const isEditMode = !!existingEvent && !isDuplicate
 
-  const personalCats: EventCategory[] = ['personal', 'sport', 'deadline', 'finance']
-  const workCats: EventCategory[]     = ['work', 'deadline', 'finance']
-  const categories = isWork ? workCats : personalCats
-
   async function handleSave() {
     if (!title.trim()) return
     setSaving(true)
@@ -283,7 +287,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
         is_all_day: isAllDay,
         category,
         emoji: emoji || null,
-        is_work: isWork || category === 'work',
+        is_work: isWork || category === 'prace' || category === 'work',
         client_id: existingEvent?.client_id ?? null,
         is_recurring: isRecurring,
         recurrence_type: isRecurring ? recType : null,
@@ -353,17 +357,20 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
           <div>
             <label className={labelCls}>Kategorie</label>
             <div className="flex flex-wrap gap-2">
-              {categories.map(cat => {
-                const c = CATEGORY_COLORS[cat]
+              {appCategories.map(cat => {
+                const catStyle = getCategoryInlineStyle(cat.id, appCategories)
+                const isSelected = category === cat.id
                 return (
                   <button
-                    key={cat}
-                    onClick={() => setCategory(cat)}
-                    className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-all ${
-                      category === cat ? `${c.bg} ${c.border} ${c.text}` : 'bg-gray-50 border-gray-200 text-gray-500'
-                    }`}
+                    key={cat.id}
+                    onClick={() => setCategory(cat.id)}
+                    className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-all"
+                    style={isSelected
+                      ? { background: catStyle.background, borderColor: catStyle.borderColor, color: catStyle.color }
+                      : { background: '#f9fafb', borderColor: '#e5e7eb', color: '#6b7280' }
+                    }
                   >
-                    {CATEGORY_LABELS[cat]}
+                    {cat.icon} {cat.name}
                   </button>
                 )
               })}
@@ -515,7 +522,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
 
 // ── WeekView ──────────────────────────────────────────────────────
 
-function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, highlightDay }: {
+function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, highlightDay, appCategories = DEFAULT_CATEGORIES }: {
   weekStart: Date
   events: CalendarEvent[]
   tasks: Task[]
@@ -526,6 +533,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
   onTaskComplete?: (task: Task) => void
   completedIds?: Set<string>
   highlightDay?: string | null
+  appCategories?: AppCategory[]
 }) {
   const today = new Date()
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -601,6 +609,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                       onClick={onTaskClick ? () => onTaskClick(t) : undefined}
                       onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
                       isCompleted={completedIds?.has(t.id)}
+                      appCategories={appCategories}
                     />
                   ))}
                   {evs.map(ev => (
@@ -610,6 +619,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                       onClick={() => onEventClick(ev)}
                       onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
                       isCompleted={completedIds?.has(ev.id)}
+                      appCategories={appCategories}
                     />
                   ))}
                 </div>
@@ -624,12 +634,13 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
 
 // ── MonthView ─────────────────────────────────────────────────────
 
-function MonthView({ month, events, tasks, onNavigateToDay, onEventClick }: {
+function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCategories = DEFAULT_CATEGORIES }: {
   month: Date
   events: CalendarEvent[]
   tasks: Task[]
   onNavigateToDay: (d: Date) => void
   onEventClick: (ev: CalendarEvent) => void
+  appCategories?: AppCategory[]
 }) {
   const today = new Date()
   const mStart = startOfMonth(month)
@@ -699,12 +710,13 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick }: {
               </div>
               <div className="flex flex-col gap-0.5">
                 {shownEvs.map(ev => {
-                  const c = CATEGORY_COLORS[ev.category]
+                  const catStyle = getCategoryInlineStyle(ev.category, appCategories)
                   return (
                     <div
                       key={ev.id}
                       onClick={e => { e.stopPropagation(); onEventClick(ev) }}
-                      className={`text-[9px] font-semibold px-1 py-0.5 rounded truncate ${c.bg} ${c.text}`}
+                      className="text-[9px] font-semibold px-1 py-0.5 rounded truncate"
+                      style={{ background: catStyle.background, color: catStyle.color }}
                     >
                       {ev.emoji} {ev.title}
                     </div>
@@ -755,7 +767,7 @@ export default function KalendarPage() {
   const [dupEvent, setDupEvent]       = useState<CalendarEvent | null>(null)
   const [detailEvent, setDetail]      = useState<CalendarEvent | null>(null)
   const [editingCalTask, setEditingCalTask] = useState<Task | null>(null)
-  const [calCategories, setCalCategories]  = useState<TodoCategory[]>(DEFAULT_TODO_CATEGORIES)
+  const [appCategories, setAppCategories]  = useState<AppCategory[]>(DEFAULT_CATEGORIES)
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
   const [highlightDay, setHighlightDay]    = useState<string | null>(null)
   const [completedIds, setCompletedIds]    = useState<Set<string>>(new Set())
@@ -815,11 +827,11 @@ export default function KalendarPage() {
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [load])
 
-  // Load task categories and clients for edit modal
+  // Load categories and clients
   useEffect(() => {
     if (!userId) return
-    fetchTodoSettings(userId).then(s => {
-      if (s?.categories?.length) setCalCategories(s.categories)
+    fetchCategories(userId).then(cats => {
+      if (cats.length) setAppCategories(cats)
     }).catch(() => {})
     fetchClients(userId).then(cs => setCalClients(cs.map(c => ({ id: c.id, name: c.name })))).catch(() => {})
   }, [userId])
@@ -970,6 +982,7 @@ export default function KalendarPage() {
             onTaskComplete={handleCompleteTask}
             completedIds={completedIds}
             highlightDay={highlightDay}
+            appCategories={appCategories}
           />
         ) : (
           <MonthView
@@ -978,6 +991,7 @@ export default function KalendarPage() {
             tasks={tasks}
             onNavigateToDay={handleMonthDayClick}
             onEventClick={setDetail}
+            appCategories={appCategories}
           />
         )}
       </div>
@@ -998,6 +1012,7 @@ export default function KalendarPage() {
           userId={userId}
           onSave={handleEventSaved}
           onClose={() => setShowAdd(false)}
+          appCategories={appCategories}
         />
       )}
       {detailEvent && (
@@ -1007,6 +1022,7 @@ export default function KalendarPage() {
           onDelete={handleDeleteEvent}
           onEdit={handleOpenEdit}
           onDuplicate={handleOpenDuplicate}
+          appCategories={appCategories}
         />
       )}
 
@@ -1021,6 +1037,7 @@ export default function KalendarPage() {
           onSave={handleEventSaved}
           onUpdate={handleEventUpdated}
           onClose={() => setEditEvent(null)}
+          appCategories={appCategories}
         />
       )}
 
@@ -1034,13 +1051,14 @@ export default function KalendarPage() {
           isDuplicate={true}
           onSave={handleEventSaved}
           onClose={() => setDupEvent(null)}
+          appCategories={appCategories}
         />
       )}
 
       {/* Task edit modal — opened by clicking a task chip in calendar */}
       {editingCalTask && (
         <AddTaskSheet
-          categories={calCategories}
+          categories={appCategories}
           clients={calClients}
           existingTask={editingCalTask}
           onSave={async payload => {
