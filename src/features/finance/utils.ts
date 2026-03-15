@@ -95,14 +95,18 @@ export function matchCategory(text: string, cats: CatMap, keywords: Record<strin
   return Object.keys(cats)[Object.keys(cats).length - 1] || 'Ostatní'
 }
 
-export function extractDescription(text: string): string {
-  return text
-    .replace(/\d[\d\s]*([.,]\d{1,2})?/, '')
-    .replace(/[-–]?\s*(banka|hotovost|karta|bankovní|cash)/i, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .replace(/^[-–,\s]+|[-–,\s]+$/g, '')
-    || 'Výdaj'
+export function extractDescription(text: string, wallets: Array<{ name: string }> = []): string {
+  let s = text
+  // Remove amount
+  s = s.replace(/\d[\d\s]*([.,]\d{1,2})?/, '')
+  // Remove known wallet names (fuzzy: strip if word appears close to a wallet name)
+  for (const w of wallets) {
+    const pattern = new RegExp(`[-–]?\\s*${w.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'gi')
+    s = s.replace(pattern, '')
+  }
+  // Remove generic wallet keywords
+  s = s.replace(/[-–]?\s*(banka|bankovní|hotovost|cash|karta|card|ucet|účet|stravenky?|stravnky?)/gi, '')
+  return s.replace(/\s+/g, ' ').trim().replace(/^[-–,\s]+|[-–,\s]+$/g, '') || 'Výdaj'
 }
 
 export interface ParsedEntry {
@@ -117,29 +121,80 @@ export function parseEntry(
   text: string,
   cats: CatMap,
   _walletHint: string,
-  type: 'exp' | 'inc'
+  type: 'exp' | 'inc',
+  wallets: Array<{ name: string }> = []
 ): ParsedEntry & { error?: boolean } {
   const amount = extractAmount(text)
   if (!amount) return { amount: 0, description: '', category: '', date: todayStr(), error: true }
   const keywords = type === 'exp' ? EXP_KEYWORDS : INC_KEYWORDS
   const category = matchCategory(text, cats, keywords)
-  const description = extractDescription(text) || (type === 'exp' ? 'Výdaj' : 'Příjem')
+  const description = extractDescription(text, wallets) || (type === 'exp' ? 'Výdaj' : 'Příjem')
   return { amount, description, category, date: todayStr() }
 }
 
-export function parseWalletHint(text: string, wallets: Array<{ id: string; name: string }>): string | null {
-  const lower = text.toLowerCase()
-  for (const w of wallets) {
-    const name = w.name.toLowerCase()
-    if (lower.includes(`- ${name}`) || lower.includes(`– ${name}`) || lower.endsWith(name)) {
-      return w.id
+// Normalize string: lowercase + remove diacritics
+function norm(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+// Simple edit distance (Levenshtein) for short strings
+function editDistance(a: string, b: string): number {
+  const m = a.length, n = b.length
+  const dp: number[][] = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)])
+  for (let j = 0; j <= n; j++) dp[0][j] = j
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i-1] === b[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
     }
   }
-  if (lower.includes('banka') || lower.includes('bankovní') || lower.includes('card') || lower.includes('karta')) {
-    return wallets.find(w => w.name.toLowerCase().includes('bank'))?.id || null
+  return dp[m][n]
+}
+
+// Check if a query word fuzzy-matches a wallet name (tolerates typos)
+function fuzzyMatchWallet(query: string, walletName: string): boolean {
+  const q = norm(query)
+  const w = norm(walletName)
+  // Exact substring match
+  if (q.includes(w) || w.includes(q)) return true
+  // Split text into words and check each against wallet name words
+  const qWords = q.split(/\s+/)
+  const wWords = w.split(/\s+/)
+  for (const qw of qWords) {
+    if (qw.length < 3) continue
+    for (const ww of wWords) {
+      if (ww.length < 3) continue
+      // Allow 1 typo for 4-6 char words, 2 typos for longer
+      const maxDist = qw.length >= 7 ? 2 : 1
+      if (editDistance(qw, ww) <= maxDist) return true
+    }
   }
-  if (lower.includes('hotovost') || lower.includes('cash')) {
-    return wallets.find(w => w.name.toLowerCase().includes('hotov') || w.name.toLowerCase().includes('cash'))?.id || null
+  return false
+}
+
+export function parseWalletHint(text: string, wallets: Array<{ id: string; name: string }>): string | null {
+  // Try fuzzy match against each wallet name (no dash required)
+  for (const w of wallets) {
+    if (fuzzyMatchWallet(text, w.name)) return w.id
+  }
+  // Fallback keywords for common wallet types
+  const lower = norm(text)
+  const words = lower.split(/\s+/)
+  for (const word of words) {
+    // "ucet" / "account" → bank
+    if (editDistance(word, 'ucet') <= 1 || editDistance(word, 'banka') <= 1) {
+      const match = wallets.find(w => norm(w.name).includes('bank') || norm(w.name).includes('ucet'))
+      if (match) return match.id
+    }
+    // "hotovost" / "cash" → cash wallet
+    if (editDistance(word, 'hotovost') <= 2 || editDistance(word, 'cash') <= 1) {
+      const match = wallets.find(w => norm(w.name).includes('hotov') || norm(w.name).includes('cash'))
+      if (match) return match.id
+    }
+    // "karta" / "card" → card wallet
+    if (editDistance(word, 'karta') <= 1 || editDistance(word, 'card') <= 1) {
+      const match = wallets.find(w => norm(w.name).includes('kart') || norm(w.name).includes('card'))
+      if (match) return match.id
+    }
   }
   return null
 }

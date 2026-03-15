@@ -49,10 +49,11 @@ export default function FinancePage() {
     setIncInput('')
   }
 
-  const catBarData = Object.entries(catSums)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, value]) => ({ name, value, color: (expCats[name] ?? { color: '#94a3b8' }).color }))
+  // All categories — those with expenses first (sorted by amount), then empty ones
+  const catBarData = [
+    ...Object.entries(catSums).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value, color: (expCats[name] ?? { color: '#94a3b8' }).color })),
+    ...Object.entries(expCats).filter(([name]) => !catSums[name]).map(([name, cat]) => ({ name, value: 0, color: cat.color })),
+  ]
   const maxCat = catBarData[0]?.value || 1
 
   return (
@@ -126,7 +127,7 @@ export default function FinancePage() {
                 value={expInput}
                 onChange={e => setExpInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleExpSubmit()}
-                placeholder="oběd 150 / netflix 299 - banka"
+                placeholder="oběd 150 ucet / netflix 299 banka"
               />
               <button onClick={handleExpSubmit} disabled={!expInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-red-500 text-white text-[13px] font-bold disabled:opacity-40">−</button>
               <button onClick={() => setShowAddExp(true)} className="px-3 py-2.5 rounded-[12px] border border-gray-200 text-gray-500 text-[13px]">✎</button>
@@ -135,8 +136,8 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* Category bars */}
-        {catBarData.length > 0 && (
+        {/* Category bars — always shown when categories exist */}
+        {!loading && catBarData.length > 0 && (
           <div className="bg-white rounded-[16px] shadow-card p-4">
             <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">Výdaje dle kategorie</div>
             <div className="flex flex-col gap-2.5">
@@ -144,10 +145,10 @@ export default function FinancePage() {
                 <div key={name}>
                   <div className="flex justify-between mb-1">
                     <span className="text-[12px] font-semibold text-gray-700">{expCats[name]?.icon} {name}</span>
-                    <span className="text-[12px] font-bold text-gray-600">{fmt(value)} Kč</span>
+                    <span className={`text-[12px] font-bold ${value > 0 ? 'text-gray-600' : 'text-gray-300'}`}>{value > 0 ? `${fmt(value)} Kč` : '—'}</span>
                   </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${(value / maxCat) * 100}%`, background: color }} />
+                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all" style={{ width: `${(value / maxCat) * 100}%`, background: color, opacity: value > 0 ? 1 : 0 }} />
                   </div>
                 </div>
               ))}

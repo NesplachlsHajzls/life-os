@@ -56,11 +56,24 @@ export interface Wallet {
   type: string
 }
 
+// ── Debt (závazkek / pohledávka) ─────────────────────────────────
+
+export interface Debt {
+  id: string
+  person: string          // name of person/entity ("Jirka", "Banka")
+  amount: number          // amount of this specific entry
+  note: string            // what it's for ("oběd", "půjčka na auto")
+  date_from: string       // ISO date — when debt started
+  date_to?: string        // ISO date — when it should be settled (optional)
+  type: 'liability' | 'receivable'   // závazek | pohledávka
+}
+
 export interface FinanceSettings {
   user_id: string
   exp_cats: CatMap
   wallets: Wallet[]
   budgets: Record<string, number>
+  debts?: Debt[]
 }
 
 // ── Load all finance data ─────────────────────────────────────────

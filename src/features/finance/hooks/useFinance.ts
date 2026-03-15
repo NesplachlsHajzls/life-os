@@ -16,6 +16,7 @@ import {
   Commitment,
   Recurring,
   Wallet,
+  Debt,
 } from '../api'
 import {
   DEFAULT_EXP_CATS,
@@ -43,6 +44,7 @@ export function useFinance(userId: string) {
   const [incCats]                     = useState<CatMap>(DEFAULT_INC_CATS)
   const [wallets,     setWallets]     = useState<Wallet[]>(DEFAULT_WALLETS)
   const [budgets,     setBudgets]     = useState<Record<string, number>>({})
+  const [debts,       setDebts]       = useState<Debt[]>([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState<string | null>(null)
   const [curMonth,    setCurMonth]    = useState(() => mKey(todayStr()))
@@ -68,6 +70,7 @@ export function useFinance(userId: string) {
         if (data.settings.exp_cats) setExpCats(data.settings.exp_cats)
         if (data.settings.wallets)  setWallets(data.settings.wallets)
         if (data.settings.budgets)  setBudgets(data.settings.budgets)
+        if (data.settings.debts)    setDebts(data.settings.debts)
       }
       setLoading(false)
     }).catch(err => {
@@ -79,7 +82,7 @@ export function useFinance(userId: string) {
   // ── Add expense (quick text parse) ─────────────────────────────
 
   const addExpenseText = useCallback(async (text: string): Promise<string | null> => {
-    const parsed = parseEntry(text, expCats, '', 'exp')
+    const parsed = parseEntry(text, expCats, '', 'exp', wallets)
     if (parsed.error) return 'Nezadáno číslo. Zkus: "oběd 150" nebo "benzin 800"'
     const walletId = parseWalletHint(text, wallets)
     try {
@@ -186,6 +189,39 @@ export function useFinance(userId: string) {
     showToast('✅ Příjem upraven')
   }, [])
 
+  // Edit expense with wallet balance recalculation
+  const editExpenseWithWallet = useCallback(async (newExp: Expense, oldExp: Expense) => {
+    const oldWalletId = oldExp.wallet_id
+    const newWalletId = newExp.wallet_id
+
+    let updatedWallets = wallets
+
+    if (oldWalletId === newWalletId && oldWalletId) {
+      // Same wallet — adjust only the difference
+      const diff = oldExp.amount - newExp.amount
+      updatedWallets = wallets.map(w =>
+        w.id === oldWalletId ? { ...w, balance: w.balance + diff } : w
+      )
+    } else if (oldWalletId !== newWalletId) {
+      // Wallet changed (or one is null) — give back old, deduct new
+      updatedWallets = wallets.map(w => {
+        if (oldWalletId && w.id === oldWalletId) return { ...w, balance: w.balance + oldExp.amount }
+        if (newWalletId && w.id === newWalletId) return { ...w, balance: w.balance - newExp.amount }
+        return w
+      })
+    }
+
+    await updateExpense(newExp)
+    setExpenses(prev => prev.map(e => e.id === newExp.id ? newExp : e))
+
+    if (updatedWallets !== wallets) {
+      setWallets(updatedWallets)
+      await saveSettings(userId, { wallets: updatedWallets })
+    }
+
+    showToast('✅ Výdaj upraven')
+  }, [userId, wallets])
+
   // ── Wallets ─────────────────────────────────────────────────────
 
   const saveWallets = useCallback(async (list: Wallet[]) => {
@@ -204,6 +240,35 @@ export function useFinance(userId: string) {
     await saveSettings(userId, { wallets: updated })
     showToast(`💸 Přesunuto ${fmt(amount)} Kč`)
   }, [userId, wallets])
+
+  // ── Debts (závazky / pohledávky) ───────────────────────────────
+
+  const addDebt = useCallback(async (entry: Omit<Debt, 'id'>) => {
+    const newDebt: Debt = { ...entry, id: Math.random().toString(36).slice(2, 10) }
+    const updated = [...debts, newDebt]
+    setDebts(updated)
+    await saveSettings(userId, { debts: updated })
+    showToast(entry.type === 'liability' ? `💳 Přidán závazek — ${entry.person} ${fmt(entry.amount)} Kč` : `💚 Přidána pohledávka — ${entry.person} ${fmt(entry.amount)} Kč`)
+  }, [userId, debts])
+
+  const removeDebt = useCallback(async (id: string) => {
+    const updated = debts.filter(d => d.id !== id)
+    setDebts(updated)
+    await saveSettings(userId, { debts: updated })
+    showToast('🗑️ Smazáno')
+  }, [userId, debts])
+
+  const editDebt = useCallback(async (debt: Debt) => {
+    const updated = debts.map(d => d.id === debt.id ? debt : d)
+    setDebts(updated)
+    await saveSettings(userId, { debts: updated })
+    showToast('✅ Upraveno')
+  }, [userId, debts])
+
+  const saveDebts = useCallback(async (list: Debt[]) => {
+    setDebts(list)
+    await saveSettings(userId, { debts: list })
+  }, [userId])
 
   // ── Commitments ─────────────────────────────────────────────────
 
@@ -267,12 +332,13 @@ export function useFinance(userId: string) {
   return {
     // State
     loading, error, toast, curMonth, setCurMonth,
-    expenses, incomes, commitments, recurring, wallets, budgets, expCats, incCats,
+    expenses, incomes, commitments, recurring, wallets, budgets, expCats, incCats, debts,
     // Derived
     filtExpenses, filtIncomes, totalInc, totalExp, totalCom, volne, totalWallets, catSums, dueRecurring, allMonths,
     // Actions
     addExpenseText, addExpenseManual, addIncomeText, addIncomeManual,
-    removeExpense, removeIncome, editExpense, editIncome,
+    removeExpense, removeIncome, editExpense, editIncome, editExpenseWithWallet,
     saveWallets, handleTransfer, saveCommitmentsData, saveExpCats, saveBudgets, confirmRecurring,
+    addDebt, removeDebt, editDebt, saveDebts,
   }
 }

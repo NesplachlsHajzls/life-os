@@ -5,9 +5,10 @@ import { Header } from '@/components/layout/Header'
 import { FinanceTabs } from '@/features/finance/components/FinanceTabs'
 import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
-import { AddExpenseSheet, AddIncomeSheet } from '@/features/finance/components/AddTransactionSheet'
+import { AddExpenseSheet, AddIncomeSheet, EditExpenseSheet, EditIncomeSheet } from '@/features/finance/components/AddTransactionSheet'
 import { fmt, mLabel, mKey, todayStr } from '@/features/finance/utils'
 import { FAB } from '@/components/ui/FAB'
+import type { Expense, Income } from '@/features/finance/api'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -22,12 +23,15 @@ export default function TransakcePage() {
     expCats, incCats, wallets,
     addExpenseManual, addIncomeManual,
     removeExpense, removeIncome,
+    editExpenseWithWallet, editIncome,
     allMonths,
   } = useFinance(userId)
 
-  const [showAddExp, setShowAddExp] = useState(false)
-  const [showAddInc, setShowAddInc] = useState(false)
-  const [filter, setFilter]         = useState<'all' | 'exp' | 'inc'>('all')
+  const [showAddExp, setShowAddExp]       = useState(false)
+  const [showAddInc, setShowAddInc]       = useState(false)
+  const [editingExp, setEditingExp]       = useState<Expense | null>(null)
+  const [editingInc, setEditingInc]       = useState<Income | null>(null)
+  const [filter, setFilter]               = useState<'all' | 'exp' | 'inc'>('all')
 
   // Merge and sort all transactions
   const allItems = [
@@ -110,10 +114,23 @@ export default function TransakcePage() {
                       <div className="text-[13px] font-semibold truncate">{item.description}</div>
                       <div className="text-[11px] text-gray-400">{item.category}</div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <span className={`text-[14px] font-bold ${isExp ? 'text-gray-700' : 'text-green-600'}`}>
                         {isExp ? '−' : '+'}{fmt(item.amount)} Kč
                       </span>
+                      <button
+                        onClick={() => {
+                          if (isExp) {
+                            const exp = filtExpenses.find(e => e.id === item.id)
+                            if (exp) setEditingExp(exp)
+                          } else {
+                            const inc = filtIncomes.find(i => i.id === item.id)
+                            if (inc) setEditingInc(inc)
+                          }
+                        }}
+                        className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[12px] transition-colors"
+                        title="Upravit"
+                      >✏️</button>
                       <button
                         onClick={() => isExp ? removeExpense(item.id) : removeIncome(item.id)}
                         className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 text-[14px] transition-colors"
@@ -141,6 +158,24 @@ export default function TransakcePage() {
       )}
       {showAddInc && (
         <AddIncomeSheet incCats={incCats} onSave={addIncomeManual} onClose={() => setShowAddInc(false)} />
+      )}
+
+      {editingExp && (
+        <EditExpenseSheet
+          expense={editingExp}
+          expCats={expCats}
+          wallets={wallets}
+          onSave={(newExp, oldExp) => editExpenseWithWallet(newExp, oldExp)}
+          onClose={() => setEditingExp(null)}
+        />
+      )}
+      {editingInc && (
+        <EditIncomeSheet
+          income={editingInc}
+          incCats={incCats}
+          onSave={editIncome}
+          onClose={() => setEditingInc(null)}
+        />
       )}
     </>
   )
