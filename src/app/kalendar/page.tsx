@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
 import {
@@ -692,6 +692,7 @@ export default function KalendarPage() {
   const [calCategories, setCalCategories]  = useState<TodoCategory[]>(DEFAULT_TODO_CATEGORIES)
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
   const [highlightDay, setHighlightDay]    = useState<string | null>(null)
+  const lastSaveRef = useRef<number>(0)
 
   const weekStart = startOfWeek(currentDate)
   const weekEnd   = addDays(weekStart, 6)
@@ -699,9 +700,9 @@ export default function KalendarPage() {
   const rangeStart = view === 'week' ? weekStart : startOfMonth(currentDate)
   const rangeEnd   = view === 'week' ? weekEnd   : endOfMonth(currentDate)
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (silent = false) => {
     if (!userId) return
-    setLoading(true)
+    if (!silent) setLoading(true)
     try {
       const [rawEvents, rawTasks] = await Promise.all([
         fetchEventsInRange(userId, rangeStart.toISOString(), rangeEnd.toISOString()),
@@ -729,9 +730,13 @@ export default function KalendarPage() {
 
   useEffect(() => { load() }, [load])
 
-  // Refresh tasks when user switches back to this tab (e.g. after editing in todo)
+  // Refresh when user switches back to this tab — but skip if we just saved (avoids flash)
   useEffect(() => {
-    function onVisible() { if (document.visibilityState === 'visible') load() }
+    function onVisible() {
+      if (document.visibilityState === 'visible' && Date.now() - lastSaveRef.current > 1500) {
+        load(true)
+      }
+    }
     document.addEventListener('visibilitychange', onVisible)
     return () => document.removeEventListener('visibilitychange', onVisible)
   }, [load])
@@ -777,33 +782,23 @@ export default function KalendarPage() {
 
   async function handleDeleteEvent(id: string) {
     await deleteEvent(id)
-    setEvents(prev => prev.filter(ev => !ev.id.startsWith(id)))
+    lastSaveRef.current = Date.now()
     setDetail(null)
+    load(true)
   }
 
-  function handleEventSaved(ev: CalendarEvent) {
+  function handleEventSaved(_ev: CalendarEvent) {
+    lastSaveRef.current = Date.now()
     setShowAdd(false)
     setDupEvent(null)
-    if (ev.is_recurring) {
-      const expanded = expandRecurring(ev, rangeStart, rangeEnd)
-      setEvents(prev => [...prev, ...expanded])
-    } else {
-      setEvents(prev => [...prev, ev])
-    }
+    load(true)
   }
 
-  function handleEventUpdated(updated: CalendarEvent) {
+  function handleEventUpdated(_updated: CalendarEvent) {
+    lastSaveRef.current = Date.now()
     setEditEvent(null)
     setDetail(null)
-    // Replace all occurrences (recurring have suffixed ids)
-    setEvents(prev => {
-      const baseId = updated.id.split('_')[0]
-      const filtered = prev.filter(ev => !ev.id.startsWith(baseId))
-      if (updated.is_recurring) {
-        return [...filtered, ...expandRecurring(updated, rangeStart, rangeEnd)]
-      }
-      return [...filtered, updated]
-    })
+    load(true)
   }
 
   function handleOpenEdit(ev: CalendarEvent) {
@@ -942,9 +937,9 @@ export default function KalendarPage() {
           onSave={async payload => {
             const updated = { ...editingCalTask, ...payload }
             await updateTask(updated)
-            // Refresh tasks to reflect the change
-            setTasks(prev => prev.map(t => t.id === updated.id ? updated : t))
+            lastSaveRef.current = Date.now()
             setEditingCalTask(null)
+            load(true)
           }}
           onClose={() => setEditingCalTask(null)}
         />

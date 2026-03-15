@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { AppDrawer } from './AppDrawer'
 
@@ -16,12 +16,25 @@ const RIGHT_ITEMS = [
 
 export function BottomNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = useState(false)
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 
   const dashActive = pathname === '/'
+
+  // Double-click detection on dashboard button:
+  // – single click → navigate to /
+  // – double click → open drawer (native onDoubleClick, no delay on single tap)
+  function handleDashClick() {
+    router.push('/')
+  }
+
+  function handleDashDoubleClick(e: React.MouseEvent) {
+    e.preventDefault()
+    setOpen(true)
+  }
 
   return (
     <>
@@ -44,48 +57,19 @@ export function BottomNav() {
             </Link>
           ))}
 
-          {/* ── Center column: arrow + dashboard stacked, both float up ── */}
+          {/* ── Center dashboard button ── */}
           <div className="flex-1 flex justify-center overflow-visible">
-            {/* This wrapper floats the whole group above the nav line */}
             <div
               className="flex flex-col items-center"
-              style={{ marginTop: -36 }}
+              style={{ marginTop: -20 }}
             >
-              {/* ↑ arrow pill — opens drawer */}
+              {/* Dashboard home button — single tap: go home, double tap: open drawer */}
               <button
-                onClick={() => setOpen(true)}
-                aria-label="Všechny sekce"
-                className="flex items-center justify-center mb-1 active:scale-90 transition-transform"
+                onClick={handleDashClick}
+                onDoubleClick={handleDashDoubleClick}
+                aria-label="Dashboard"
+                className="flex flex-col items-center gap-0.5 active:scale-95 transition-transform"
               >
-                <div
-                  className="flex items-center gap-1 px-3 py-1 rounded-full"
-                  style={{
-                    background: open ? 'var(--color-primary)' : 'var(--color-primary-light)',
-                    border: '1.5px solid var(--color-primary-mid)',
-                  }}
-                >
-                  <span
-                    className="text-[12px] font-bold leading-none"
-                    style={{
-                      color: open ? '#fff' : 'var(--color-primary)',
-                      display: 'inline-block',
-                      transition: 'transform 0.2s',
-                      transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-                    }}
-                  >
-                    ↑
-                  </span>
-                  <span
-                    className="text-[10px] font-bold leading-none"
-                    style={{ color: open ? '#fff' : 'var(--color-primary)' }}
-                  >
-                    Vše
-                  </span>
-                </div>
-              </button>
-
-              {/* Dashboard home button */}
-              <Link href="/" className="flex flex-col items-center gap-0.5 active:scale-95 transition-transform">
                 <div
                   className="w-[52px] h-[52px] rounded-[16px] flex items-center justify-center"
                   style={{
@@ -105,7 +89,7 @@ export function BottomNav() {
                 >
                   Dashboard
                 </span>
-              </Link>
+              </button>
             </div>
           </div>
 
