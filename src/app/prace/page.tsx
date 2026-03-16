@@ -91,6 +91,11 @@ export default function PracePage() {
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
               📊 Pipeline
             </Link>
+            <Link href="/prace/import"
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold border border-gray-200 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap flex-shrink-0"
+              style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              📥 Import
+            </Link>
             <button onClick={() => setShowAdd(true)}
               className="px-4 py-2.5 rounded-[12px] text-[13px] font-bold text-white whitespace-nowrap flex-shrink-0"
               style={{ background: 'var(--color-primary)' }}>
