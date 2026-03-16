@@ -113,12 +113,11 @@ export async function loadFinanceData(userId: string) {
 // ── Settings ──────────────────────────────────────────────────────
 
 export async function saveSettings(userId: string, patch: Partial<FinanceSettings>) {
-  const { data: existing } = await supabase.from('ft_settings').select('*').eq('user_id', userId).maybeSingle()
-  const base = existing ?? { user_id: userId, exp_cats: DEFAULT_EXP_CATS, wallets: DEFAULT_WALLETS, budgets: {} }
-  const { error } = await supabase.from('ft_settings').upsert(
-    { ...base, user_id: userId, ...patch },
-    { onConflict: 'user_id' }
-  )
+  // Use UPDATE (not upsert) — loadFinanceData always ensures the row exists first.
+  // This eliminates the extra SELECT that was needed before every save.
+  const { error } = await supabase.from('ft_settings')
+    .update(patch)
+    .eq('user_id', userId)
   if (error) console.error('saveSettings error:', error)
 }
 
