@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
 import {
   insertClient,
+  insertContact,
   CLIENT_COLORS,
   CLIENT_STATUSES,
   SUBJECT_TYPES,
@@ -21,32 +22,40 @@ interface ParsedRow {
   [col: string]: string
 }
 
+interface ClientGroup {
+  mainRow: ParsedRow
+  extraContacts: ParsedRow[]
+}
+
 // Fields the user can map to — null means "skip this column"
 type ClientField =
-  | 'name' | 'email' | 'phone' | 'website' | 'address'
+  | 'name' | 'contact_name' | 'email' | 'phone' | 'website' | 'address'
   | 'notes' | 'status' | 'subject_type' | 'tags'
   | 'billing_email' | 'monthly_avg_invoice' | 'ra_count'
-  | 'is_prague' | null
+  | 'kraj' | 'pp_value' | 'has_ra'
+  | null
 
 const FIELD_OPTIONS: { value: ClientField; label: string; hint?: string }[] = [
   { value: null,                   label: '— Přeskočit —' },
-  { value: 'name',                 label: 'Název / Jméno firmy', hint: 'povinné' },
+  { value: 'name',                 label: 'Název firmy', hint: 'povinné' },
+  { value: 'contact_name',         label: 'Jméno kontaktu / osoby' },
   { value: 'email',                label: 'E-mail' },
   { value: 'phone',                label: 'Telefon' },
+  { value: 'billing_email',        label: 'Fakturační e-mail' },
+  { value: 'kraj',                 label: 'Kraj' },
+  { value: 'pp_value',             label: 'PP (hodnota)' },
+  { value: 'has_ra',               label: 'Má RA (ano/ne)' },
+  { value: 'ra_count',             label: 'Počet RA' },
+  { value: 'subject_type',         label: 'Typ subjektu / Kategorie' },
+  { value: 'status',               label: 'Status klienta' },
+  { value: 'tags',                 label: 'Štítky (čárkou oddělené)' },
   { value: 'website',              label: 'Web' },
   { value: 'address',              label: 'Adresa' },
   { value: 'notes',                label: 'Poznámky' },
-  { value: 'status',               label: 'Status klienta' },
-  { value: 'subject_type',         label: 'Typ subjektu' },
-  { value: 'tags',                 label: 'Štítky (čárkou oddělené)' },
-  { value: 'billing_email',        label: 'Fakturační e-mail' },
   { value: 'monthly_avg_invoice',  label: 'Průměrná fakturace/měs. (Kč)' },
-  { value: 'ra_count',             label: 'Počet RA' },
-  { value: 'is_prague',            label: 'Praha (ano/ne)' },
 ]
 
 // ── SheetJS loader ────────────────────────────────────────────────
-// Loaded from CDN — never touches user data server-side
 
 declare global {
   interface Window {
@@ -71,7 +80,7 @@ function useXlsx() {
   return ready
 }
 
-// ── CSV parser (no library needed) ───────────────────────────────
+// ── CSV parser ────────────────────────────────────────────────────
 
 function parseCsv(text: string): ParsedRow[] {
   const lines = text.split(/\r?\n/).filter(l => l.trim())
@@ -102,24 +111,93 @@ function splitCsvLine(line: string): string[] {
   return res
 }
 
-// ── Smart column guesser ──────────────────────────────────────────
+// ── Kraj normaliser ───────────────────────────────────────────────
 
-function guessField(col: string): ClientField {
+type KrajEntry = [RegExp, string]
+
+const KRAJ_MAP: KrajEntry[] = [
+  [/^(pha|pr|pra)$|^(praha|prague)/i,                  'Praha'],
+  [/^(sc|stc)$|stredoc|středoc/i,                       'Středočeský'],
+  [/^(jc|jhc)$|jihoc|jihočes/i,                         'Jihočeský'],
+  [/^(pl|plz|plk)$|plzensky|plzeňský|plzen/i,           'Plzeňský'],
+  [/^(kv|kvk)$|karlovar/i,                              'Karlovarský'],
+  [/^(ul|ulk)$|usteck|ústeck|usti nad labem|ústí/i,     'Ústecký'],
+  [/^(lb|lbk)$|liberec/i,                               'Liberecký'],
+  [/^(hk|khk)$|hradec|kralovehr|královéhrad/i,          'Královéhradecký'],
+  [/^(pa|pak)$|pardub/i,                                 'Pardubický'],
+  [/^(vy|vys)$|vysocin|vysočin/i,                       'Vysočina'],
+  [/^(jm|jmk)$|jihomor|jihomorav/i,                    'Jihomoravský'],
+  [/^(ol|olk)$|olomou/i,                                'Olomoucký'],
+  [/^(zl|zlk)$|zlinsk|zlínsk/i,                        'Zlínský'],
+  [/^(ms|msk)$|moravsk.*slez|ostrav/i,                  'Moravskoslezský'],
+]
+
+function normalizeKraj(v: string): string {
+  const s = v.trim()
+  if (!s) return s
+  const lower = s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  for (const [re, name] of KRAJ_MAP) {
+    if (re.test(lower)) return name
+  }
+  return s
+}
+
+// ── Subject type abbreviations ────────────────────────────────────
+
+const SUBJECT_ABBR: Record<string, SubjectType> = {
+  'k':  'Komerční',
+  'zs': 'Zdravotnictví soukromé',
+  'zv': 'Zdravotnictví veřejné',
+  'o':  'Obec',
+  'vs': 'Veřejná správa',
+}
+
+// ── Smart column guesser ──────────────────────────────────────────
+// 1) name-based  2) index-based fallback for the user's specific CRM format
+// Column index: 0=PP, 1=hasRA, 2=raCount, 3=category, 4=kraj, 5=name, 6=skip, 7=contact, 8=phone, 9=email, 10=skip, 11=billingEmail
+
+function guessByName(col: string): ClientField | undefined {
   const c = col.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-  if (/nazev|jmeno|firma|name|company|spolecnost/.test(c)) return 'name'
-  if (/billing.mail|fakturac/.test(c)) return 'billing_email'
-  if (/email|e.mail|mail/.test(c)) return 'email'
-  if (/tel|phone|mobil/.test(c)) return 'phone'
-  if (/web|www|url|site/.test(c)) return 'website'
-  if (/adres|address|sidlo/.test(c)) return 'address'
-  if (/poznamk|note|comment/.test(c)) return 'notes'
-  if (/status|stav/.test(c)) return 'status'
-  if (/typ.subj|subjekt|sektor|obor/.test(c)) return 'subject_type'
-  if (/stitk|tag/.test(c)) return 'tags'
-  if (/fakturac|invoice|mesicni/.test(c)) return 'monthly_avg_invoice'
-  if (/\bra\b|r\.a|certif/.test(c)) return 'ra_count'
-  if (/prah|prague/.test(c)) return 'is_prague'
-  return null
+  if (/^pp$/.test(c))                                        return 'pp_value'
+  if (/ma.ra|has.ra|registr.*autorit/.test(c))               return 'has_ra'
+  if (/pocet.ra|ra.pocet|count.ra|ra.count/.test(c))         return 'ra_count'
+  if (/^ra$/.test(c))                                        return 'ra_count'
+  if (/kraj/.test(c))                                        return 'kraj'
+  if (/nazev|jmeno.firmy|firma|name|company|spolecnost/.test(c)) return 'name'
+  if (/jmeno.kontakt|contact|osoba|kontakt.jmen/.test(c))    return 'contact_name'
+  if (/billing.mail|fakturac.*mail|fakturac.*email/.test(c)) return 'billing_email'
+  if (/email|e.mail|mail/.test(c))                           return 'email'
+  if (/tel|phone|mobil/.test(c))                             return 'phone'
+  if (/web|www|url|site/.test(c))                            return 'website'
+  if (/adres|address|sidlo/.test(c))                         return 'address'
+  if (/poznamk|note|comment/.test(c))                        return 'notes'
+  if (/status|stav/.test(c))                                 return 'status'
+  if (/typ.subj|subjekt|kategori|sektor|obor/.test(c))       return 'subject_type'
+  if (/stitk|tag/.test(c))                                   return 'tags'
+  if (/fakturac|invoice|mesicni/.test(c))                    return 'monthly_avg_invoice'
+  return undefined
+}
+
+function guessByIndex(colIndex: number): ClientField {
+  switch (colIndex) {
+    case 0:  return 'pp_value'
+    case 1:  return 'has_ra'
+    case 2:  return 'ra_count'
+    case 3:  return 'subject_type'
+    case 4:  return 'kraj'
+    case 5:  return 'name'
+    case 6:  return null          // position — skip
+    case 7:  return 'contact_name'
+    case 8:  return 'phone'
+    case 9:  return 'email'
+    case 10: return null
+    case 11: return 'billing_email'
+    default: return null
+  }
+}
+
+function guessField(col: string, colIndex: number): ClientField {
+  return guessByName(col) ?? guessByIndex(colIndex)
 }
 
 // ── Value normalizers ─────────────────────────────────────────────
@@ -134,18 +212,38 @@ function normalizeStatus(v: string): ClientStatus {
 }
 
 function normalizeSubjectType(v: string): SubjectType | null {
-  const l = v.toLowerCase()
+  const l = v.toLowerCase().trim()
+  if (SUBJECT_ABBR[l]) return SUBJECT_ABBR[l]
   if (/obec|muni/.test(l)) return 'Obec'
-  if (/verej.*sprav|public/.test(l)) return 'Veřejná správa'
-  if (/zdrav.*verej|public.*health/.test(l)) return 'Zdravotnictví veřejné'
-  if (/zdrav|health|hospital/.test(l)) return 'Zdravotnictví soukromé'
+  if (/verej.*sprav|public.admin|vs/.test(l)) return 'Veřejná správa'
+  if (/zdrav.*verej|public.*health|zv/.test(l)) return 'Zdravotnictví veřejné'
+  if (/zdrav|health|hospital|zs/.test(l)) return 'Zdravotnictví soukromé'
   if (/komerc|commerc/.test(l)) return 'Komerční'
   return null
 }
 
-function normalizeBool(v: string): boolean {
-  const l = v.toLowerCase()
-  return /^(ano|yes|1|true|x|prague|praha)$/.test(l.trim())
+function isTruthy(v: string): boolean {
+  return /^(ano|yes|1|true|x|✓|√|jo)$/i.test(v.trim())
+}
+
+// ── Multi-contact row grouping ────────────────────────────────────
+// Rows where the "name" column (company name) is empty are treated as
+// additional contacts belonging to the most recent client above them.
+
+function buildGroups(rows: ParsedRow[], nameCol: string | null): ClientGroup[] {
+  const groups: ClientGroup[] = []
+  let current: ClientGroup | null = null
+  for (const row of rows) {
+    const name = nameCol ? (row[nameCol] ?? '').trim() : ''
+    if (name) {
+      if (current) groups.push(current)
+      current = { mainRow: row, extraContacts: [] }
+    } else if (current) {
+      current.extraContacts.push(row)
+    }
+  }
+  if (current) groups.push(current)
+  return groups
 }
 
 // ── Main component ────────────────────────────────────────────────
@@ -170,7 +268,7 @@ export default function ImportPage() {
     setColumns(cols)
     setRows(rawRows)
     const autoMap: Record<string, ClientField> = {}
-    cols.forEach(col => { autoMap[col] = guessField(col) })
+    cols.forEach((col, idx) => { autoMap[col] = guessField(col, idx) })
     setMapping(autoMap)
     setStep('map')
   }
@@ -198,7 +296,7 @@ export default function ImportPage() {
       const ws = wb.Sheets[wb.SheetNames[0]]
       const raw = window.XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' }) as unknown[]
       if (raw.length < 2) return
-      const headers = (raw[0] as string[]).map(String)
+      const headers = (raw[0] as string[]).map((h, i) => String(h) || `Sloupec ${i + 1}`)
       const dataRows = (raw.slice(1) as string[][])
         .map(row => {
           const obj: ParsedRow = {}
@@ -217,8 +315,7 @@ export default function ImportPage() {
     if (file) handleFile(file)
   }, [xlsxReady]) // eslint-disable-line
 
-  // Build preview / import data from mapping
-  function buildClientPayload(row: ParsedRow) {
+  function buildClientPayload(row: ParsedRow): Record<string, string> {
     const mapped: Record<string, string> = {}
     for (const [col, field] of Object.entries(mapping)) {
       if (field) mapped[field] = row[col] ?? ''
@@ -226,11 +323,18 @@ export default function ImportPage() {
     return mapped
   }
 
-  function getPreviewRows() {
-    return rows.slice(0, 5).map(buildClientPayload)
+  // Find the column key mapped to the given field
+  function findMappedCol(field: ClientField): string | null {
+    return Object.entries(mapping).find(([, f]) => f === field)?.[0] ?? null
+  }
+
+  function getPreviewGroups(): ClientGroup[] {
+    const nameCol = findMappedCol('name')
+    return buildGroups(rows, nameCol).slice(0, 5)
   }
 
   const nameField = Object.values(mapping).includes('name')
+  const mappedFields = new Set(Object.values(mapping).filter(Boolean))
 
   async function runImport() {
     if (!user) return
@@ -239,15 +343,31 @@ export default function ImportPage() {
     let ok = 0, skip = 0
     const errs: string[] = []
 
-    for (let i = 0; i < rows.length; i++) {
-      const data = buildClientPayload(rows[i])
+    const nameCol = findMappedCol('name')
+    const groups = buildGroups(rows, nameCol)
+
+    for (let gi = 0; gi < groups.length; gi++) {
+      const { mainRow, extraContacts } = groups[gi]
+      const data = buildClientPayload(mainRow)
       const name = (data.name ?? '').trim()
 
       if (!name) { skip++; setSkipped(skip); continue }
 
       try {
-        const color = CLIENT_COLORS[i % CLIENT_COLORS.length]
-        await insertClient({
+        // Build tags: existing tags + PP + kraj
+        const tags: string[] = []
+        if (data.tags) data.tags.split(',').map(t => t.trim()).filter(Boolean).forEach(t => tags.push(t))
+        if (data.pp_value?.trim()) tags.push(`PP:${data.pp_value.trim()}`)
+        const krajNorm = data.kraj ? normalizeKraj(data.kraj) : ''
+        if (krajNorm) tags.push(`kraj:${krajNorm}`)
+
+        const hasRa = isTruthy(data.has_ra ?? '')
+        const raCount = hasRa && data.ra_count ? (parseInt(data.ra_count) || null) : null
+        const isPrague = krajNorm === 'Praha'
+
+        const color = CLIENT_COLORS[gi % CLIENT_COLORS.length]
+
+        const client = await insertClient({
           user_id: user.id,
           name,
           color,
@@ -259,24 +379,55 @@ export default function ImportPage() {
           address: data.address?.trim() || null,
           notes: data.notes?.trim() || null,
           billing_email: data.billing_email?.trim() || null,
-          tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+          tags,
           subject_type: data.subject_type ? normalizeSubjectType(data.subject_type) : null,
           monthly_avg_invoice: data.monthly_avg_invoice ? parseFloat(data.monthly_avg_invoice.replace(',', '.')) || null : null,
-          ra_count: data.ra_count ? parseInt(data.ra_count) || null : null,
-          is_prague: data.is_prague ? normalizeBool(data.is_prague) : false,
+          ra_count: raCount,
+          is_prague: isPrague,
           products: [],
           price_list: null,
           partner_id: null,
           first_meeting_status: null,
         })
+
+        // Primary contact from the main row (if contact_name is mapped)
+        const mainContactName = data.contact_name?.trim()
+        if (mainContactName) {
+          await insertContact({
+            client_id: client.id,
+            user_id: user.id,
+            name: mainContactName,
+            role: null,
+            phone: data.phone?.trim() || null,
+            email: data.email?.trim() || null,
+            is_primary: true,
+          })
+        }
+
+        // Extra contacts from subsequent rows with empty company name
+        for (const extraRow of extraContacts) {
+          const extraData = buildClientPayload(extraRow)
+          const extraName = extraData.contact_name?.trim() || ''
+          if (!extraName) continue
+          await insertContact({
+            client_id: client.id,
+            user_id: user.id,
+            name: extraName,
+            role: null,
+            phone: extraData.phone?.trim() || null,
+            email: extraData.email?.trim() || null,
+            is_primary: false,
+          })
+        }
+
         ok++
         setImported(ok)
       } catch (err) {
-        errs.push(`Řádek ${i + 2}: ${name} — ${err instanceof Error ? err.message : 'chyba'}`)
+        errs.push(`Klient ${gi + 1}: ${name} — ${err instanceof Error ? err.message : 'chyba'}`)
         skip++; setSkipped(skip)
       }
 
-      setProgress(Math.round(((i + 1) / rows.length) * 100))
+      setProgress(Math.round(((gi + 1) / groups.length) * 100))
     }
 
     setErrors(errs)
@@ -284,7 +435,10 @@ export default function ImportPage() {
   }
 
   const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]'
-  const mappedFields = new Set(Object.values(mapping).filter(Boolean))
+
+  // Count groups for preview
+  const previewGroups = step === 'preview' ? getPreviewGroups() : []
+  const allGroups = step === 'preview' ? buildGroups(rows, findMappedCol('name')) : []
 
   return (
     <>
@@ -352,9 +506,10 @@ export default function ImportPage() {
               <div className="font-bold mb-1.5">💡 Tipy pro přehledný import</div>
               <div className="space-y-1 text-blue-600">
                 <div>• <strong>První řádek</strong> musí být záhlaví sloupců (názvy polí)</div>
-                <div>• Jediné povinné pole je <strong>název firmy / klienta</strong></div>
-                <div>• Ostatní sloupce (email, telefon…) namapuješ v dalším kroku</div>
-                <div>• Sloupce, které nechceš importovat, jednoduše přeskočíš</div>
+                <div>• Importér automaticky rozpozná sloupce PP, Kraj, RA, Kategorie, Jméno, Telefon, Email aj.</div>
+                <div>• <strong>Více kontaktů u jednoho klienta</strong>: řádky s prázdným názvem firmy se automaticky přiřadí k předchozímu klientovi</div>
+                <div>• Kraj se uloží jako štítek <em>kraj:Praha</em>, PP jako <em>PP:hodnota</em></div>
+                <div>• Zkratky kategorií: K, ZS, ZV, O, VS jsou automaticky rozpoznány</div>
               </div>
             </div>
           </div>
@@ -373,13 +528,18 @@ export default function ImportPage() {
               </p>
 
               <div className="space-y-2.5">
-                {columns.map(col => {
+                {columns.map((col, idx) => {
                   const sample = rows.slice(0, 3).map(r => r[col]).filter(Boolean).join(', ')
                   return (
                     <div key={col} className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="text-[12px] font-bold text-gray-700 mb-0.5 truncate">{col}</div>
-                        {sample && <div className="text-[11px] text-gray-400 truncate">{sample}</div>}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold text-gray-300 w-5 text-right flex-shrink-0">
+                            {String.fromCharCode(65 + idx)}
+                          </span>
+                          <div className="text-[12px] font-bold text-gray-700 truncate">{col}</div>
+                        </div>
+                        {sample && <div className="text-[11px] text-gray-400 truncate pl-6">{sample}</div>}
                       </div>
                       <div className="text-gray-300 text-[14px] mt-1 flex-shrink-0">→</div>
                       <select
@@ -405,7 +565,7 @@ export default function ImportPage() {
 
             {!nameField && (
               <div className="bg-red-50 rounded-[14px] p-3 text-[12px] text-red-600 mb-4">
-                ⚠️ Musíš namapovat aspoň sloupec <strong>Název / Jméno firmy</strong>. Bez toho nelze importovat.
+                ⚠️ Musíš namapovat aspoň sloupec <strong>Název firmy</strong>. Bez toho nelze importovat.
               </div>
             )}
 
@@ -431,35 +591,54 @@ export default function ImportPage() {
             <div className="bg-white rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-[16px] font-bold text-gray-900">Náhled importu</h2>
-                <span className="text-[12px] text-gray-400">{rows.length} klientů</span>
+                <span className="text-[12px] text-gray-400">{allGroups.length} klientů</span>
               </div>
-              <p className="text-[13px] text-gray-500 mb-4">Prvních 5 záznamů — takto budou vypadat po importu:</p>
+              <p className="text-[13px] text-gray-500 mb-4">Prvních 5 klientů — takto budou vypadat po importu:</p>
 
               <div className="space-y-2">
-                {getPreviewRows().map((row, i) => (
-                  <div key={i} className="bg-gray-50 rounded-[12px] px-3 py-2.5">
-                    <div className="text-[13px] font-bold text-gray-900 mb-1">
-                      💼 {row.name || <span className="text-red-400 font-normal">— chybí název, bude přeskočen —</span>}
+                {previewGroups.map((group, i) => {
+                  const data = buildClientPayload(group.mainRow)
+                  const krajNorm = data.kraj ? normalizeKraj(data.kraj) : ''
+                  const ppVal = data.pp_value?.trim()
+                  const hasRa = isTruthy(data.has_ra ?? '')
+                  const raCountVal = data.ra_count?.trim()
+                  const subjType = data.subject_type ? normalizeSubjectType(data.subject_type) : null
+                  return (
+                    <div key={i} className="bg-gray-50 rounded-[12px] px-3 py-2.5">
+                      <div className="text-[13px] font-bold text-gray-900 mb-1">
+                        💼 {data.name || <span className="text-red-400 font-normal">— chybí název, bude přeskočen —</span>}
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mb-1">
+                        {data.contact_name && <span className="text-[11px] text-gray-600">👤 {data.contact_name}</span>}
+                        {data.email        && <span className="text-[11px] text-gray-500">✉️ {data.email}</span>}
+                        {data.phone        && <span className="text-[11px] text-gray-500">📞 {data.phone}</span>}
+                        {subjType          && <span className="text-[11px] text-blue-600">🏷 {subjType}</span>}
+                        {krajNorm          && <span className="text-[11px] text-teal-600">📍 {krajNorm}</span>}
+                        {ppVal             && <span className="text-[11px] text-purple-600">PP: {ppVal}</span>}
+                        {hasRa             && <span className="text-[11px] text-green-600">RA{raCountVal ? ` ×${raCountVal}` : ''}</span>}
+                      </div>
+                      {group.extraContacts.length > 0 && (
+                        <div className="text-[10px] text-gray-400 pl-1">
+                          + {group.extraContacts.length} další kontakt{group.extraContacts.length > 1 ? 'y' : ''}:
+                          {' '}{group.extraContacts
+                            .map(r => buildClientPayload(r).contact_name?.trim())
+                            .filter(Boolean)
+                            .join(', ')}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-0.5">
-                      {row.email    && <span className="text-[11px] text-gray-500">✉️ {row.email}</span>}
-                      {row.phone    && <span className="text-[11px] text-gray-500">📞 {row.phone}</span>}
-                      {row.status   && <span className="text-[11px] text-gray-500">● {normalizeStatus(row.status)}</span>}
-                      {row.subject_type && <span className="text-[11px] text-gray-500">🏷 {normalizeSubjectType(row.subject_type) ?? row.subject_type}</span>}
-                      {row.address  && <span className="text-[11px] text-gray-500 w-full">📍 {row.address}</span>}
-                    </div>
-                  </div>
-                ))}
-                {rows.length > 5 && (
+                  )
+                })}
+                {allGroups.length > 5 && (
                   <div className="text-[12px] text-gray-400 text-center py-1">
-                    … a dalších {rows.length - 5} záznamů
+                    … a dalších {allGroups.length - 5} klientů
                   </div>
                 )}
               </div>
             </div>
 
             <div className="bg-amber-50 rounded-[14px] p-3 text-[12px] text-amber-700 mb-4">
-              ⚠️ Import přidá <strong>{rows.length} nových klientů</strong> do práce. Duplicity nejsou automaticky detekovány.
+              ⚠️ Import přidá <strong>{allGroups.length} nových klientů</strong> do práce. Duplicity nejsou automaticky detekovány.
             </div>
 
             <div className="flex gap-3">
@@ -471,7 +650,7 @@ export default function ImportPage() {
                 className="flex-1 py-3 rounded-[14px] text-white text-[13px] font-bold"
                 style={{ background: 'var(--color-primary)' }}
               >
-                Importovat {rows.length} klientů
+                Importovat {allGroups.length} klientů
               </button>
             </div>
           </div>

@@ -25,6 +25,7 @@ export default function PracePage() {
   const [search,        setSearch]        = useState('')
   const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>('Vše')
   const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>('Vše')
+  const [krajFilter,    setKrajFilter]    = useState<string>('Vše')
   const [showAdd,      setShowAdd]      = useState(false)
   const [newName,      setNewName]      = useState('')
   const [newColor,     setNewColor]     = useState(CLIENT_COLORS[0])
@@ -38,12 +39,29 @@ export default function PracePage() {
     setShowAdd(false)
   }
 
+  // Extract kraj value from tags (stored as "kraj:Praha" etc.)
+  function getKraj(tags: string[]): string | null {
+    const t = tags.find(t => t.startsWith('kraj:'))
+    return t ? t.slice(5) : null
+  }
+
+  // Collect all unique kraj values present in the data
+  const availableKraje = useMemo(() => {
+    const krajSet = new Set<string>()
+    clients.forEach(c => {
+      const k = getKraj(c.tags ?? [])
+      if (k) krajSet.add(k)
+    })
+    return Array.from(krajSet).sort()
+  }, [clients])
+
   const filtered = useMemo(() => {
     return clients
       .filter(c => statusFilter === 'Vše' || c.status === statusFilter)
       .filter(c => subjectFilter === 'Vše' || c.subject_type === subjectFilter)
+      .filter(c => krajFilter === 'Vše' || getKraj(c.tags ?? []) === krajFilter)
       .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))
-  }, [clients, search, statusFilter, subjectFilter])
+  }, [clients, search, statusFilter, subjectFilter, krajFilter])
 
   const activeDeals = deals.filter(d => d.stage !== 'Uzavřen' && d.stage !== 'Ztracen')
   const totalDealValue = activeDeals.reduce((sum, d) => sum + (d.value ?? 0), 0)
@@ -137,6 +155,28 @@ export default function PracePage() {
               </button>
             ))}
           </div>
+
+          {/* Row 4: Kraj filter — only shown when there are clients with kraj tags */}
+          {availableKraje.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Kraj:</span>
+              <button onClick={() => setKrajFilter('Vše')}
+                className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
+                style={{ background: krajFilter === 'Vše' ? 'var(--color-primary)' : '#f3f4f6', color: krajFilter === 'Vše' ? '#fff' : '#6b7280' }}>
+                Vše
+              </button>
+              {availableKraje.map(k => (
+                <button key={k} onClick={() => setKrajFilter(k)}
+                  className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
+                  style={{
+                    background: krajFilter === k ? '#0ea5e9' : '#e0f2fe',
+                    color: krajFilter === k ? '#fff' : '#0369a1',
+                  }}>
+                  📍 {k}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Client list */}
@@ -183,12 +223,19 @@ export default function PracePage() {
                             {client.subject_type}
                           </span>
                         )}
-                        {client.is_prague && (
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px] bg-sky-50 text-sky-600">
-                            🏙️ Praha
-                          </span>
-                        )}
-                        {!client.subject_type && !client.is_prague && client.address && (
+                        {(() => {
+                          const k = getKraj(client.tags ?? [])
+                          return k ? (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px] bg-sky-50 text-sky-600">
+                              📍 {k}
+                            </span>
+                          ) : client.is_prague ? (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px] bg-sky-50 text-sky-600">
+                              🏙️ Praha
+                            </span>
+                          ) : null
+                        })()}
+                        {!client.subject_type && !getKraj(client.tags ?? []) && !client.is_prague && client.address && (
                           <span className="text-[11px] text-gray-400 truncate hidden lg:block">{client.address}</span>
                         )}
                       </div>
