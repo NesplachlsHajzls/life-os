@@ -81,32 +81,46 @@ export function Sidebar() {
             {section.items.map(item => {
               const active = isActive(item.href)
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all"
-                  style={{
-                    background: active ? 'rgba(255,255,255,0.18)' : 'transparent',
-                  }}
-                >
-                  <span className="text-[18px] leading-none flex-shrink-0">{item.icon}</span>
-                  <span
-                    className="text-[13px] font-semibold"
-                    style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
+                <div key={item.href} className="relative group/nav mb-0.5">
+                  <Link
+                    href={item.href}
+                    className="flex items-center gap-3 px-3 py-2 rounded-[10px] transition-all w-full"
+                    style={{
+                      background: active ? 'rgba(255,255,255,0.18)' : 'transparent',
+                    }}
                   >
-                    {item.label}
-                  </span>
-                  <div className="ml-auto flex items-center gap-1.5">
-                    {item.href === '/todo' && todoCount > 0 && (
-                      <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-white/20 text-white text-[10px] font-bold flex items-center justify-center">
-                        {todoCount > 99 ? '99+' : todoCount}
-                      </span>
-                    )}
-                    {active && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-white opacity-80" />
-                    )}
-                  </div>
-                </Link>
+                    <span className="text-[18px] leading-none flex-shrink-0">{item.icon}</span>
+                    <span
+                      className="text-[13px] font-semibold"
+                      style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
+                    >
+                      {item.label}
+                    </span>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      {item.href === '/todo' && todoCount > 0 && (
+                        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-white/20 text-white text-[10px] font-bold flex items-center justify-center">
+                          {todoCount > 99 ? '99+' : todoCount}
+                        </span>
+                      )}
+                      {active && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-white opacity-80" />
+                      )}
+                    </div>
+                  </Link>
+                  {/* Open in new window — visible on hover */}
+                  <button
+                    onClick={e => { e.preventDefault(); window.open(item.href, '_blank') }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-[6px] flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity hover:bg-white/20"
+                    title="Otevřít v novém okně"
+                    style={{ color: 'rgba(255,255,255,0.7)' }}
+                  >
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4.5 1.5H1.5v8h8V6.5" />
+                      <path d="M6.5 1.5H9.5V4.5" />
+                      <line x1="5.5" y1="5.5" x2="9.5" y2="1.5" />
+                    </svg>
+                  </button>
+                </div>
               )
             })}
           </div>

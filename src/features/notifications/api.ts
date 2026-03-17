@@ -48,47 +48,75 @@ export async function deleteNotification(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
+// ── Settings helpers ──────────────────────────────────────────────
+
+export type NotifLeadTime = 30 | 60 | 180 | 720 | 1440   // minutes before event
+export const NOTIF_LEAD_OPTIONS: { value: NotifLeadTime; label: string }[] = [
+  { value: 30,   label: '30 min předem' },
+  { value: 60,   label: '1 hod předem' },
+  { value: 180,  label: '3 hod předem' },
+  { value: 720,  label: '12 hod předem' },
+  { value: 1440, label: 'Den předem' },
+]
+
+export function getNotifLeadTime(): NotifLeadTime {
+  try {
+    const v = localStorage.getItem('notif_lead_minutes')
+    if (v) return Number(v) as NotifLeadTime
+  } catch {}
+  return 60  // default: 1 hour
+}
+
+export function setNotifLeadTime(v: NotifLeadTime): void {
+  try { localStorage.setItem('notif_lead_minutes', String(v)) } catch {}
+}
+
 // ── Auto-generate ─────────────────────────────────────────────────
-// Called on app open — generates notifications for upcoming events if not already generated
+// Called on app open — generates notifications for upcoming events
+// Deduplication: skip if an UNREAD notification for that event already exists
 
 export async function generateUpcomingNotifications(userId: string): Promise<void> {
   try {
+    const leadMinutes = getNotifLeadTime()
     const now = new Date()
-    const in48h = new Date(now.getTime() + 48 * 3600 * 1000)
+    // Fetch window: from now up to leadMinutes ahead (+ small buffer so you see
+    // events that start soon, even if you open the app slightly late)
+    const windowEnd = new Date(now.getTime() + (leadMinutes + 30) * 60 * 1000)
 
-    // Fetch upcoming non-recurring events
-    const upcoming = await fetchUpcomingEvents(userId, 48)
+    const upcoming = await fetchUpcomingEvents(userId, Math.ceil((leadMinutes + 30) / 60))
 
-    // Also expand recurring events for next 48h
     const allEvents: CalendarEvent[] = []
     for (const ev of upcoming) {
       if (ev.is_recurring) {
-        const expanded = expandRecurring(ev, now, in48h)
-        allEvents.push(...expanded)
+        allEvents.push(...expandRecurring(ev, now, windowEnd))
       } else {
         allEvents.push(ev)
       }
     }
 
-    // Check which event_ids already have notifications today
-    const today = now.toISOString().split('T')[0]
+    if (allEvents.length === 0) return
+
+    // Dedup: check ALL unread notifications for these event base IDs
+    const baseIds = allEvents.map(ev => ev.id.split('_')[0])
     const { data: existing } = await supabase
       .from('notifications')
-      .select('event_id, created_at')
+      .select('event_id')
       .eq('user_id', userId)
-      .gte('created_at', today)
+      .eq('read', false)
+      .in('event_id', baseIds)
 
     const existingIds = new Set((existing ?? []).map((n: { event_id: string }) => n.event_id))
 
     const toInsert: Omit<AppNotification, 'id' | 'created_at'>[] = []
 
     for (const ev of allEvents) {
-      // Use base ID for recurring (strip the _timestamp suffix)
       const baseId = ev.id.split('_')[0]
       if (existingIds.has(baseId)) continue
 
       const start = new Date(ev.start_datetime)
       const diffMin = Math.round((start.getTime() - now.getTime()) / 60000)
+      // Only notify events that are actually upcoming within the lead window
+      if (diffMin < 0) continue
 
       let timeLabel = ''
       if (diffMin < 60) timeLabel = `za ${diffMin} min`
