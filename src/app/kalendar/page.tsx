@@ -522,7 +522,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
 
 // ── WeekView ──────────────────────────────────────────────────────
 
-function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, highlightDay, appCategories = DEFAULT_CATEGORIES }: {
+function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, collapsedDays, onToggleDay, highlightDay, appCategories = DEFAULT_CATEGORIES }: {
   weekStart: Date
   events: CalendarEvent[]
   tasks: Task[]
@@ -532,6 +532,8 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
   onEventComplete?: (ev: CalendarEvent) => void
   onTaskComplete?: (task: Task) => void
   completedIds?: Set<string>
+  collapsedDays?: Set<string>
+  onToggleDay?: (dayIso: string) => void
   highlightDay?: string | null
   appCategories?: AppCategory[]
 }) {
@@ -579,6 +581,8 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
         const tks = tasksByDay[day.toDateString()] ?? []
         const dayIso = day.toISOString().split('T')[0]
         const isHighlight = highlightDay === dayIso
+        const isCollapsed = collapsedDays?.has(dayIso) ?? false
+        const totalItems = evs.length + tks.length
         const label = isToday
           ? `📍 ${CZ_DAYS_FULL[day.getDay()]} ${day.getDate()}. ${CZ_MONTHS[day.getMonth()]} — dnes`
           : `${CZ_DAYS_FULL[day.getDay()]} ${day.getDate()}. ${CZ_MONTHS[day.getMonth()]}`
@@ -589,42 +593,57 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
             style={isHighlight ? { animation: 'calFlash 1.4s ease-out', borderRadius: 12 } : undefined}
           >
             {di > 0 && <div className="h-px bg-gray-100 my-4" />}
-            <div className="flex items-center justify-between mb-2">
-              <div className={`text-[11px] font-bold uppercase tracking-wide ${isToday ? 'text-[var(--color-primary)]' : 'text-gray-400'}`}>
-                {label}
+            {/* Day header — kliknutím kolaps/rozbalení */}
+            <div
+              className="flex items-center justify-between mb-2 cursor-pointer select-none group"
+              onClick={() => onToggleDay?.(dayIso)}
+            >
+              <div className="flex items-center gap-2">
+                <span className={`text-[10px] transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'} text-gray-400`}>▶</span>
+                <div className={`text-[11px] font-bold uppercase tracking-wide ${isToday ? 'text-[var(--color-primary)]' : 'text-gray-400'}`}>
+                  {label}
+                </div>
+                {isCollapsed && totalItems > 0 && (
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                    {totalItems}
+                  </span>
+                )}
               </div>
-              <button onClick={() => onDayClick(day)} className="text-[11px] text-[var(--color-primary)] font-semibold">
+              <button
+                onClick={e => { e.stopPropagation(); onDayClick(day) }}
+                className="text-[11px] text-[var(--color-primary)] font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+              >
                 + přidat
               </button>
             </div>
-            {evs.length === 0 && tks.length === 0
-              ? <div className="text-[12px] text-gray-300 py-2 text-center">Žádné události</div>
-              : (
-                <div className="flex flex-col gap-2">
-                  {/* Tasks without time → top of day (before timed events) */}
-                  {tks.map(t => (
-                    <TaskChip
-                      key={t.id}
-                      task={t}
-                      onClick={onTaskClick ? () => onTaskClick(t) : undefined}
-                      onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
-                      isCompleted={completedIds?.has(t.id)}
-                      appCategories={appCategories}
-                    />
-                  ))}
-                  {evs.map(ev => (
-                    <EventChip
-                      key={ev.id}
-                      event={ev}
-                      onClick={() => onEventClick(ev)}
-                      onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
-                      isCompleted={completedIds?.has(ev.id)}
-                      appCategories={appCategories}
-                    />
-                  ))}
-                </div>
-              )
-            }
+            {!isCollapsed && (
+              evs.length === 0 && tks.length === 0
+                ? <div className="text-[12px] text-gray-300 py-2 text-center">Žádné události</div>
+                : (
+                  <div className="flex flex-col gap-2">
+                    {tks.map(t => (
+                      <TaskChip
+                        key={t.id}
+                        task={t}
+                        onClick={onTaskClick ? () => onTaskClick(t) : undefined}
+                        onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
+                        isCompleted={completedIds?.has(t.id)}
+                        appCategories={appCategories}
+                      />
+                    ))}
+                    {evs.map(ev => (
+                      <EventChip
+                        key={ev.id}
+                        event={ev}
+                        onClick={() => onEventClick(ev)}
+                        onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
+                        isCompleted={completedIds?.has(ev.id)}
+                        appCategories={appCategories}
+                      />
+                    ))}
+                  </div>
+                )
+            )}
           </div>
         )
       })}
@@ -771,7 +790,16 @@ export default function KalendarPage() {
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
   const [highlightDay, setHighlightDay]    = useState<string | null>(null)
   const [completedIds, setCompletedIds]    = useState<Set<string>>(new Set())
+  const [collapsedDays, setCollapsedDays]  = useState<Set<string>>(new Set())
   const lastSaveRef = useRef<number>(0)
+
+  // Load persisted completed event IDs from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('cal_completed_events')
+      if (raw) setCompletedIds(prev => new Set([...prev, ...JSON.parse(raw)]))
+    } catch { /* ignore */ }
+  }, [])
 
   const weekStart = startOfWeek(currentDate)
   const weekEnd   = endOfDay(addDays(weekStart, 6))
@@ -900,21 +928,55 @@ export default function KalendarPage() {
     }
   }
 
-  // Pure visual toggle — no DB changes, no removal from list
+  // Event toggle — persists to localStorage (no completed field in DB)
   function handleCompleteEvent(event: CalendarEvent) {
     setCompletedIds(prev => {
       const next = new Set(prev)
       if (next.has(event.id)) next.delete(event.id)
       else next.add(event.id)
+      try {
+        // Only persist non-recurring IDs (recurring have synthetic suffixes)
+        const toSave = [...next].filter(id => !id.includes('_'))
+        localStorage.setItem('cal_completed_events', JSON.stringify(toSave))
+      } catch { /* ignore */ }
       return next
     })
   }
 
-  function handleCompleteTask(task: Task) {
+  // Task toggle — persists to DB
+  async function handleCompleteTask(task: Task) {
+    const newStatus: 'open' | 'done' = completedIds.has(task.id) ? 'open' : 'done'
+    const done_at = newStatus === 'done' ? new Date().toISOString() : null
+    // Optimistic update
     setCompletedIds(prev => {
       const next = new Set(prev)
-      if (next.has(task.id)) next.delete(task.id)
-      else next.add(task.id)
+      if (newStatus === 'done') next.add(task.id)
+      else next.delete(task.id)
+      return next
+    })
+    try {
+      await updateTask({ id: task.id, status: newStatus, done_at })
+      // Remove from visible list when done (tasks are filtered to open)
+      if (newStatus === 'done') {
+        setTimeout(() => setTasks(prev => prev.filter(t => t.id !== task.id)), 600)
+      }
+    } catch {
+      // Revert on error
+      setCompletedIds(prev => {
+        const next = new Set(prev)
+        if (newStatus === 'done') next.delete(task.id)
+        else next.add(task.id)
+        return next
+      })
+    }
+  }
+
+  // Toggle collapse for a day
+  function handleToggleDay(dayIso: string) {
+    setCollapsedDays(prev => {
+      const next = new Set(prev)
+      if (next.has(dayIso)) next.delete(dayIso)
+      else next.add(dayIso)
       return next
     })
   }
@@ -981,6 +1043,8 @@ export default function KalendarPage() {
             onEventComplete={handleCompleteEvent}
             onTaskComplete={handleCompleteTask}
             completedIds={completedIds}
+            collapsedDays={collapsedDays}
+            onToggleDay={handleToggleDay}
             highlightDay={highlightDay}
             appCategories={appCategories}
           />
