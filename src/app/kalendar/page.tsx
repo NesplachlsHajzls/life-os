@@ -89,19 +89,6 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
       className="rounded-xl px-3 py-2 border-l-[3px] cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-2"
       style={{ background: style.background, borderColor: style.borderColor }}
     >
-      <div className="flex-1 min-w-0">
-        <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
-          {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
-        </div>
-        <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
-          {event.emoji && <span className="mr-1">{event.emoji}</span>}
-          {event.title}
-          {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
-        </div>
-        {clientName && (
-          <div className="text-[10px] font-semibold text-gray-400 mt-0.5 truncate">💼 {clientName}</div>
-        )}
-      </div>
       {onComplete && (
         <button
           onClick={e => { e.stopPropagation(); onComplete() }}
@@ -115,6 +102,19 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
           {isCompleted && <span className="text-[9px] text-white font-bold leading-none">✓</span>}
         </button>
       )}
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
+          {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
+        </div>
+        <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
+          {event.emoji && <span className="mr-1">{event.emoji}</span>}
+          {event.title}
+          {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
+        </div>
+        {clientName && (
+          <div className="text-[10px] font-semibold text-gray-400 mt-0.5 truncate">💼 {clientName}</div>
+        )}
+      </div>
     </div>
   )
 }
@@ -137,14 +137,6 @@ function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFA
       className={`rounded-xl px-3 py-2 border-l-[3px] ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''} flex items-center gap-2`}
       style={{ background: style.background, borderColor: style.borderColor }}
     >
-      <div className="flex-1 min-w-0">
-        <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
-          ✅ {clientName ? clientName : 'Úkol'}
-        </div>
-        <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
-          {task.title}
-        </div>
-      </div>
       {onComplete && (
         <button
           onClick={e => { e.stopPropagation(); onComplete() }}
@@ -158,6 +150,14 @@ function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFA
           {isCompleted && <span className="text-[9px] text-white font-bold leading-none">✓</span>}
         </button>
       )}
+      <div className="flex-1 min-w-0">
+        <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
+          ✅ {clientName ? clientName : 'Úkol'}
+        </div>
+        <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
+          {task.title}
+        </div>
+      </div>
     </div>
   )
 }
