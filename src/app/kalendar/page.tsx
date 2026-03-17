@@ -16,6 +16,8 @@ import {
   updateEvent,
   deleteEvent,
   expandRecurring,
+  fetchCompletedEventIds,
+  setEventCompleted,
 } from '@/features/calendar/api'
 import { fetchTasks, updateTask, Task } from '@/features/todo/api'
 import { fetchClients } from '@/features/prace/api'
@@ -816,13 +818,13 @@ export default function KalendarPage() {
   const [collapsedDays, setCollapsedDays]  = useState<Set<string>>(new Set())
   const lastSaveRef = useRef<number>(0)
 
-  // Load persisted completed event IDs from localStorage
+  // Load completed event IDs from DB (cross-device sync)
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('cal_completed_events')
-      if (raw) setCompletedIds(prev => new Set([...prev, ...JSON.parse(raw)]))
-    } catch { /* ignore */ }
-  }, [])
+    if (!userId) return
+    fetchCompletedEventIds(userId).then(ids => {
+      if (ids.size > 0) setCompletedIds(ids)
+    }).catch(() => {})
+  }, [userId])
 
   const weekStart = startOfWeek(currentDate)
   const weekEnd   = endOfDay(addDays(weekStart, 6))
@@ -951,18 +953,26 @@ export default function KalendarPage() {
     }
   }
 
-  // Event toggle — persists to localStorage (no completed field in DB)
+  // Event toggle — persists to DB for cross-device sync
   function handleCompleteEvent(event: CalendarEvent) {
+    if (!userId) return
+    const willComplete = !completedIds.has(event.id)
+    // Optimistic update
     setCompletedIds(prev => {
       const next = new Set(prev)
-      if (next.has(event.id)) next.delete(event.id)
-      else next.add(event.id)
-      try {
-        // Only persist non-recurring IDs (recurring have synthetic suffixes)
-        const toSave = [...next].filter(id => !id.includes('_'))
-        localStorage.setItem('cal_completed_events', JSON.stringify(toSave))
-      } catch { /* ignore */ }
+      if (willComplete) next.add(event.id)
+      else next.delete(event.id)
       return next
+    })
+    // Persist to DB (baseId strips recurring suffix)
+    setEventCompleted(userId, event.id, willComplete).catch(() => {
+      // Revert on error
+      setCompletedIds(prev => {
+        const next = new Set(prev)
+        if (willComplete) next.delete(event.id)
+        else next.add(event.id)
+        return next
+      })
     })
   }
 

@@ -137,6 +137,28 @@ export async function deleteEvent(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
+// ── Completed events (cross-device sync) ──────────────────────────
+// Requires table: cal_completed_events (user_id UUID, event_id TEXT, PRIMARY KEY (user_id, event_id))
+
+export async function fetchCompletedEventIds(userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .from('cal_completed_events')
+    .select('event_id')
+    .eq('user_id', userId)
+  if (error) return new Set()
+  return new Set((data ?? []).map((r: { event_id: string }) => r.event_id))
+}
+
+export async function setEventCompleted(userId: string, eventId: string, completed: boolean): Promise<void> {
+  // Recurring events have synthetic IDs like "uuid_2026-03-17" — strip suffix for storage
+  const baseId = eventId.includes('_') ? eventId.split('_')[0] : eventId
+  if (completed) {
+    await supabase.from('cal_completed_events').upsert({ user_id: userId, event_id: baseId }, { onConflict: 'user_id,event_id' })
+  } else {
+    await supabase.from('cal_completed_events').delete().eq('user_id', userId).eq('event_id', baseId)
+  }
+}
+
 // ── Recurring expansion ───────────────────────────────────────────
 // Generates virtual occurrences of recurring events within a date range
 
