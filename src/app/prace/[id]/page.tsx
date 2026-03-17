@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useUser } from '@/hooks/useUser'
@@ -20,7 +20,7 @@ import {
 } from '@/features/prace/api'
 import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
 import { parseTaskInput } from '@/features/todo/utils'
-import { fetchClientMeetings, insertNote, Note } from '@/features/notes/api'
+import { fetchClientMeetings, fetchOrCreateClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 function fmtCZK(v: number | null) {
@@ -87,7 +87,7 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
   )
 }
 
-type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky'
+type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky' | 'poznamky'
 
 export default function ClientPage() {
   const params = useParams()
@@ -103,6 +103,11 @@ export default function ClientPage() {
   const [deals,      setDeals]      = useState<Deal[]>([])
   const [meetings,   setMeetings]   = useState<Note[]>([])
   const [orders,     setOrders]     = useState<ClientOrder[]>([])
+  const [clientNote, setClientNote] = useState<Note | null>(null)
+  const [noteTitle,  setNoteTitle]  = useState('')
+  const [noteContent,setNoteContent]= useState('')
+  const [noteSaveState, setNoteSaveState] = useState<'saved' | 'saving' | 'unsaved'>('saved')
+  const noteSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [loading,    setLoading]    = useState(true)
   const [toast,      setToast]      = useState<string | null>(null)
   const [tab,        setTab]        = useState<Tab>('prehled')
@@ -262,10 +267,21 @@ export default function ClientPage() {
       fetchOrders(clientId),
     ]).then(([cls, t, co, ac, d, m, ord]) => {
       if (cancelled) return
-      setClient(cls.find(c => c.id === clientId) ?? null)
+      const foundClient = cls.find(c => c.id === clientId) ?? null
+      setClient(foundClient)
       setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setMeetings(m)
       setOrders(ord as ClientOrder[])
       setLoading(false)
+      // Load client note lazily (don't block main load)
+      if (foundClient) {
+        fetchOrCreateClientNote(userId, clientId, foundClient.name).then(note => {
+          if (!cancelled) {
+            setClientNote(note)
+            setNoteTitle(note.title)
+            setNoteContent(note.content ?? '')
+          }
+        }).catch(() => {})
+      }
     }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [userId, clientId])
@@ -398,6 +414,21 @@ export default function ClientPage() {
     setClient(prev => prev ? { ...prev, first_meeting_status: next } : prev)
   }
 
+  // ── Client note autosave ──────────────────────────────────────
+  const scheduleSaveNote = useCallback((title: string, content: string, noteId: string) => {
+    setNoteSaveState('unsaved')
+    if (noteSaveTimer.current) clearTimeout(noteSaveTimer.current)
+    noteSaveTimer.current = setTimeout(async () => {
+      setNoteSaveState('saving')
+      try {
+        await updateNote(noteId, { title, content })
+        setNoteSaveState('saved')
+      } catch {
+        setNoteSaveState('unsaved')
+      }
+    }, 1000)
+  }, [])
+
   // ── Order actions ─────────────────────────────────────────────
   function openAddOrder() {
     setEditingOrder(null)
@@ -455,6 +486,7 @@ export default function ClientPage() {
     { id: 'objednavky',  label: 'Objednávky',  count: pendingOrders.length },
     { id: 'kontakty',    label: 'Kontakty',    count: contacts.length },
     { id: 'schuzky',     label: 'Schůzky',     count: meetings.length },
+    { id: 'poznamky',    label: 'Poznámky' },
   ]
 
   return (
@@ -957,6 +989,48 @@ export default function ClientPage() {
           )}
 
           {/* ══ SCHŮZKY ══ */}
+          {/* ══ POZNÁMKY ══ */}
+          {tab === 'poznamky' && (
+            <div className="flex flex-col gap-3">
+              {/* Save state indicator */}
+              <div className="flex justify-end">
+                <span className={`text-[11px] font-semibold transition-colors ${
+                  noteSaveState === 'saved'   ? 'text-green-400' :
+                  noteSaveState === 'saving'  ? 'text-amber-400' :
+                  'text-gray-300'
+                }`}>
+                  {noteSaveState === 'saved' ? '✓ Uloženo' : noteSaveState === 'saving' ? 'Ukládám…' : '● Neuloženo'}
+                </span>
+              </div>
+
+              {/* Title */}
+              <input
+                className="w-full bg-transparent border-none outline-none text-[28px] font-extrabold text-gray-900 placeholder-gray-200 resize-none"
+                placeholder="Název poznámky"
+                value={noteTitle}
+                onChange={e => {
+                  setNoteTitle(e.target.value)
+                  if (clientNote) scheduleSaveNote(e.target.value, noteContent, clientNote.id)
+                }}
+              />
+
+              {/* Divider */}
+              <div className="border-t border-gray-100" />
+
+              {/* Content */}
+              <textarea
+                className="w-full bg-transparent border-none outline-none text-[15px] text-gray-700 resize-none placeholder-gray-300 leading-relaxed"
+                style={{ minHeight: 320 }}
+                placeholder="Začni psát poznámky ke klientovi…"
+                value={noteContent}
+                onChange={e => {
+                  setNoteContent(e.target.value)
+                  if (clientNote) scheduleSaveNote(noteTitle, e.target.value, clientNote.id)
+                }}
+              />
+            </div>
+          )}
+
           {tab === 'schuzky' && (
             <>
               <div className="flex justify-end mb-4">
@@ -1411,7 +1485,7 @@ export default function ClientPage() {
                 <div className="flex gap-2">
                   <input className={fieldCls} value={eProductInput} onChange={e => setEProductInput(e.target.value)}
                     onKeyDown={e => {
-                      if ((e.key === 'Enter' || e.key === ',') && eProductInput.trim()) {
+                      if (e.key === 'Enter' && eProductInput.trim()) {
                         e.preventDefault()
                         setEProducts(prev => [...prev, eProductInput.trim()])
                         setEProductInput('')

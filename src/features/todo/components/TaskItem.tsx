@@ -100,15 +100,24 @@ export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clients
         )}
       </div>
 
-      {/* Priority dots */}
-      <div className="flex-shrink-0 flex items-center gap-1.5 mt-1">
+      {/* Priority dots + actions */}
+      <div className="flex-shrink-0 flex items-center gap-1 mt-1">
         <span
-          className="text-[10px] font-bold leading-none"
+          className="text-[10px] font-bold leading-none mr-0.5"
           style={{ color: priority.color }}
           title={priority.title}
         >
           {priority.label}
         </span>
+        {onEdit && (
+          <button
+            onClick={() => onEdit(task)}
+            className="w-5 h-5 flex items-center justify-center rounded-full text-gray-300 hover:text-blue-400 hover:bg-blue-50 text-[11px] transition-colors"
+            title="Upravit úkol"
+          >
+            ✏️
+          </button>
+        )}
         <button
           onClick={() => onDelete(task.id)}
           className="w-5 h-5 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 text-[12px] transition-colors"

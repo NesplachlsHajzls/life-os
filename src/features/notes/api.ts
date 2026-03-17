@@ -66,6 +66,37 @@ export async function fetchSubNotes(parentId: string): Promise<Note[]> {
   return (data as Note[]) ?? []
 }
 
+/** Pracovní poznámka klienta (is_meeting = false, client_id = clientId) — vrátí jednu nebo null */
+export async function fetchClientNote(userId: string, clientId: string): Promise<Note | null> {
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('client_id', clientId)
+    .eq('is_meeting', false)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  if (error) return null
+  return data as Note | null
+}
+
+/** Vrátí existující klientskou poznámku, nebo vytvoří novou */
+export async function fetchOrCreateClientNote(userId: string, clientId: string, clientName: string): Promise<Note> {
+  const existing = await fetchClientNote(userId, clientId)
+  if (existing) return existing
+  return insertNote({
+    user_id:      userId,
+    client_id:    clientId,
+    title:        `Poznámky – ${clientName}`,
+    content:      null,
+    parent_id:    null,
+    is_meeting:   false,
+    meeting_date: null,
+    icon:         '📝',
+  })
+}
+
 /** Schůzky (is_meeting = true) pro daného klienta */
 export async function fetchClientMeetings(clientId: string): Promise<Note[]> {
   const { data, error } = await supabase
