@@ -815,13 +815,15 @@ export default function KalendarPage() {
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
   const [highlightDay, setHighlightDay]    = useState<string | null>(null)
   const [completedIds, setCompletedIds]    = useState<Set<string>>(new Set())
-  const [collapsedDays, setCollapsedDays]  = useState<Set<string>>(() => {
+  const [collapsedDays, setCollapsedDays]  = useState<Set<string>>(new Set())
+
+  // Restore collapsed days from localStorage after hydration
+  useEffect(() => {
     try {
       const stored = localStorage.getItem('cal_collapsed_days')
-      if (stored) return new Set(JSON.parse(stored) as string[])
+      if (stored) setCollapsedDays(new Set(JSON.parse(stored) as string[]))
     } catch {}
-    return new Set()
-  })
+  }, [])
   const lastSaveRef = useRef<number>(0)
 
   // Load completed event IDs from DB (cross-device sync)

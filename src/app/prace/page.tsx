@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
@@ -23,19 +23,21 @@ export default function PracePage() {
   const { loading, toast, clients, openTasks, dueThisWeek, deals, addClient, getClientOpenTasks } = usePrace(userId)
 
   const [search,        setSearch]        = useState('')
-  const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>(() => {
-    try { return (localStorage.getItem('prace_status_filter') as ClientStatus | 'Vše') || 'Vše' } catch { return 'Vše' }
-  })
-  const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>(() => {
-    try { return (localStorage.getItem('prace_subject_filter') as SubjectType | 'Vše') || 'Vše' } catch { return 'Vše' }
-  })
-  const [krajFilter,    setKrajFilter]    = useState<Set<string>>(() => {
+  const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>('Vše')
+  const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>('Vše')
+  const [krajFilter,    setKrajFilter]    = useState<Set<string>>(new Set())
+
+  // Restore filters from localStorage after hydration (lazy init doesn't work in Next.js SSR)
+  useEffect(() => {
     try {
-      const stored = localStorage.getItem('prace_kraj_filter')
-      if (stored) return new Set(JSON.parse(stored) as string[])
+      const s = localStorage.getItem('prace_status_filter')
+      if (s) setStatusFilter(s as ClientStatus | 'Vše')
+      const t = localStorage.getItem('prace_subject_filter')
+      if (t) setSubjectFilter(t as SubjectType | 'Vše')
+      const k = localStorage.getItem('prace_kraj_filter')
+      if (k) setKrajFilter(new Set(JSON.parse(k) as string[]))
     } catch {}
-    return new Set()
-  })
+  }, [])
   const [showAdd,      setShowAdd]      = useState(false)
   const [newName,      setNewName]      = useState('')
   const [newColor,     setNewColor]     = useState(CLIENT_COLORS[0])
