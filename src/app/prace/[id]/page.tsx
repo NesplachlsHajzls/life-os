@@ -9,7 +9,8 @@ import {
   fetchClientTasks, fetchClients, fetchContacts, fetchActivities, fetchDeals,
   insertContact, deleteContact, insertActivity, deleteActivity, insertDeal, updateDeal, deleteDeal,
   updateClient, deleteClient,
-  Client, ClientContact, ClientActivity, Deal,
+  fetchOrders, insertOrder, updateOrder, deleteOrder,
+  Client, ClientContact, ClientActivity, Deal, ClientOrder,
   DEAL_STAGES, DEAL_STAGE_COLORS, DealStage,
   ACTIVITY_TYPES, ACTIVITY_ICONS, ACTIVITY_LABELS, ActivityType,
   CLIENT_STATUSES, CLIENT_COLORS, CLIENT_ICONS,
@@ -40,7 +41,53 @@ const STATUS_COLORS: Record<string, string> = {
 const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]'
 const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
-type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'kontakty' | 'schuzky'
+// ── OrderRow ──────────────────────────────────────────────────────
+
+function OrderRow({ order, clientColor, onEdit, onToggle }: {
+  order: ClientOrder
+  clientColor: string
+  onEdit: () => void
+  onToggle: () => void
+}) {
+  const dateStr = new Date(order.date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })
+  return (
+    <div className={`bg-white rounded-[14px] p-4 flex items-start gap-3 transition-opacity ${order.invoiced ? 'opacity-60' : ''}`}
+      style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+      {/* Invoiced toggle */}
+      <button onClick={onToggle}
+        className={`mt-0.5 w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+          order.invoiced
+            ? 'bg-green-400 border-green-400'
+            : 'border-gray-300 hover:border-green-400'
+        }`}
+        title={order.invoiced ? 'Označit jako nefakturované' : 'Označit jako fakturované'}>
+        {order.invoiced && <span className="text-[10px] text-white font-bold">✓</span>}
+      </button>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className={`text-[14px] font-bold ${order.invoiced ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+          {order.subject}
+        </div>
+        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+          <span className="text-[12px] text-gray-400">📅 {dateStr}</span>
+          {order.amount != null && (
+            <span className="text-[12px] font-semibold" style={{ color: order.invoiced ? '#9ca3af' : clientColor }}>
+              {new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(order.amount)}
+            </span>
+          )}
+          {order.invoiced && <span className="text-[11px] font-semibold text-green-500">Fakturováno</span>}
+        </div>
+        {order.note && <div className="text-[12px] text-gray-400 mt-0.5 truncate">{order.note}</div>}
+      </div>
+
+      {/* Edit */}
+      <button onClick={onEdit} className="text-gray-300 hover:text-gray-500 text-[15px] transition-colors flex-shrink-0 px-1">✏️</button>
+    </div>
+  )
+}
+
+type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky'
 
 export default function ClientPage() {
   const params = useParams()
@@ -55,6 +102,7 @@ export default function ClientPage() {
   const [activities, setActivities] = useState<ClientActivity[]>([])
   const [deals,      setDeals]      = useState<Deal[]>([])
   const [meetings,   setMeetings]   = useState<Note[]>([])
+  const [orders,     setOrders]     = useState<ClientOrder[]>([])
   const [loading,    setLoading]    = useState(true)
   const [toast,      setToast]      = useState<string | null>(null)
   const [tab,        setTab]        = useState<Tab>('prehled')
@@ -95,6 +143,14 @@ export default function ClientPage() {
   const [mTitle, setMTitle] = useState('')
   const [mDate,  setMDate]  = useState(new Date().toISOString().slice(0, 10))
   const [creatingMeeting, setCreatingMeeting] = useState(false)
+
+  // Order form
+  const [showAddOrder,  setShowAddOrder]  = useState(false)
+  const [editingOrder,  setEditingOrder]  = useState<ClientOrder | null>(null)
+  const [oDate,    setODate]    = useState(new Date().toISOString().slice(0, 10))
+  const [oSubject, setOSubject] = useState('')
+  const [oAmount,  setOAmount]  = useState('')
+  const [oNote,    setONote]    = useState('')
 
   // Edit client form
   const [showEditClient, setShowEditClient] = useState(false)
@@ -203,10 +259,12 @@ export default function ClientPage() {
       fetchActivities(clientId),
       fetchDeals(userId, clientId),
       fetchClientMeetings(clientId),
-    ]).then(([cls, t, co, ac, d, m]) => {
+      fetchOrders(clientId),
+    ]).then(([cls, t, co, ac, d, m, ord]) => {
       if (cancelled) return
       setClient(cls.find(c => c.id === clientId) ?? null)
       setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setMeetings(m)
+      setOrders(ord as ClientOrder[])
       setLoading(false)
     }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -340,13 +398,63 @@ export default function ClientPage() {
     setClient(prev => prev ? { ...prev, first_meeting_status: next } : prev)
   }
 
+  // ── Order actions ─────────────────────────────────────────────
+  function openAddOrder() {
+    setEditingOrder(null)
+    setODate(new Date().toISOString().slice(0, 10))
+    setOSubject(''); setOAmount(''); setONote('')
+    setShowAddOrder(true)
+  }
+  function openEditOrder(order: ClientOrder) {
+    setEditingOrder(order)
+    setODate(order.date)
+    setOSubject(order.subject)
+    setOAmount(order.amount != null ? String(order.amount) : '')
+    setONote(order.note ?? '')
+    setShowAddOrder(true)
+  }
+  async function handleSaveOrder() {
+    if (!oSubject.trim() || !userId) return
+    const payload = {
+      user_id: userId, client_id: clientId,
+      date: oDate, subject: oSubject.trim(),
+      amount: oAmount ? parseFloat(oAmount.replace(',', '.')) || null : null,
+      invoiced: editingOrder?.invoiced ?? false,
+      note: oNote.trim() || null,
+    }
+    if (editingOrder) {
+      await updateOrder(editingOrder.id, payload)
+      setOrders(prev => prev.map(o => o.id === editingOrder.id ? { ...o, ...payload } : o))
+      showToast('✏️ Objednávka upravena')
+    } else {
+      const data = await insertOrder(payload)
+      setOrders(prev => [data, ...prev])
+      showToast('✅ Objednávka přidána')
+    }
+    setShowAddOrder(false)
+  }
+  async function toggleInvoiced(order: ClientOrder) {
+    const invoiced = !order.invoiced
+    await updateOrder(order.id, { invoiced })
+    setOrders(prev => prev.map(o => o.id === order.id ? { ...o, invoiced } : o))
+  }
+  async function handleDeleteOrder(id: string) {
+    await deleteOrder(id)
+    setOrders(prev => prev.filter(o => o.id !== id))
+    setShowAddOrder(false)
+    showToast('🗑️ Smazáno')
+  }
+
+  const pendingOrders = orders.filter(o => !o.invoiced)
+
   const TABS: { id: Tab; label: string; count?: number }[] = [
-    { id: 'prehled',  label: 'Přehled' },
-    { id: 'ukoly',    label: 'Úkoly',    count: openTasks.length },
-    { id: 'aktivity', label: 'Aktivity', count: activities.length },
-    { id: 'obchody',  label: 'Obchody',  count: deals.length },
-    { id: 'kontakty', label: 'Kontakty', count: contacts.length },
-    { id: 'schuzky',  label: 'Schůzky',  count: meetings.length },
+    { id: 'prehled',     label: 'Přehled' },
+    { id: 'ukoly',       label: 'Úkoly',       count: openTasks.length },
+    { id: 'aktivity',    label: 'Aktivity',    count: activities.length },
+    { id: 'obchody',     label: 'Obchody',     count: deals.length },
+    { id: 'objednavky',  label: 'Objednávky',  count: pendingOrders.length },
+    { id: 'kontakty',    label: 'Kontakty',    count: contacts.length },
+    { id: 'schuzky',     label: 'Schůzky',     count: meetings.length },
   ]
 
   return (
@@ -777,6 +885,77 @@ export default function ClientPage() {
             </>
           )}
 
+          {/* ══ OBJEDNÁVKY ══ */}
+          {tab === 'objednavky' && (
+            <>
+              {/* Toolbar */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  {pendingOrders.length > 0 && (
+                    <span className="text-[12px] font-bold px-2.5 py-1 rounded-full bg-orange-50 text-orange-600">
+                      🧾 {pendingOrders.length} čeká na fakturaci
+                    </span>
+                  )}
+                </div>
+                <button onClick={openAddOrder}
+                  className="px-4 py-2 rounded-[12px] text-[13px] font-bold text-white"
+                  style={{ background: clientColor }}>
+                  + Přidat objednávku
+                </button>
+              </div>
+
+              {orders.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-[48px] mb-3">📦</div>
+                  <p className="text-[14px] font-semibold text-gray-500 mb-1">Zatím žádné objednávky</p>
+                  <p className="text-[12px] text-gray-400">Zaznamenej co si klient odebral, ať nezapomeneš fakturovat</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {/* Nefakturované */}
+                  {pendingOrders.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-bold text-orange-500 uppercase tracking-wide px-1 mb-2">
+                        Čeká na fakturaci
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {pendingOrders.map(order => (
+                          <OrderRow
+                            key={order.id}
+                            order={order}
+                            clientColor={clientColor}
+                            onEdit={() => openEditOrder(order)}
+                            onToggle={() => toggleInvoiced(order)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Fakturované */}
+                  {orders.filter(o => o.invoiced).length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1 mb-2 mt-2">
+                        Fakturováno
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {orders.filter(o => o.invoiced).map(order => (
+                          <OrderRow
+                            key={order.id}
+                            order={order}
+                            clientColor={clientColor}
+                            onEdit={() => openEditOrder(order)}
+                            onToggle={() => toggleInvoiced(order)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
           {/* ══ SCHŮZKY ══ */}
           {tab === 'schuzky' && (
             <>
@@ -854,6 +1033,59 @@ export default function ClientPage() {
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: clientColor }}>
                   {creatingMeeting ? '…' : '🤝 Přidat & otevřít'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add / Edit order modal ── */}
+      {showAddOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
+          onClick={e => { if (e.target === e.currentTarget) setShowAddOrder(false) }}>
+          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-[18px] font-extrabold text-gray-900">
+                📦 {editingOrder ? 'Upravit objednávku' : 'Nová objednávka'}
+              </h2>
+              <button onClick={() => setShowAddOrder(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+            </div>
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Datum *</label>
+                  <input className={fieldCls} type="date" value={oDate} onChange={e => setODate(e.target.value)} />
+                </div>
+                <div>
+                  <label className={labelCls}>Částka (Kč)</label>
+                  <input className={fieldCls} type="number" value={oAmount} onChange={e => setOAmount(e.target.value)}
+                    placeholder="Volitelné" min="0" step="1" />
+                </div>
+              </div>
+              <div>
+                <label className={labelCls}>Předmět / Popis *</label>
+                <input className={fieldCls} value={oSubject} onChange={e => setOSubject(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSaveOrder()}
+                  placeholder="Např. Certifikát TWINS Kval, Čipová karta, Obnova…" />
+              </div>
+              <div>
+                <label className={labelCls}>Poznámka</label>
+                <input className={fieldCls} value={oNote} onChange={e => setONote(e.target.value)}
+                  placeholder="Volitelná poznámka…" />
+              </div>
+              <div className="flex gap-3 pt-1">
+                {editingOrder && (
+                  <button onClick={() => handleDeleteOrder(editingOrder.id)}
+                    className="px-4 py-3 rounded-[14px] border border-red-100 text-red-400 text-[13px] font-semibold hover:bg-red-50 transition-colors">
+                    🗑️
+                  </button>
+                )}
+                <button onClick={() => setShowAddOrder(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={handleSaveOrder} disabled={!oSubject.trim()}
+                  className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
+                  style={{ background: clientColor }}>
+                  {editingOrder ? 'Uložit' : '+ Přidat'}
                 </button>
               </div>
             </div>

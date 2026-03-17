@@ -306,3 +306,60 @@ export async function fetchAllWorkTasks(userId: string): Promise<Task[]> {
   if (error) throw new Error(error.message)
   return (data as Task[]) ?? []
 }
+
+// ── Client Orders ─────────────────────────────────────────────────
+// Tracks services / products delivered to a client that still need invoicing.
+// SQL migration to run in Supabase:
+//
+//   CREATE TABLE client_orders (
+//     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+//     client_id  UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+//     user_id    UUID NOT NULL,
+//     date       DATE NOT NULL DEFAULT CURRENT_DATE,
+//     subject    TEXT NOT NULL,
+//     amount     NUMERIC(10,2),
+//     invoiced   BOOLEAN NOT NULL DEFAULT FALSE,
+//     note       TEXT,
+//     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+//   );
+//   CREATE INDEX ON client_orders(client_id);
+//   CREATE INDEX ON client_orders(user_id);
+
+export interface ClientOrder {
+  id:         string
+  client_id:  string
+  user_id:    string
+  date:       string          // ISO date "YYYY-MM-DD"
+  subject:    string
+  amount:     number | null
+  invoiced:   boolean
+  note:       string | null
+  created_at: string
+}
+
+export async function fetchOrders(clientId: string): Promise<ClientOrder[]> {
+  const { data, error } = await supabase
+    .from('client_orders')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as ClientOrder[]) ?? []
+}
+
+export async function insertOrder(payload: Omit<ClientOrder, 'id' | 'created_at'>): Promise<ClientOrder> {
+  const { data, error } = await supabase.from('client_orders').insert(payload).select().single()
+  if (error) throw new Error(error.message)
+  return data as ClientOrder
+}
+
+export async function updateOrder(id: string, payload: Partial<ClientOrder>): Promise<void> {
+  const { error } = await supabase.from('client_orders').update(payload).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteOrder(id: string): Promise<void> {
+  const { error } = await supabase.from('client_orders').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
