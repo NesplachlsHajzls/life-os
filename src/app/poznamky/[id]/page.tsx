@@ -9,6 +9,7 @@ import {
   Note, NOTE_ICONS,
 } from '@/features/notes/api'
 import { fetchClientById } from '@/features/prace/api'
+import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID  = '00000000-0000-0000-0000-000000000001'
 const AUTOSAVE_MS   = 800   // debounce delay
@@ -280,14 +281,17 @@ export default function NoteDetailPage() {
           />
         </div>
 
-        {/* Content textarea */}
-        <textarea
-          value={content}
-          onChange={e => handleContentChange(e.target.value)}
-          placeholder="Začni psát… Přidávej poznámky, myšlenky, zápisky ze schůzky…"
-          className="flex-1 w-full bg-transparent border-none outline-none resize-none text-[15px] text-gray-700 leading-relaxed placeholder-gray-200 min-h-[300px] lg:min-h-[400px]"
-          autoFocus={!note.content}
-        />
+        {/* Rich text editor */}
+        <div className="bg-white rounded-[14px] overflow-hidden" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+          <RichTextEditor
+            value={content}
+            onChange={handleContentChange}
+            placeholder="Začni psát… Přidávej poznámky, myšlenky, zápisky ze schůzky…"
+            minHeight={360}
+            autoFocus={!note.content}
+            className="px-3"
+          />
+        </div>
 
         {/* Sub-notes section */}
         <div className="mt-4 pt-4 border-t border-gray-200">

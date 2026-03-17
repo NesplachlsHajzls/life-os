@@ -21,6 +21,7 @@ import {
 import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
 import { parseTaskInput } from '@/features/todo/utils'
 import { fetchClientMeetings, fetchOrCreateClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
+import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 function fmtCZK(v: number | null) {
@@ -1013,9 +1014,18 @@ export default function ClientPage() {
           {/* ══ POZNÁMKY ══ */}
           {tab === 'poznamky' && (
             <div className="flex flex-col gap-3">
-              {/* Save state indicator */}
-              <div className="flex justify-end">
-                <span className={`text-[11px] font-semibold transition-colors ${
+              {/* Title row + save indicator */}
+              <div className="flex items-center gap-3">
+                <input
+                  className="flex-1 bg-transparent border-none outline-none text-[24px] font-extrabold text-gray-900 placeholder-gray-200"
+                  placeholder="Název poznámky"
+                  value={noteTitle}
+                  onChange={e => {
+                    setNoteTitle(e.target.value)
+                    if (clientNote) scheduleSaveNote(e.target.value, noteContent, clientNote.id)
+                  }}
+                />
+                <span className={`text-[11px] font-semibold flex-shrink-0 transition-colors ${
                   noteSaveState === 'saved'   ? 'text-green-400' :
                   noteSaveState === 'saving'  ? 'text-amber-400' :
                   'text-gray-300'
@@ -1024,31 +1034,19 @@ export default function ClientPage() {
                 </span>
               </div>
 
-              {/* Title */}
-              <input
-                className="w-full bg-transparent border-none outline-none text-[28px] font-extrabold text-gray-900 placeholder-gray-200 resize-none"
-                placeholder="Název poznámky"
-                value={noteTitle}
-                onChange={e => {
-                  setNoteTitle(e.target.value)
-                  if (clientNote) scheduleSaveNote(e.target.value, noteContent, clientNote.id)
-                }}
-              />
-
-              {/* Divider */}
-              <div className="border-t border-gray-100" />
-
-              {/* Content */}
-              <textarea
-                className="w-full bg-transparent border-none outline-none text-[15px] text-gray-700 resize-none placeholder-gray-300 leading-relaxed"
-                style={{ minHeight: 320 }}
-                placeholder="Začni psát poznámky ke klientovi…"
-                value={noteContent}
-                onChange={e => {
-                  setNoteContent(e.target.value)
-                  if (clientNote) scheduleSaveNote(noteTitle, e.target.value, clientNote.id)
-                }}
-              />
+              {/* Rich text editor */}
+              <div className="bg-white rounded-[14px] overflow-hidden" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                <RichTextEditor
+                  value={noteContent}
+                  onChange={val => {
+                    setNoteContent(val)
+                    if (clientNote) scheduleSaveNote(noteTitle, val, clientNote.id)
+                  }}
+                  placeholder="Začni psát poznámky ke klientovi…"
+                  minHeight={320}
+                  className="px-3"
+                />
+              </div>
             </div>
           )}
 
