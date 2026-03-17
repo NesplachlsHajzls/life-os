@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
@@ -25,12 +25,50 @@ export default function PracePage() {
   const [search,        setSearch]        = useState('')
   const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>('Vše')
   const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>('Vše')
-  const [krajFilter,    setKrajFilter]    = useState<string>('Vše')
+  const [krajFilter,    setKrajFilter]    = useState<Set<string>>(new Set())
   const [showAdd,      setShowAdd]      = useState(false)
   const [newName,      setNewName]      = useState('')
   const [newColor,     setNewColor]     = useState(CLIENT_COLORS[0])
   const [newIcon,      setNewIcon]      = useState('💼')
   const [newStatus,    setNewStatus]    = useState<ClientStatus>('Aktivní')
+
+  // ── Drag-to-scroll for kraj filter ──────────────────────────────
+  const krajScrollRef = useRef<HTMLDivElement>(null)
+  const dragState = useRef({ dragging: false, startX: 0, scrollLeft: 0, moved: false })
+
+  const onKrajMouseDown = useCallback((e: React.MouseEvent) => {
+    const el = krajScrollRef.current
+    if (!el) return
+    dragState.current = { dragging: true, startX: e.clientX, scrollLeft: el.scrollLeft, moved: false }
+    el.style.cursor = 'grabbing'
+    el.style.userSelect = 'none'
+  }, [])
+
+  const onKrajMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragState.current.dragging) return
+    const el = krajScrollRef.current
+    if (!el) return
+    const dx = e.clientX - dragState.current.startX
+    if (Math.abs(dx) > 3) dragState.current.moved = true
+    el.scrollLeft = dragState.current.scrollLeft - dx
+  }, [])
+
+  const onKrajMouseUp = useCallback(() => {
+    const el = krajScrollRef.current
+    if (el) { el.style.cursor = 'grab'; el.style.userSelect = '' }
+    dragState.current.dragging = false
+  }, [])
+
+  function toggleKraj(k: string) {
+    // Prevent toggling when user just dragged
+    if (dragState.current.moved) { dragState.current.moved = false; return }
+    setKrajFilter(prev => {
+      const next = new Set(prev)
+      if (next.has(k)) next.delete(k)
+      else next.add(k)
+      return next
+    })
+  }
 
   async function handleAdd() {
     if (!newName.trim()) return
@@ -59,7 +97,7 @@ export default function PracePage() {
     return clients
       .filter(c => statusFilter === 'Vše' || c.status === statusFilter)
       .filter(c => subjectFilter === 'Vše' || c.subject_type === subjectFilter)
-      .filter(c => krajFilter === 'Vše' || getKraj(c.tags ?? []) === krajFilter)
+      .filter(c => krajFilter.size === 0 || krajFilter.has(getKraj(c.tags ?? []) ?? ''))
       .filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()))
   }, [clients, search, statusFilter, subjectFilter, krajFilter])
 
@@ -158,19 +196,33 @@ export default function PracePage() {
 
           {/* Row 4: Kraj filter — only shown when there are clients with kraj tags */}
           {availableKraje.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
+            <div
+              ref={krajScrollRef}
+              className="flex gap-2 overflow-x-auto items-center select-none"
+              style={{ scrollbarWidth: 'none', cursor: 'grab' }}
+              onMouseDown={onKrajMouseDown}
+              onMouseMove={onKrajMouseMove}
+              onMouseUp={onKrajMouseUp}
+              onMouseLeave={onKrajMouseUp}
+            >
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Kraj:</span>
-              <button onClick={() => setKrajFilter('Vše')}
-                className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
-                style={{ background: krajFilter === 'Vše' ? 'var(--color-primary)' : '#f3f4f6', color: krajFilter === 'Vše' ? '#fff' : '#6b7280' }}>
+              <button
+                onMouseDown={e => e.stopPropagation()}
+                onClick={() => setKrajFilter(new Set())}
+                className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0"
+                style={{ background: krajFilter.size === 0 ? 'var(--color-primary)' : '#f3f4f6', color: krajFilter.size === 0 ? '#fff' : '#6b7280' }}>
                 Vše
               </button>
               {availableKraje.map(k => (
-                <button key={k} onClick={() => setKrajFilter(k)}
-                  className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
+                <button key={k}
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={() => toggleKraj(k)}
+                  className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0"
                   style={{
-                    background: krajFilter === k ? '#0ea5e9' : '#e0f2fe',
-                    color: krajFilter === k ? '#fff' : '#0369a1',
+                    background: krajFilter.has(k) ? '#0ea5e9' : '#e0f2fe',
+                    color: krajFilter.has(k) ? '#fff' : '#0369a1',
+                    outline: krajFilter.has(k) ? '2px solid #0ea5e9' : 'none',
+                    outlineOffset: '1px',
                   }}>
                   📍 {k}
                 </button>
