@@ -23,9 +23,19 @@ export default function PracePage() {
   const { loading, toast, clients, openTasks, dueThisWeek, deals, addClient, getClientOpenTasks } = usePrace(userId)
 
   const [search,        setSearch]        = useState('')
-  const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>('Vše')
-  const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>('Vše')
-  const [krajFilter,    setKrajFilter]    = useState<Set<string>>(new Set())
+  const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>(() => {
+    try { return (localStorage.getItem('prace_status_filter') as ClientStatus | 'Vše') || 'Vše' } catch { return 'Vše' }
+  })
+  const [subjectFilter, setSubjectFilter] = useState<SubjectType | 'Vše'>(() => {
+    try { return (localStorage.getItem('prace_subject_filter') as SubjectType | 'Vše') || 'Vše' } catch { return 'Vše' }
+  })
+  const [krajFilter,    setKrajFilter]    = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem('prace_kraj_filter')
+      if (stored) return new Set(JSON.parse(stored) as string[])
+    } catch {}
+    return new Set()
+  })
   const [showAdd,      setShowAdd]      = useState(false)
   const [newName,      setNewName]      = useState('')
   const [newColor,     setNewColor]     = useState(CLIENT_COLORS[0])
@@ -66,6 +76,7 @@ export default function PracePage() {
       const next = new Set(prev)
       if (next.has(k)) next.delete(k)
       else next.add(k)
+      try { localStorage.setItem('prace_kraj_filter', JSON.stringify(Array.from(next))) } catch {}
       return next
     })
   }
@@ -163,7 +174,7 @@ export default function PracePage() {
           <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Status:</span>
             {(['Vše', ...CLIENT_STATUSES] as const).map(s => (
-              <button key={s} onClick={() => setStatusFilter(s)}
+              <button key={s} onClick={() => { setStatusFilter(s); try { localStorage.setItem('prace_status_filter', s) } catch {} }}
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
                 style={{
                   background: statusFilter === s ? (s === 'Vše' ? 'var(--color-primary)' : STATUS_COLORS[s]) : '#f3f4f6',
@@ -177,13 +188,13 @@ export default function PracePage() {
           {/* Row 3: Subject type filter */}
           <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Typ:</span>
-            <button onClick={() => setSubjectFilter('Vše')}
+            <button onClick={() => { setSubjectFilter('Vše'); try { localStorage.setItem('prace_subject_filter', 'Vše') } catch {} }}
               className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
               style={{ background: subjectFilter === 'Vše' ? 'var(--color-primary)' : '#f3f4f6', color: subjectFilter === 'Vše' ? '#fff' : '#6b7280' }}>
               Vše
             </button>
             {SUBJECT_TYPES.map(t => (
-              <button key={t} onClick={() => setSubjectFilter(t)}
+              <button key={t} onClick={() => { setSubjectFilter(t); try { localStorage.setItem('prace_subject_filter', t) } catch {} }}
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
                 style={{
                   background: subjectFilter === t ? SUBJECT_TYPE_COLORS[t] : SUBJECT_TYPE_COLORS[t] + '15',
@@ -208,7 +219,7 @@ export default function PracePage() {
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Kraj:</span>
               <button
                 onMouseDown={e => e.stopPropagation()}
-                onClick={() => setKrajFilter(new Set())}
+                onClick={() => { setKrajFilter(new Set()); try { localStorage.setItem('prace_kraj_filter', '[]') } catch {} }}
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0"
                 style={{ background: krajFilter.size === 0 ? 'var(--color-primary)' : '#f3f4f6', color: krajFilter.size === 0 ? '#fff' : '#6b7280' }}>
                 Vše
