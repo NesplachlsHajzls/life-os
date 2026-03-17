@@ -274,10 +274,10 @@ export default function ClientPage() {
       setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setMeetings(m)
       setOrders(ord as ClientOrder[])
       setLoading(false)
-      // Load client note lazily (don't block main load)
+      // Load existing client note lazily — do NOT create one automatically
       if (foundClient) {
-        fetchOrCreateClientNote(userId, clientId, foundClient.name).then(note => {
-          if (!cancelled) {
+        fetchClientNote(userId, clientId).then(note => {
+          if (!cancelled && note) {
             setClientNote(note)
             setNoteTitle(note.title)
             setNoteContent(note.content ?? '')
@@ -545,7 +545,17 @@ export default function ClientPage() {
       {/* Tabs */}
       <div className="flex bg-white border-b border-gray-100 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
         {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
+          <button key={t.id} onClick={() => {
+            setTab(t.id)
+            // Create client note on first open of the Poznámky tab (lazy creation)
+            if (t.id === 'poznamky' && !clientNote && client && userId) {
+              fetchOrCreateClientNote(userId, client.id, client.name).then(note => {
+                setClientNote(note)
+                setNoteTitle(note.title)
+                setNoteContent(note.content ?? '')
+              }).catch(() => {})
+            }
+          }}
             className="flex-shrink-0 px-4 py-3 text-[13px] font-bold border-b-2 transition-colors whitespace-nowrap"
             style={{ borderColor: tab === t.id ? clientColor : 'transparent', color: tab === t.id ? clientColor : '#9ca3af' }}>
             {t.label}{t.count !== undefined && t.count > 0 ? ` (${t.count})` : ''}
