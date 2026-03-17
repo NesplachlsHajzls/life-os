@@ -73,14 +73,16 @@ function fmtDateInput(d: Date): string {
 
 // ── EventChip ─────────────────────────────────────────────────────
 
-function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DEFAULT_CATEGORIES }: {
+function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DEFAULT_CATEGORIES, clientsMap = {} }: {
   event: CalendarEvent
   onClick?: () => void
   onComplete?: () => void
   isCompleted?: boolean
   appCategories?: AppCategory[]
+  clientsMap?: Record<string, string>
 }) {
   const style = getCategoryInlineStyle(event.category, appCategories)
+  const clientName = event.client_id ? clientsMap[event.client_id] : null
   return (
     <div
       onClick={onClick}
@@ -96,6 +98,9 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
           {event.title}
           {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
         </div>
+        {clientName && (
+          <div className="text-[10px] font-semibold text-gray-400 mt-0.5 truncate">💼 {clientName}</div>
+        )}
       </div>
       {onComplete && (
         <button
@@ -116,15 +121,16 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
 
 // ── TaskChip ──────────────────────────────────────────────────────
 
-function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFAULT_CATEGORIES }: {
+function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFAULT_CATEGORIES, clientsMap = {} }: {
   task: Task
   onClick?: () => void
   onComplete?: () => void
   isCompleted?: boolean
   appCategories?: AppCategory[]
+  clientsMap?: Record<string, string>
 }) {
   const style = getCategoryInlineStyle(task.category ?? 'osobni', appCategories)
-  const isWork = task.category === 'prace' || !!task.client_id
+  const clientName = task.client_id ? clientsMap[task.client_id] : null
   return (
     <div
       onClick={onClick}
@@ -133,7 +139,7 @@ function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFA
     >
       <div className="flex-1 min-w-0">
         <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
-          ✅ Úkol{isWork ? ' · práce' : ''}
+          ✅ {clientName ? clientName : 'Úkol'}
         </div>
         <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
           {task.title}
@@ -522,7 +528,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
 
 // ── WeekView ──────────────────────────────────────────────────────
 
-function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, collapsedDays, onToggleDay, highlightDay, appCategories = DEFAULT_CATEGORIES }: {
+function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, collapsedDays, onToggleDay, highlightDay, appCategories = DEFAULT_CATEGORIES, clientsMap = {} }: {
   weekStart: Date
   events: CalendarEvent[]
   tasks: Task[]
@@ -536,6 +542,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
   onToggleDay?: (dayIso: string) => void
   highlightDay?: string | null
   appCategories?: AppCategory[]
+  clientsMap?: Record<string, string>
 }) {
   const today = new Date()
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i))
@@ -618,29 +625,45 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
             </div>
             {!isCollapsed && (
               evs.length === 0 && tks.length === 0
-                ? <div className="text-[12px] text-gray-300 py-2 text-center">Žádné události</div>
+                ? <div className="text-[12px] text-gray-300 py-1.5 text-center">Žádné události ani úkoly</div>
                 : (
-                  <div className="flex flex-col gap-2">
-                    {tks.map(t => (
-                      <TaskChip
-                        key={t.id}
-                        task={t}
-                        onClick={onTaskClick ? () => onTaskClick(t) : undefined}
-                        onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
-                        isCompleted={completedIds?.has(t.id)}
-                        appCategories={appCategories}
-                      />
-                    ))}
-                    {evs.map(ev => (
-                      <EventChip
-                        key={ev.id}
-                        event={ev}
-                        onClick={() => onEventClick(ev)}
-                        onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
-                        isCompleted={completedIds?.has(ev.id)}
-                        appCategories={appCategories}
-                      />
-                    ))}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Levý sloupec — Události */}
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-300 mb-0.5">Události</div>
+                      {evs.length === 0
+                        ? <div className="text-[11px] text-gray-200 italic">—</div>
+                        : evs.map(ev => (
+                          <EventChip
+                            key={ev.id}
+                            event={ev}
+                            onClick={() => onEventClick(ev)}
+                            onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
+                            isCompleted={completedIds?.has(ev.id)}
+                            appCategories={appCategories}
+                            clientsMap={clientsMap}
+                          />
+                        ))
+                      }
+                    </div>
+                    {/* Pravý sloupec — Úkoly */}
+                    <div className="flex flex-col gap-2">
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-300 mb-0.5">Úkoly</div>
+                      {tks.length === 0
+                        ? <div className="text-[11px] text-gray-200 italic">—</div>
+                        : tks.map(t => (
+                          <TaskChip
+                            key={t.id}
+                            task={t}
+                            onClick={onTaskClick ? () => onTaskClick(t) : undefined}
+                            onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
+                            isCompleted={completedIds?.has(t.id)}
+                            appCategories={appCategories}
+                            clientsMap={clientsMap}
+                          />
+                        ))
+                      }
+                    </div>
                   </div>
                 )
             )}
@@ -1047,6 +1070,7 @@ export default function KalendarPage() {
             onToggleDay={handleToggleDay}
             highlightDay={highlightDay}
             appCategories={appCategories}
+            clientsMap={Object.fromEntries(calClients.map(c => [c.id, c.name]))}
           />
         ) : (
           <MonthView
