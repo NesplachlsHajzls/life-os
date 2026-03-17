@@ -20,7 +20,7 @@ import {
 } from '@/features/prace/api'
 import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
 import { parseTaskInput } from '@/features/todo/utils'
-import { fetchClientMeetings, fetchOrCreateClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
+import { fetchClientMeetings, fetchClientNote, fetchOrCreateClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
