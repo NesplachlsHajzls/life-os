@@ -226,6 +226,11 @@ export async function insertContact(payload: Omit<ClientContact, 'id' | 'created
   return data as ClientContact
 }
 
+export async function updateContact(id: string, payload: Partial<Pick<ClientContact, 'name' | 'role' | 'phone' | 'email' | 'is_primary'>>): Promise<void> {
+  const { error } = await supabase.from('client_contacts').update(payload).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
 export async function deleteContact(id: string): Promise<void> {
   const { error } = await supabase.from('client_contacts').delete().eq('id', id)
   if (error) throw new Error(error.message)

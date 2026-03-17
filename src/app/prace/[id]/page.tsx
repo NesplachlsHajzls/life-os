@@ -7,7 +7,7 @@ import { useUser } from '@/hooks/useUser'
 import { TaskItem } from '@/features/todo/components/TaskItem'
 import {
   fetchClientTasks, fetchClients, fetchContacts, fetchActivities, fetchDeals,
-  insertContact, deleteContact, insertActivity, deleteActivity, insertDeal, updateDeal, deleteDeal,
+  insertContact, updateContact, deleteContact, insertActivity, deleteActivity, insertDeal, updateDeal, deleteDeal,
   updateClient, deleteClient,
   fetchOrders, insertOrder, updateOrder, deleteOrder,
   Client, ClientContact, ClientActivity, Deal, ClientOrder,
@@ -125,6 +125,7 @@ export default function ClientPage() {
 
   // Contact form
   const [showAddContact, setShowAddContact] = useState(false)
+  const [editingContact, setEditingContact] = useState<ClientContact | null>(null)
   const [cName, setCName] = useState(''); const [cRole, setCRole] = useState('')
   const [cPhone, setCPhone] = useState(''); const [cEmail, setCEmail] = useState('')
   const [cPrimary, setCPrimary] = useState(false)
@@ -334,16 +335,36 @@ export default function ClientPage() {
   }
 
   // ── Contact actions ───────────────────────────────────────────
-  async function handleAddContact() {
-    if (!cName.trim() || !userId) return
-    const data = await insertContact({ client_id: clientId, user_id: userId, name: cName, role: cRole || null, phone: cPhone || null, email: cEmail || null, is_primary: cPrimary })
-    setContacts(prev => [...prev, data])
+  function openAddContact() {
+    setEditingContact(null)
     setCName(''); setCRole(''); setCPhone(''); setCEmail(''); setCPrimary(false)
-    setShowAddContact(false); showToast('✅ Kontakt přidán')
+    setShowAddContact(true)
+  }
+
+  function openEditContact(c: ClientContact) {
+    setEditingContact(c)
+    setCName(c.name); setCRole(c.role ?? ''); setCPhone(c.phone ?? ''); setCEmail(c.email ?? ''); setCPrimary(c.is_primary)
+    setShowAddContact(true)
+  }
+
+  async function handleSaveContact() {
+    if (!cName.trim() || !userId) return
+    if (editingContact) {
+      await updateContact(editingContact.id, { name: cName, role: cRole || null, phone: cPhone || null, email: cEmail || null, is_primary: cPrimary })
+      setContacts(prev => prev.map(c => c.id === editingContact.id ? { ...c, name: cName, role: cRole || null, phone: cPhone || null, email: cEmail || null, is_primary: cPrimary } : c))
+      showToast('✏️ Kontakt upraven')
+    } else {
+      const data = await insertContact({ client_id: clientId, user_id: userId, name: cName, role: cRole || null, phone: cPhone || null, email: cEmail || null, is_primary: cPrimary })
+      setContacts(prev => [...prev, data])
+      showToast('✅ Kontakt přidán')
+    }
+    setCName(''); setCRole(''); setCPhone(''); setCEmail(''); setCPrimary(false)
+    setEditingContact(null); setShowAddContact(false)
   }
 
   async function handleDeleteContact(id: string) {
     await deleteContact(id); setContacts(prev => prev.filter(c => c.id !== id))
+    setShowAddContact(false)
   }
 
   // ── Activity actions ──────────────────────────────────────────
@@ -595,7 +616,7 @@ export default function ClientPage() {
                   <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
                       <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">Kontaktní osoby</div>
-                      <button onClick={() => setShowAddContact(true)}
+                      <button onClick={() => openAddContact()}
                         className="w-7 h-7 flex items-center justify-center rounded-full text-white text-[16px] font-bold leading-none"
                         style={{ background: clientColor }}>+</button>
                     </div>
@@ -604,7 +625,7 @@ export default function ClientPage() {
                     ) : (
                       <div className="flex flex-col">
                         {contacts.map((c, i) => (
-                          <div key={c.id} className={`flex items-center gap-3 px-5 py-3 ${i > 0 ? 'border-t border-gray-50' : ''}`}>
+                          <div key={c.id} onClick={() => openEditContact(c)} className={`flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${i > 0 ? 'border-t border-gray-50' : ''}`}>
                             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold text-white flex-shrink-0"
                               style={{ background: clientColor }}>{c.name[0].toUpperCase()}</div>
                             <div className="flex-1 min-w-0">
@@ -618,7 +639,7 @@ export default function ClientPage() {
                                 {c.email && <span className="text-[11px] text-gray-500 truncate">✉️ {c.email}</span>}
                               </div>
                             </div>
-                            <button onClick={() => handleDeleteContact(c.id)} className="text-gray-300 hover:text-red-400 text-[16px] transition-colors flex-shrink-0">×</button>
+                            <button onClick={e => { e.stopPropagation(); handleDeleteContact(c.id) }} className="text-gray-300 hover:text-red-400 text-[16px] transition-colors flex-shrink-0">×</button>
                           </div>
                         ))}
                       </div>
@@ -885,7 +906,7 @@ export default function ClientPage() {
           {tab === 'kontakty' && (
             <>
               <div className="flex justify-end mb-4">
-                <button onClick={() => setShowAddContact(true)}
+                <button onClick={() => openAddContact()}
                   className="px-4 py-2 rounded-[12px] text-[13px] font-bold text-white"
                   style={{ background: clientColor }}>+ Kontakt</button>
               </div>
@@ -895,7 +916,7 @@ export default function ClientPage() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {contacts.map(c => (
-                    <div key={c.id} className="bg-white rounded-[14px] p-4 flex items-start gap-4" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                    <div key={c.id} onClick={() => openEditContact(c)} className="bg-white rounded-[14px] p-4 flex items-start gap-4 cursor-pointer hover:shadow-md transition-all" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-[18px] font-bold text-white flex-shrink-0"
                         style={{ background: clientColor }}>{c.name[0].toUpperCase()}</div>
                       <div className="flex-1 min-w-0">
@@ -909,7 +930,7 @@ export default function ClientPage() {
                           {c.email && <span className="text-[13px] text-gray-600">✉️ {c.email}</span>}
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteContact(c.id)} className="text-gray-300 hover:text-red-400 text-[18px] transition-colors">×</button>
+                      <button onClick={e => { e.stopPropagation(); handleDeleteContact(c.id) }} className="text-gray-300 hover:text-red-400 text-[18px] transition-colors">×</button>
                     </div>
                   ))}
                 </div>
@@ -1170,11 +1191,11 @@ export default function ClientPage() {
       {/* ── Add contact modal ── */}
       {showAddContact && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
-          onClick={e => { if (e.target === e.currentTarget) setShowAddContact(false) }}>
+          onClick={e => { if (e.target === e.currentTarget) { setShowAddContact(false); setEditingContact(null) } }}>
           <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">👤 Nová kontaktní osoba</h2>
-              <button onClick={() => setShowAddContact(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-gray-900">{editingContact ? '✏️ Upravit kontakt' : '👤 Nová kontaktní osoba'}</h2>
+              <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Jméno *</label><input className={fieldCls} value={cName} onChange={e => setCName(e.target.value)} placeholder="Jméno a příjmení"/></div>
@@ -1187,9 +1208,15 @@ export default function ClientPage() {
                 <input type="checkbox" checked={cPrimary} onChange={e => setCPrimary(e.target.checked)} className="w-4 h-4 rounded" />
                 <span className="text-[13px] font-medium text-gray-700">Primární kontakt</span>
               </label>
+              {editingContact && (
+                <button onClick={() => handleDeleteContact(editingContact.id)}
+                  className="w-full py-2.5 rounded-[12px] border border-red-200 text-red-500 text-[13px] font-semibold hover:bg-red-50 transition-colors">
+                  🗑 Smazat kontakt
+                </button>
+              )}
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setShowAddContact(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
-                <button onClick={handleAddContact} disabled={!cName.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>Přidat</button>
+                <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={handleSaveContact} disabled={!cName.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>{editingContact ? 'Uložit' : 'Přidat'}</button>
               </div>
             </div>
           </div>
