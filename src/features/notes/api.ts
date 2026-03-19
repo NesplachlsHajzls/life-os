@@ -12,6 +12,7 @@ export interface Note {
   is_meeting:   boolean
   meeting_date: string | null
   icon:         string
+  category:     string | null   // AppCategory.id — shared with todo/calendar
   created_at:   string
   updated_at:   string
 }
@@ -122,7 +123,7 @@ export async function insertNote(
 
 export async function updateNote(
   id: string,
-  payload: Partial<Pick<Note, 'title' | 'content' | 'icon' | 'meeting_date'>>
+  payload: Partial<Pick<Note, 'title' | 'content' | 'icon' | 'meeting_date' | 'category'>>
 ): Promise<void> {
   const { error } = await supabase
     .from('notes')
