@@ -95,6 +95,7 @@ export async function fetchOrCreateClientNote(userId: string, clientId: string, 
     is_meeting:   false,
     meeting_date: null,
     icon:         '📝',
+    category:     null,
   })
 }
 

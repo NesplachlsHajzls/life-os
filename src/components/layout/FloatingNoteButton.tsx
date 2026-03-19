@@ -23,7 +23,7 @@ export function FloatingNoteButton() {
       const note = await insertNote({
         user_id: userId, title: 'Nová poznámka', content: '',
         parent_id: null, client_id: null, is_meeting: false,
-        meeting_date: null, icon: '📝',
+        meeting_date: null, icon: '📝', category: null,
       })
       router.push(`/poznamky/${note.id}`)
     } catch {

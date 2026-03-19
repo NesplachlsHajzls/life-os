@@ -416,6 +416,7 @@ export default function ClientPage() {
         user_id: userId, title: mTitle.trim(), content: '',
         parent_id: null, client_id: clientId,
         is_meeting: true, meeting_date: mDate || null, icon: '🤝',
+        category: null,
       })
       setMeetings(prev => [note, ...prev])
       setMTitle(''); setMDate(new Date().toISOString().slice(0, 10))
