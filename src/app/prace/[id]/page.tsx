@@ -20,7 +20,7 @@ import {
 } from '@/features/prace/api'
 import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
 import { parseTaskInput } from '@/features/todo/utils'
-import { fetchClientMeetings, fetchClientNote, fetchOrCreateClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
+import { fetchClientMeetings, fetchClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -548,12 +548,14 @@ export default function ClientPage() {
         {TABS.map(t => (
           <button key={t.id} onClick={() => {
             setTab(t.id)
-            // Create client note on first open of the Poznámky tab (lazy creation)
+            // Load existing client note on first open of Poznámky tab (no auto-creation)
             if (t.id === 'poznamky' && !clientNote && client && userId) {
-              fetchOrCreateClientNote(userId, client.id, client.name).then(note => {
-                setClientNote(note)
-                setNoteTitle(note.title)
-                setNoteContent(note.content ?? '')
+              fetchClientNote(userId, client.id).then(note => {
+                if (note) {
+                  setClientNote(note)
+                  setNoteTitle(note.title)
+                  setNoteContent(note.content ?? '')
+                }
               }).catch(() => {})
             }
           }}
