@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
 import { usePrace } from '@/features/prace/hooks/usePrace'
 import { CLIENT_COLORS, CLIENT_ICONS, CLIENT_STATUSES, ClientStatus, SUBJECT_TYPES, SubjectType, SUBJECT_TYPE_COLORS, FIRST_MEETING_COLORS } from '@/features/prace/api'
+import { fetchNoteCountsByClient } from '@/features/notes/api'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -21,6 +22,13 @@ export default function PracePage() {
   const userId = !authLoading ? (user?.id ?? DEMO_USER_ID) : null
 
   const { loading, toast, clients, openTasks, dueThisWeek, deals, addClient, getClientOpenTasks } = usePrace(userId)
+
+  const [noteCounts, setNoteCounts] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    if (!userId) return
+    fetchNoteCountsByClient(userId).then(setNoteCounts).catch(() => {})
+  }, [userId])
 
   const [search,        setSearch]        = useState('')
   const [statusFilter,  setStatusFilter]  = useState<ClientStatus | 'Vše'>('Vše')
@@ -255,11 +263,12 @@ export default function PracePage() {
         ) : (
           <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
             {/* Table header */}
-            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-wide">
               <span>Klient</span>
               <span>Kontakt</span>
               <span className="text-center">Úkoly</span>
               <span className="text-center">Obchody</span>
+              <span className="text-center">Pozn.</span>
               <span>Status</span>
               <span />
             </div>
@@ -267,11 +276,12 @@ export default function PracePage() {
             {filtered.map((client, i) => {
               const openCount  = getClientOpenTasks(client.id).length
               const dealCount  = deals.filter(d => d.client_id === client.id && d.stage !== 'Uzavřen' && d.stage !== 'Ztracen').length
+              const noteCount  = noteCounts[client.id] ?? 0
               const subjColor  = client.subject_type ? SUBJECT_TYPE_COLORS[client.subject_type] : null
 
               return (
                 <Link key={client.id} href={`/prace/${client.id}`}
-                  className={`flex lg:grid lg:grid-cols-[2fr_160px_80px_80px_80px_40px] items-center gap-3 lg:gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  className={`flex lg:grid lg:grid-cols-[2fr_160px_80px_80px_80px_80px_40px] items-center gap-3 lg:gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
 
                   {/* Name + icon + badges */}
                   <div className="flex items-center gap-3 min-w-0">
@@ -325,6 +335,13 @@ export default function PracePage() {
                   <div className="hidden lg:flex justify-center">
                     {dealCount > 0
                       ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">{dealCount}</span>
+                      : <span className="text-[12px] text-gray-300">—</span>}
+                  </div>
+
+                  {/* Notes count */}
+                  <div className="hidden lg:flex justify-center">
+                    {noteCount > 0
+                      ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">📝 {noteCount}</span>
                       : <span className="text-[12px] text-gray-300">—</span>}
                   </div>
 

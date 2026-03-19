@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
 import { fetchRootNotes, insertNote, deleteNote, Note } from '@/features/notes/api'
 import { fetchCategories, AppCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
+import { fetchClients, Client } from '@/features/prace/api'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -33,6 +34,7 @@ export default function PoznamkyPage() {
 
   const [notes,      setNotes]      = useState<Note[]>([])
   const [categories, setCategories] = useState<AppCategory[]>(DEFAULT_CATEGORIES)
+  const [clients,    setClients]    = useState<Client[]>([])
   const [activeCat,  setActiveCat]  = useState<string | null>(null)
   const [loading,    setLoading]    = useState(true)
   const [search,     setSearch]     = useState('')
@@ -41,11 +43,12 @@ export default function PoznamkyPage() {
   useEffect(() => {
     if (!userId) return
     let cancelled = false
-    Promise.all([fetchRootNotes(userId), fetchCategories(userId)])
-      .then(([data, cats]) => {
+    Promise.all([fetchRootNotes(userId), fetchCategories(userId), fetchClients(userId)])
+      .then(([data, cats, cls]) => {
         if (cancelled) return
         setNotes(data)
         if (cats.length) setCategories(cats)
+        setClients(cls)
         setLoading(false)
       }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -158,7 +161,8 @@ export default function PoznamkyPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
             {filtered.map(note => {
-              const cat = note.category ? categories.find(c => c.id === note.category) : null
+              const cat    = note.category  ? categories.find(c => c.id === note.category)  : null
+              const client = note.client_id ? clients.find(c => c.id === note.client_id)    : null
               return (
                 <Link key={note.id} href={`/poznamky/${note.id}`}
                   className="group bg-white rounded-[16px] p-4 hover:shadow-md transition-all relative"
@@ -184,6 +188,12 @@ export default function PoznamkyPage() {
                           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]"
                             style={{ background: cat.color + '18', color: cat.color }}>
                             {cat.icon} {cat.name}
+                          </span>
+                        )}
+                        {client && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]"
+                            style={{ background: client.color + '18', color: client.color }}>
+                            {client.icon} {client.name}
                           </span>
                         )}
                       </div>

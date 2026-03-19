@@ -99,6 +99,35 @@ export async function fetchOrCreateClientNote(userId: string, clientId: string, 
   })
 }
 
+/** Všechny ne-schůzkové root-poznámky klienta (pro záložku Poznámky u klienta) */
+export async function fetchAllClientNotes(clientId: string): Promise<Note[]> {
+  const { data, error } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('client_id', clientId)
+    .eq('is_meeting', false)
+    .is('parent_id', null)
+    .order('updated_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as Note[]) ?? []
+}
+
+/** Počty poznámek pro každého klienta — vrací mapu {client_id: count} */
+export async function fetchNoteCountsByClient(userId: string): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from('notes')
+    .select('client_id')
+    .eq('user_id', userId)
+    .eq('is_meeting', false)
+    .not('client_id', 'is', null)
+  if (error) return {}
+  const counts: Record<string, number> = {}
+  for (const row of (data ?? [])) {
+    if (row.client_id) counts[row.client_id] = (counts[row.client_id] ?? 0) + 1
+  }
+  return counts
+}
+
 /** Schůzky (is_meeting = true) pro daného klienta */
 export async function fetchClientMeetings(clientId: string): Promise<Note[]> {
   const { data, error } = await supabase
@@ -124,7 +153,7 @@ export async function insertNote(
 
 export async function updateNote(
   id: string,
-  payload: Partial<Pick<Note, 'title' | 'content' | 'icon' | 'meeting_date' | 'category'>>
+  payload: Partial<Pick<Note, 'title' | 'content' | 'icon' | 'meeting_date' | 'category' | 'client_id'>>
 ): Promise<void> {
   const { error } = await supabase
     .from('notes')

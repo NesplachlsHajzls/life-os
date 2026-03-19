@@ -20,7 +20,7 @@ import {
 } from '@/features/prace/api'
 import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
 import { parseTaskInput } from '@/features/todo/utils'
-import { fetchClientMeetings, fetchClientNote, insertNote, updateNote, Note } from '@/features/notes/api'
+import { fetchClientMeetings, fetchAllClientNotes, insertNote, updateNote, deleteNote, Note } from '@/features/notes/api'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -102,13 +102,10 @@ export default function ClientPage() {
   const [contacts,   setContacts]   = useState<ClientContact[]>([])
   const [activities, setActivities] = useState<ClientActivity[]>([])
   const [deals,      setDeals]      = useState<Deal[]>([])
-  const [meetings,   setMeetings]   = useState<Note[]>([])
-  const [orders,     setOrders]     = useState<ClientOrder[]>([])
-  const [clientNote, setClientNote] = useState<Note | null>(null)
-  const [noteTitle,  setNoteTitle]  = useState('')
-  const [noteContent,setNoteContent]= useState('')
-  const [noteSaveState, setNoteSaveState] = useState<'saved' | 'saving' | 'unsaved'>('saved')
-  const noteSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [meetings,       setMeetings]       = useState<Note[]>([])
+  const [orders,         setOrders]         = useState<ClientOrder[]>([])
+  const [clientNotes,    setClientNotes]    = useState<Note[]>([])
+  const [creatingCNote,  setCreatingCNote]  = useState(false)
   const [loading,    setLoading]    = useState(true)
   const [toast,      setToast]      = useState<string | null>(null)
   const [tab,        setTab]        = useState<Tab>('prehled')
@@ -267,23 +264,15 @@ export default function ClientPage() {
       fetchDeals(userId, clientId),
       fetchClientMeetings(clientId),
       fetchOrders(clientId),
-    ]).then(([cls, t, co, ac, d, m, ord]) => {
+      fetchAllClientNotes(clientId),
+    ]).then(([cls, t, co, ac, d, m, ord, cn]) => {
       if (cancelled) return
       const foundClient = cls.find(c => c.id === clientId) ?? null
       setClient(foundClient)
       setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setMeetings(m)
       setOrders(ord as ClientOrder[])
+      setClientNotes(cn)
       setLoading(false)
-      // Load existing client note lazily — do NOT create one automatically
-      if (foundClient) {
-        fetchClientNote(userId, clientId).then(note => {
-          if (!cancelled && note) {
-            setClientNote(note)
-            setNoteTitle(note.title)
-            setNoteContent(note.content ?? '')
-          }
-        }).catch(() => {})
-      }
     }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [userId, clientId])
@@ -437,19 +426,24 @@ export default function ClientPage() {
     setClient(prev => prev ? { ...prev, first_meeting_status: next } : prev)
   }
 
-  // ── Client note autosave ──────────────────────────────────────
-  const scheduleSaveNote = useCallback((title: string, content: string, noteId: string) => {
-    setNoteSaveState('unsaved')
-    if (noteSaveTimer.current) clearTimeout(noteSaveTimer.current)
-    noteSaveTimer.current = setTimeout(async () => {
-      setNoteSaveState('saving')
-      try {
-        await updateNote(noteId, { title, content })
-        setNoteSaveState('saved')
-      } catch {
-        setNoteSaveState('unsaved')
-      }
-    }, 1000)
+  // ── Client note actions ──────────────────────────────────────
+  const handleNewClientNote = useCallback(async () => {
+    if (!userId || !client || creatingCNote) return
+    setCreatingCNote(true)
+    try {
+      const note = await insertNote({
+        user_id: userId, title: 'Nová poznámka', content: '',
+        parent_id: null, client_id: client.id,
+        is_meeting: false, meeting_date: null, icon: '📝', category: 'prace',
+      })
+      router.push(`/poznamky/${note.id}`)
+    } catch { setCreatingCNote(false) }
+  }, [userId, client, creatingCNote, router])
+
+  const handleDeleteClientNote = useCallback(async (id: string, e: React.MouseEvent) => {
+    e.preventDefault(); e.stopPropagation()
+    await deleteNote(id)
+    setClientNotes(prev => prev.filter(n => n.id !== id))
   }, [])
 
   // ── Order actions ─────────────────────────────────────────────
@@ -509,7 +503,7 @@ export default function ClientPage() {
     { id: 'objednavky',  label: 'Objednávky',  count: pendingOrders.length },
     { id: 'kontakty',    label: 'Kontakty',    count: contacts.length },
     { id: 'schuzky',     label: 'Schůzky',     count: meetings.length },
-    { id: 'poznamky',    label: 'Poznámky' },
+    { id: 'poznamky',    label: 'Poznámky',    count: clientNotes.length },
   ]
 
   return (
@@ -548,16 +542,6 @@ export default function ClientPage() {
         {TABS.map(t => (
           <button key={t.id} onClick={() => {
             setTab(t.id)
-            // Load existing client note on first open of Poznámky tab (no auto-creation)
-            if (t.id === 'poznamky' && !clientNote && client && userId) {
-              fetchClientNote(userId, client.id).then(note => {
-                if (note) {
-                  setClientNote(note)
-                  setNoteTitle(note.title)
-                  setNoteContent(note.content ?? '')
-                }
-              }).catch(() => {})
-            }
           }}
             className="flex-shrink-0 px-4 py-3 text-[13px] font-bold border-b-2 transition-colors whitespace-nowrap"
             style={{ borderColor: tab === t.id ? clientColor : 'transparent', color: tab === t.id ? clientColor : '#9ca3af' }}>
@@ -1026,41 +1010,62 @@ export default function ClientPage() {
           {/* ══ SCHŮZKY ══ */}
           {/* ══ POZNÁMKY ══ */}
           {tab === 'poznamky' && (
-            <div className="flex flex-col gap-3">
-              {/* Title row + save indicator */}
-              <div className="flex items-center gap-3">
-                <input
-                  className="flex-1 bg-transparent border-none outline-none text-[24px] font-extrabold text-gray-900 placeholder-gray-200"
-                  placeholder="Název poznámky"
-                  value={noteTitle}
-                  onChange={e => {
-                    setNoteTitle(e.target.value)
-                    if (clientNote) scheduleSaveNote(e.target.value, noteContent, clientNote.id)
-                  }}
-                />
-                <span className={`text-[11px] font-semibold flex-shrink-0 transition-colors ${
-                  noteSaveState === 'saved'   ? 'text-green-400' :
-                  noteSaveState === 'saving'  ? 'text-amber-400' :
-                  'text-gray-300'
-                }`}>
-                  {noteSaveState === 'saved' ? '✓ Uloženo' : noteSaveState === 'saving' ? 'Ukládám…' : '● Neuloženo'}
-                </span>
+            <>
+              <div className="flex justify-end mb-4">
+                <button onClick={handleNewClientNote} disabled={creatingCNote}
+                  className="px-4 py-2 rounded-[12px] text-[13px] font-bold text-white disabled:opacity-60"
+                  style={{ background: clientColor }}>
+                  {creatingCNote ? '…' : '📝 Nová poznámka'}
+                </button>
               </div>
 
-              {/* Rich text editor */}
-              <div className="bg-white rounded-[14px] overflow-hidden" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                <RichTextEditor
-                  value={noteContent}
-                  onChange={val => {
-                    setNoteContent(val)
-                    if (clientNote) scheduleSaveNote(noteTitle, val, clientNote.id)
-                  }}
-                  placeholder="Začni psát poznámky ke klientovi…"
-                  minHeight={320}
-                  className="px-3"
-                />
-              </div>
-            </div>
+              {clientNotes.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="text-[48px] mb-3">📝</div>
+                  <p className="text-[14px] font-semibold text-gray-500 mb-1">Zatím žádné poznámky</p>
+                  <p className="text-[12px] text-gray-400">Přidej první poznámku ke klientovi</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                  {clientNotes.map(note => (
+                    <Link key={note.id} href={`/poznamky/${note.id}`}
+                      className="group bg-white rounded-[16px] p-4 hover:shadow-md transition-all relative"
+                      style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                      <button onClick={e => handleDeleteClientNote(note.id, e)}
+                        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">
+                        ×
+                      </button>
+                      <div className="flex items-start gap-3">
+                        <span className="text-[22px] flex-shrink-0 mt-0.5">{note.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[14px] font-bold text-gray-900 truncate pr-6">{note.title}</div>
+                          {note.content ? (
+                            <div className="text-[12px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed">
+                              {note.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)}
+                            </div>
+                          ) : (
+                            <div className="text-[12px] text-gray-300 mt-0.5 italic">Prázdná poznámka…</div>
+                          )}
+                          <span className="text-[11px] text-gray-300 mt-1.5 block">
+                            {(() => {
+                              const diff = Date.now() - new Date(note.updated_at).getTime()
+                              const mins = Math.floor(diff / 60_000)
+                              const hours = Math.floor(diff / 3_600_000)
+                              const days = Math.floor(diff / 86_400_000)
+                              if (mins < 1) return 'Právě teď'
+                              if (mins < 60) return `Před ${mins} min`
+                              if (hours < 24) return `Před ${hours} h`
+                              if (days < 7) return `Před ${days} d`
+                              return new Date(note.updated_at).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })
+                            })()}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
           )}
 
           {tab === 'schuzky' && (

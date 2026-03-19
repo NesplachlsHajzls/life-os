@@ -8,7 +8,7 @@ import {
   fetchNote, fetchSubNotes, insertNote, updateNote, deleteNote,
   Note, NOTE_ICONS,
 } from '@/features/notes/api'
-import { fetchClientById } from '@/features/prace/api'
+import { fetchClientById, fetchClients, Client } from '@/features/prace/api'
 import { fetchCategories, AppCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
@@ -29,6 +29,7 @@ export default function NoteDetailPage() {
   const [subNotes,   setSubNotes]   = useState<Note[]>([])
   const [clientName, setClientName] = useState<string | null>(null)
   const [categories, setCategories] = useState<AppCategory[]>(DEFAULT_CATEGORIES)
+  const [clients,    setClients]    = useState<Client[]>([])
   const [loading,    setLoading]    = useState(true)
 
   // Editable state
@@ -36,10 +37,13 @@ export default function NoteDetailPage() {
   const [content,  setContent]  = useState('')
   const [icon,     setIcon]     = useState('📝')
   const [category, setCategory] = useState<string | null>(null)
+  const [clientId, setClientId] = useState<string | null>(null)
   const [saveState, setSaveState] = useState<SaveState>('saved')
 
-  const [showIconPicker,   setShowIconPicker]   = useState(false)
-  const [showCatPicker,    setShowCatPicker]    = useState(false)
+  const [showIconPicker,    setShowIconPicker]    = useState(false)
+  const [showCatPicker,     setShowCatPicker]     = useState(false)
+  const [showClientPicker,  setShowClientPicker]  = useState(false)
+  const [clientSearch,      setClientSearch]      = useState('')
   const [creating, setCreating] = useState(false)
 
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -53,7 +57,8 @@ export default function NoteDetailPage() {
       fetchNote(noteId),
       fetchSubNotes(noteId),
       fetchCategories(userId),
-    ]).then(([n, subs, cats]) => {
+      fetchClients(userId),
+    ]).then(([n, subs, cats, cls]) => {
       if (cancelled) return
       if (!n) { router.push('/poznamky'); return }
       setNote(n)
@@ -61,12 +66,16 @@ export default function NoteDetailPage() {
       setContent(n.content ?? '')
       setIcon(n.icon)
       setCategory(n.category ?? null)
+      setClientId(n.client_id ?? null)
       setSubNotes(subs)
       if (cats.length) setCategories(cats)
+      setClients(cls)
       setLoading(false)
       if (n.parent_id) fetchNote(n.parent_id).then(p => { if (!cancelled) setParent(p) })
-      if (n.is_meeting && n.client_id) {
-        fetchClientById(n.client_id).then(c => { if (!cancelled) setClientName(c?.name ?? null) })
+      if (n.client_id) {
+        const found = cls.find(c => c.id === n.client_id)
+        if (found) setClientName(found.name)
+        else if (n.is_meeting) fetchClientById(n.client_id).then(c => { if (!cancelled) setClientName(c?.name ?? null) })
       }
     })
     return () => { cancelled = true }
@@ -105,6 +114,20 @@ export default function NoteDetailPage() {
   function handleIconChange(ic: string)      { setIcon(ic); setShowIconPicker(false); scheduleSave(title, content, ic, category) }
   function handleCategoryChange(id: string | null) {
     setCategory(id); setShowCatPicker(false); scheduleSave(title, content, icon, id)
+    // Pokud odstraníme kategorii práce, zrušíme i klienta
+    if (!id || id !== 'prace') handleClientChange(null)
+  }
+
+  async function handleClientChange(newClientId: string | null, newClientName?: string) {
+    setClientId(newClientId)
+    setClientName(newClientName ?? null)
+    setShowClientPicker(false)
+    setClientSearch('')
+    if (!note) return
+    try {
+      await updateNote(note.id, { client_id: newClientId })
+      setNote(prev => prev ? { ...prev, client_id: newClientId } : prev)
+    } catch { /* ignore */ }
   }
 
   useEffect(() => { return () => { if (saveTimer.current) clearTimeout(saveTimer.current) } }, [])
@@ -149,9 +172,11 @@ export default function NoteDetailPage() {
   }
   if (!note) return null
 
-  const isMeeting = note.is_meeting && !!note.client_id
-  const backHref  = isMeeting
+  const isMeeting    = note.is_meeting && !!note.client_id
+  const hasClient    = !!clientId && !isMeeting
+  const backHref     = isMeeting
     ? `/prace/${note.client_id}`
+    : hasClient ? `/prace/${clientId}`
     : parent ? `/poznamky/${parent.id}` : '/poznamky'
 
   const activeCat = category ? categories.find(c => c.id === category) : null
@@ -176,6 +201,7 @@ export default function NoteDetailPage() {
           ) : (
             <>
               <Link href="/poznamky" className="hover:text-gray-600 flex-shrink-0">Poznámky</Link>
+              {hasClient && clientName && (<><span className="flex-shrink-0">/</span><Link href={`/prace/${clientId}`} className="hover:text-gray-600 truncate max-w-[120px]">{clientName}</Link></>)}
               {parent && (<><span className="flex-shrink-0">/</span><Link href={`/poznamky/${parent.id}`} className="hover:text-gray-600 truncate max-w-[120px]">{parent.title}</Link></>)}
               <span className="flex-shrink-0">/</span>
               <span className="text-gray-600 font-semibold truncate">{title || 'Nová poznámka'}</span>
@@ -235,40 +261,97 @@ export default function NoteDetailPage() {
           />
         </div>
 
-        {/* Category picker */}
+        {/* Category + client picker row */}
         {!isMeeting && (
-          <div className="relative">
-            <button
-              onClick={() => setShowCatPicker(v => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
-              style={activeCat
-                ? { background: activeCat.color + '18', borderColor: activeCat.color + '40', color: activeCat.color }
-                : { background: '#f3f4f6', borderColor: '#e5e7eb', color: '#9ca3af' }
-              }
-            >
-              {activeCat ? <>{activeCat.icon} {activeCat.name}</> : '📦 Bez kategorie'}
-              <span className="text-[10px] opacity-60">▾</span>
-            </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Category picker */}
+            <div className="relative">
+              <button
+                onClick={() => { setShowCatPicker(v => !v); setShowClientPicker(false) }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
+                style={activeCat
+                  ? { background: activeCat.color + '18', borderColor: activeCat.color + '40', color: activeCat.color }
+                  : { background: '#f3f4f6', borderColor: '#e5e7eb', color: '#9ca3af' }
+                }
+              >
+                {activeCat ? <>{activeCat.icon} {activeCat.name}</> : '📦 Bez kategorie'}
+                <span className="text-[10px] opacity-60">▾</span>
+              </button>
 
-            {showCatPicker && (
-              <div className="absolute top-full left-0 mt-1 bg-white rounded-[14px] shadow-xl border border-gray-100 p-2 z-20 flex flex-wrap gap-1.5 min-w-[240px]"
-                style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
-                <button onClick={() => handleCategoryChange(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all hover:bg-gray-50"
-                  style={{ color: !category ? 'var(--color-primary)' : '#6b7280', background: !category ? 'var(--color-primary-light, #eff6ff)' : 'transparent' }}>
-                  📦 Bez kategorie
-                </button>
-                {categories.map(cat => (
-                  <button key={cat.id} onClick={() => handleCategoryChange(cat.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all"
-                    style={{
-                      background: category === cat.id ? cat.color + '18' : 'transparent',
-                      color: category === cat.id ? cat.color : '#374151',
-                    }}
-                  >
-                    {cat.icon} {cat.name}
+              {showCatPicker && (
+                <div className="absolute top-full left-0 mt-1 bg-white rounded-[14px] shadow-xl border border-gray-100 p-2 z-20 flex flex-col gap-0.5 min-w-[200px]"
+                  style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
+                  <button onClick={() => handleCategoryChange(null)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all hover:bg-gray-50"
+                    style={{ color: !category ? 'var(--color-primary)' : '#6b7280', background: !category ? 'var(--color-primary-light, #eff6ff)' : 'transparent' }}>
+                    📦 Bez kategorie
                   </button>
-                ))}
+                  {categories.map(cat => (
+                    <button key={cat.id} onClick={() => handleCategoryChange(cat.id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all"
+                      style={{
+                        background: category === cat.id ? cat.color + '18' : 'transparent',
+                        color: category === cat.id ? cat.color : '#374151',
+                      }}
+                    >
+                      {cat.icon} {cat.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Client picker — zobrazí se jen při kategorii Práce */}
+            {category === 'prace' && (
+              <div className="relative">
+                <button
+                  onClick={() => { setShowClientPicker(v => !v); setShowCatPicker(false) }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
+                  style={clientId
+                    ? { background: '#8b5cf618', borderColor: '#8b5cf640', color: '#8b5cf6' }
+                    : { background: '#f3f4f6', borderColor: '#e5e7eb', color: '#9ca3af' }
+                  }
+                >
+                  👤 {clientName ?? 'Bez klienta'}
+                  <span className="text-[10px] opacity-60">▾</span>
+                </button>
+
+                {showClientPicker && (
+                  <div className="absolute top-full left-0 mt-1 bg-white rounded-[14px] shadow-xl border border-gray-100 p-2 z-20 flex flex-col gap-0.5 min-w-[220px]"
+                    style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
+                    <input
+                      autoFocus
+                      value={clientSearch}
+                      onChange={e => setClientSearch(e.target.value)}
+                      placeholder="Hledat klienta…"
+                      className="w-full px-3 py-1.5 text-[12px] border border-gray-200 rounded-[8px] outline-none mb-1"
+                    />
+                    {clientId && (
+                      <button onClick={() => handleClientChange(null)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left hover:bg-gray-50 text-gray-500">
+                        ✕ Odebrat klienta
+                      </button>
+                    )}
+                    {clients
+                      .filter(c => !clientSearch || c.name.toLowerCase().includes(clientSearch.toLowerCase()))
+                      .map(c => (
+                        <button key={c.id} onClick={() => handleClientChange(c.id, c.name)}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all"
+                          style={{
+                            background: c.id === clientId ? c.color + '18' : 'transparent',
+                            color: c.id === clientId ? c.color : '#374151',
+                          }}
+                        >
+                          <span className="text-[14px]">{c.icon}</span>
+                          <span className="truncate">{c.name}</span>
+                        </button>
+                      ))
+                    }
+                    {clients.filter(c => !clientSearch || c.name.toLowerCase().includes(clientSearch.toLowerCase())).length === 0 && (
+                      <p className="text-[12px] text-gray-300 px-3 py-2">Žádný klient nenalezen</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
