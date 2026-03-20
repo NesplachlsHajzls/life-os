@@ -236,7 +236,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate, appCa
 
 // ── AddEventModal ─────────────────────────────────────────────────
 
-function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate, onSave, onUpdate, onClose, appCategories = DEFAULT_CATEGORIES }: {
+function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate, onSave, onUpdate, onClose, appCategories = DEFAULT_CATEGORIES, clients = [] }: {
   defaultDate: Date
   isWork: boolean
   userId: string
@@ -246,6 +246,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
   onUpdate?: (ev: CalendarEvent) => void
   onClose: () => void
   appCategories?: AppCategory[]
+  clients?: { id: string; name: string }[]
 }) {
   const prefill = existingEvent
 
@@ -277,8 +278,16 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
   const [recInterval, setRecInterval] = useState(prefill?.recurrence_interval ?? 1)
   const [saving, setSaving]           = useState(false)
   const [showEmojis, setShowEmojis]   = useState(false)
+  const [clientId, setClientId]       = useState<string | null>(existingEvent?.client_id ?? null)
+  const [clientSearch, setClientSearch] = useState('')
+  const [showClientPicker, setShowClientPicker] = useState(false)
 
   const isEditMode = !!existingEvent && !isDuplicate
+
+  const filteredClients = clients.filter(c =>
+    c.name.toLowerCase().includes(clientSearch.toLowerCase())
+  )
+  const selectedClientName = clientId ? clients.find(c => c.id === clientId)?.name : null
 
   async function handleSave() {
     if (!title.trim()) return
@@ -302,7 +311,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
         category,
         emoji: emoji || null,
         is_work: isWork || category === 'prace' || category === 'work',
-        client_id: existingEvent?.client_id ?? null,
+        client_id: clientId,
         is_recurring: isRecurring,
         recurrence_type: isRecurring ? recType : null,
         recurrence_interval: isRecurring ? recInterval : 1,
@@ -390,6 +399,55 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
               })}
             </div>
           </div>
+
+          {/* Client picker — shown when category is prace or any time there are clients */}
+          {clients.length > 0 && (
+            <div>
+              <label className={labelCls}>Klient (volitelný)</label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowClientPicker(v => !v)}
+                  className={`w-full text-left ${fieldCls} flex items-center justify-between`}
+                >
+                  <span className={selectedClientName ? 'text-gray-900' : 'text-gray-400'}>
+                    {selectedClientName ?? 'Vybrat klienta…'}
+                  </span>
+                  {clientId && (
+                    <span
+                      onClick={e => { e.stopPropagation(); setClientId(null); setClientSearch('') }}
+                      className="text-gray-400 hover:text-gray-600 ml-2"
+                    >✕</span>
+                  )}
+                </button>
+                {showClientPicker && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                    <div className="p-2 border-b border-gray-100">
+                      <input
+                        autoFocus
+                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[13px] outline-none focus:border-[var(--color-primary)]"
+                        placeholder="Hledat klienta…"
+                        value={clientSearch}
+                        onChange={e => setClientSearch(e.target.value)}
+                      />
+                    </div>
+                    {filteredClients.length === 0 ? (
+                      <div className="px-3 py-2 text-[13px] text-gray-400">Žádný klient nenalezen</div>
+                    ) : filteredClients.map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => { setClientId(c.id); setClientSearch(''); setShowClientPicker(false) }}
+                        className={`w-full text-left px-3 py-2 text-[13px] hover:bg-gray-50 transition-colors ${clientId === c.id ? 'font-semibold text-[var(--color-primary)]' : 'text-gray-700'}`}
+                      >
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Date */}
           <div>
@@ -1126,6 +1184,7 @@ export default function KalendarPage() {
           onSave={handleEventSaved}
           onClose={() => setShowAdd(false)}
           appCategories={appCategories}
+          clients={calClients}
         />
       )}
       {detailEvent && (
@@ -1151,6 +1210,7 @@ export default function KalendarPage() {
           onUpdate={handleEventUpdated}
           onClose={() => setEditEvent(null)}
           appCategories={appCategories}
+          clients={calClients}
         />
       )}
 
@@ -1165,6 +1225,7 @@ export default function KalendarPage() {
           onSave={handleEventSaved}
           onClose={() => setDupEvent(null)}
           appCategories={appCategories}
+          clients={calClients}
         />
       )}
 

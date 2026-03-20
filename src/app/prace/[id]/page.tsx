@@ -20,7 +20,8 @@ import {
 } from '@/features/prace/api'
 import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } from '@/features/todo/api'
 import { parseTaskInput } from '@/features/todo/utils'
-import { fetchClientMeetings, fetchAllClientNotes, insertNote, updateNote, deleteNote, Note } from '@/features/notes/api'
+import { fetchAllClientNotes, insertNote, updateNote, deleteNote, Note } from '@/features/notes/api'
+import { CalendarEvent, insertEvent, fetchClientEvents } from '@/features/calendar/api'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -102,7 +103,7 @@ export default function ClientPage() {
   const [contacts,   setContacts]   = useState<ClientContact[]>([])
   const [activities, setActivities] = useState<ClientActivity[]>([])
   const [deals,      setDeals]      = useState<Deal[]>([])
-  const [meetings,       setMeetings]       = useState<Note[]>([])
+  const [clientEvents,   setClientEvents]   = useState<CalendarEvent[]>([])
   const [orders,         setOrders]         = useState<ClientOrder[]>([])
   const [clientNotes,    setClientNotes]    = useState<Note[]>([])
   const [creatingCNote,  setCreatingCNote]  = useState(false)
@@ -144,8 +145,13 @@ export default function ClientPage() {
 
   // Meeting form
   const [showAddMeeting, setShowAddMeeting] = useState(false)
-  const [mTitle, setMTitle] = useState('')
-  const [mDate,  setMDate]  = useState(new Date().toISOString().slice(0, 10))
+  const [mTitle,      setMTitle]     = useState('')
+  const [mDate,       setMDate]      = useState(new Date().toISOString().slice(0, 10))
+  const [mTime,       setMTime]      = useState('10:00')
+  const [mEndTime,    setMEndTime]   = useState('11:00')
+  const [mDesc,       setMDesc]      = useState('')
+  const [mAllDay,     setMAllDay]    = useState(false)
+  const [mSortUpcoming, setMSortUpcoming] = useState(true)
   const [creatingMeeting, setCreatingMeeting] = useState(false)
 
   // Order form
@@ -262,14 +268,14 @@ export default function ClientPage() {
       fetchContacts(clientId),
       fetchActivities(clientId),
       fetchDeals(userId, clientId),
-      fetchClientMeetings(clientId),
+      fetchClientEvents(clientId),
       fetchOrders(clientId),
       fetchAllClientNotes(clientId),
-    ]).then(([cls, t, co, ac, d, m, ord, cn]) => {
+    ]).then(([cls, t, co, ac, d, evs, ord, cn]) => {
       if (cancelled) return
       const foundClient = cls.find(c => c.id === clientId) ?? null
       setClient(foundClient)
-      setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setMeetings(m)
+      setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setClientEvents(evs)
       setOrders(ord as ClientOrder[])
       setClientNotes(cn)
       setLoading(false)
@@ -401,17 +407,37 @@ export default function ClientPage() {
     if (!mTitle.trim() || !userId || creatingMeeting) return
     setCreatingMeeting(true)
     try {
-      const note = await insertNote({
-        user_id: userId, title: mTitle.trim(), content: '',
-        parent_id: null, client_id: clientId,
-        is_meeting: true, meeting_date: mDate || null, icon: '🤝',
-        category: null,
+      const startISO = mAllDay
+        ? `${mDate}T00:00:00.000Z`
+        : new Date(`${mDate}T${mTime}`).toISOString()
+      const endISO = mAllDay
+        ? `${mDate}T23:59:59.000Z`
+        : new Date(`${mDate}T${mEndTime}`).toISOString()
+      const ev = await insertEvent({
+        user_id: userId,
+        title: mTitle.trim(),
+        description: mDesc.trim() || null,
+        start_datetime: startISO,
+        end_datetime: endISO,
+        is_all_day: mAllDay,
+        category: 'prace',
+        emoji: '🤝',
+        is_work: true,
+        client_id: clientId,
+        is_recurring: false,
+        recurrence_type: null,
+        recurrence_interval: 1,
+        recurrence_end_date: null,
       })
-      setMeetings(prev => [note, ...prev])
+      setClientEvents(prev => [ev, ...prev].sort((a, b) =>
+        new Date(b.start_datetime).getTime() - new Date(a.start_datetime).getTime()
+      ))
       setMTitle(''); setMDate(new Date().toISOString().slice(0, 10))
+      setMTime('10:00'); setMEndTime('11:00'); setMDesc('')
       setShowAddMeeting(false)
-      router.push(`/poznamky/${note.id}`)
     } catch {
+      setCreatingMeeting(false)
+    } finally {
       setCreatingMeeting(false)
     }
   }
@@ -502,7 +528,7 @@ export default function ClientPage() {
     { id: 'obchody',     label: 'Obchody',     count: deals.length },
     { id: 'objednavky',  label: 'Objednávky',  count: pendingOrders.length },
     { id: 'kontakty',    label: 'Kontakty',    count: contacts.length },
-    { id: 'schuzky',     label: 'Schůzky',     count: meetings.length },
+    { id: 'schuzky',     label: 'Schůzky',     count: clientEvents.length },
     { id: 'poznamky',    label: 'Poznámky',    count: clientNotes.length },
   ]
 
@@ -706,6 +732,38 @@ export default function ClientPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Příští schůzka */}
+              {(() => {
+                const now = new Date()
+                const nextMeeting = clientEvents
+                  .filter(e => new Date(e.start_datetime) >= now)
+                  .sort((a, b) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime())[0]
+                if (!nextMeeting) return null
+                const evDate = new Date(nextMeeting.start_datetime)
+                const isToday = evDate.toDateString() === now.toDateString()
+                const isTomorrow = evDate.toDateString() === new Date(now.getTime() + 86400000).toDateString()
+                const dayLabel = isToday ? 'dnes' : isTomorrow ? 'zítra' : evDate.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'numeric' })
+                return (
+                  <div className="rounded-[16px] p-5 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setTab('schuzky')}
+                    style={{ background: clientColor + '14', border: `1.5px solid ${clientColor}30` }}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-[12px] flex items-center justify-center text-[22px] flex-shrink-0"
+                        style={{ background: clientColor + '22' }}>🤝</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] font-bold uppercase tracking-wide mb-0.5" style={{ color: clientColor }}>Příští schůzka</div>
+                        <div className="text-[15px] font-extrabold text-gray-900 truncate">{nextMeeting.title}</div>
+                        <div className="text-[12px] font-semibold mt-0.5" style={{ color: clientColor }}>
+                          📅 {dayLabel}{!nextMeeting.is_all_day ? ` v ${evDate.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}` : ''}
+                        </div>
+                        {nextMeeting.description && (
+                          <div className="text-[12px] text-gray-500 mt-0.5 truncate">{nextMeeting.description}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Klikací sekce — Úkoly */}
               <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
@@ -1068,50 +1126,74 @@ export default function ClientPage() {
             </>
           )}
 
-          {tab === 'schuzky' && (
-            <>
-              <div className="flex justify-end mb-4">
-                <button onClick={() => setShowAddMeeting(true)}
-                  className="px-4 py-2 rounded-[12px] text-[13px] font-bold text-white"
-                  style={{ background: clientColor }}>🤝 Nová schůzka</button>
-              </div>
+          {tab === 'schuzky' && (() => {
+            const now = new Date()
+            const upcoming = clientEvents
+              .filter(e => new Date(e.start_datetime) >= now)
+              .sort((a, b) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime())
+            const historical = clientEvents
+              .filter(e => new Date(e.start_datetime) < now)
+              .sort((a, b) => new Date(b.start_datetime).getTime() - new Date(a.start_datetime).getTime())
+            const shown = mSortUpcoming ? upcoming : historical
+            return (
+              <>
+                <div className="flex items-center justify-between mb-4 gap-3">
+                  <div className="flex gap-2">
+                    {([true, false] as const).map(isUp => (
+                      <button key={String(isUp)}
+                        onClick={() => setMSortUpcoming(isUp)}
+                        className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
+                        style={{ background: mSortUpcoming === isUp ? clientColor : '#f3f4f6', color: mSortUpcoming === isUp ? '#fff' : '#6b7280' }}>
+                        {isUp ? `Nadcházející (${upcoming.length})` : `Historické (${historical.length})`}
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={() => setShowAddMeeting(true)}
+                    className="px-4 py-2 rounded-[12px] text-[13px] font-bold text-white flex-shrink-0"
+                    style={{ background: clientColor }}>🤝 Nová</button>
+                </div>
 
-              {meetings.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-[48px] mb-3">🤝</div>
-                  <p className="text-[14px] font-semibold text-gray-500 mb-1">Zatím žádné schůzky</p>
-                  <p className="text-[12px] text-gray-400">Přidej schůzku a rovnou si dělej zápisky</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {meetings.map(m => (
-                    <Link key={m.id} href={`/poznamky/${m.id}`}
-                      className="bg-white rounded-[14px] p-4 flex items-center gap-4 hover:shadow-md transition-all"
-                      style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-                      <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-[20px] flex-shrink-0"
-                        style={{ background: clientColor + '18' }}>
-                        🤝
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[14px] font-bold text-gray-900 truncate">{m.title}</div>
-                        <div className="flex items-center gap-3 mt-0.5">
-                          {m.meeting_date && (
-                            <span className="text-[12px] text-gray-400">
-                              📅 {new Date(m.meeting_date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })}
-                            </span>
-                          )}
-                          {m.content && (
-                            <span className="text-[11px] text-gray-300 truncate">{m.content.slice(0, 60)}</span>
-                          )}
+                {shown.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-[48px] mb-3">🤝</div>
+                    <p className="text-[14px] font-semibold text-gray-500 mb-1">
+                      {mSortUpcoming ? 'Žádné nadcházející schůzky' : 'Žádné historické schůzky'}
+                    </p>
+                    <p className="text-[12px] text-gray-400">Přidej schůzku a bude vidět i v kalendáři</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {shown.map(ev => {
+                      const evDate = new Date(ev.start_datetime)
+                      const isToday = evDate.toDateString() === now.toDateString()
+                      const isFuture = evDate >= now
+                      return (
+                        <div key={ev.id} className="bg-white rounded-[14px] p-4 flex items-center gap-4"
+                          style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)', borderLeft: isFuture ? `3px solid ${clientColor}` : '3px solid #e5e7eb' }}>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[14px] font-bold text-gray-900 truncate">{ev.emoji ?? '🤝'} {ev.title}</div>
+                            <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                              <span className={`text-[12px] font-semibold ${isToday ? 'text-green-600' : isFuture ? '' : 'text-gray-400'}`}
+                                style={isFuture && !isToday ? { color: clientColor } : undefined}>
+                                📅 {ev.is_all_day
+                                  ? evDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })
+                                  : evDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                }
+                                {isToday && ' — dnes'}
+                              </span>
+                            </div>
+                            {ev.description && (
+                              <div className="text-[12px] text-gray-400 mt-1 truncate">{ev.description}</div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <span className="text-gray-300 text-[16px] flex-shrink-0">→</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
+                      )
+                    })}
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
       )}
 
@@ -1119,7 +1201,7 @@ export default function ClientPage() {
       {showAddMeeting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAddMeeting(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
+          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">🤝 Nová schůzka</h2>
               <button onClick={() => setShowAddMeeting(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
@@ -1128,22 +1210,47 @@ export default function ClientPage() {
               <div>
                 <label className={labelCls}>Název schůzky *</label>
                 <input className={fieldCls} value={mTitle} onChange={e => setMTitle(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleAddMeeting()}
                   placeholder="Např. Prezentace nabídky, Podpis smlouvy…"/>
               </div>
               <div>
                 <label className={labelCls}>Datum</label>
                 <input className={fieldCls} type="date" value={mDate} onChange={e => setMDate(e.target.value)} />
               </div>
+              {/* All day toggle */}
+              <div className="flex items-center justify-between">
+                <label className="text-[13px] font-medium text-gray-700">Celý den</label>
+                <button onClick={() => setMAllDay(v => !v)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${mAllDay ? 'bg-[var(--color-primary)]' : 'bg-gray-200'}`}>
+                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${mAllDay ? 'left-5.5' : 'left-0.5'}`} />
+                </button>
+              </div>
+              {!mAllDay && (
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className={labelCls}>Od</label>
+                    <input type="time" className={fieldCls} value={mTime} onChange={e => setMTime(e.target.value)} />
+                  </div>
+                  <div className="flex-1">
+                    <label className={labelCls}>Do</label>
+                    <input type="time" className={fieldCls} value={mEndTime} onChange={e => setMEndTime(e.target.value)} />
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className={labelCls}>Popis (volitelný)</label>
+                <textarea className={`${fieldCls} resize-none`} rows={2}
+                  placeholder="Poznámka ke schůzce…"
+                  value={mDesc} onChange={e => setMDesc(e.target.value)} />
+              </div>
               <p className="text-[12px] text-gray-400 -mt-1">
-                Po přidání se otevře zápisník přímo pro tuto schůzku.
+                Schůzka se zobrazí i v kalendáři.
               </p>
               <div className="flex gap-3">
                 <button onClick={() => setShowAddMeeting(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleAddMeeting} disabled={!mTitle.trim() || creatingMeeting}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: clientColor }}>
-                  {creatingMeeting ? '…' : '🤝 Přidat & otevřít'}
+                  {creatingMeeting ? '…' : '🤝 Přidat schůzku'}
                 </button>
               </div>
             </div>

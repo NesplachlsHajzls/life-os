@@ -96,6 +96,16 @@ export async function fetchEventsInRange(
   return (data as CalendarEvent[]) ?? []
 }
 
+export async function fetchClientEvents(clientId: string): Promise<CalendarEvent[]> {
+  const { data, error } = await supabase
+    .from('calendar_events')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('start_datetime', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as CalendarEvent[]) ?? []
+}
+
 export async function fetchUpcomingEvents(userId: string, hours = 48): Promise<CalendarEvent[]> {
   const now = new Date().toISOString()
   const until = new Date(Date.now() + hours * 3600 * 1000).toISOString()
