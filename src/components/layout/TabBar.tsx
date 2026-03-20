@@ -21,26 +21,21 @@ export function TabBar() {
             ? pathname === '/'
             : pathname === tab.href || pathname.startsWith(tab.href + '/')
 
+        const bg = isActive ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)'
         return (
-          <div key={tab.id} className="flex items-center flex-shrink-0">
+          <div key={tab.id} className="flex items-stretch flex-shrink-0 rounded-[8px] overflow-hidden transition-all" style={{ background: bg }}>
             <Link
               href={tab.href}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-l-[8px] text-[12px] font-semibold transition-all"
-              style={{
-                background: isActive ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
-                color:      'rgba(255,255,255,' + (isActive ? '1' : '0.7') + ')',
-              }}
+              className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-[12px] font-semibold"
+              style={{ color: 'rgba(255,255,255,' + (isActive ? '1' : '0.7') + ')' }}
             >
               <span className="text-[13px]">{tab.icon}</span>
               <span>{tab.label}</span>
             </Link>
             <button
               onClick={() => closeTab(tab.id)}
-              className="px-3 py-1.5 flex items-center justify-center rounded-r-[8px] text-[14px] leading-none transition-all hover:bg-white/20"
-              style={{
-                background: isActive ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.55)',
-              }}
+              className="pl-1.5 pr-3 flex items-center justify-center text-[12px] leading-none hover:bg-white/20 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.55)' }}
               title="Zavřít záložku"
             >
               ×
