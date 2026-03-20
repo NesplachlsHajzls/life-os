@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useTabs } from '@/contexts/TabsContext'
 
 const SIDEBAR_SECTIONS = [
   {
@@ -40,6 +41,7 @@ export function Sidebar() {
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 
+  const { openTab } = useTabs()
   const [todoCount, setTodoCount] = useState<number>(0)
 
   useEffect(() => {
@@ -107,11 +109,11 @@ export function Sidebar() {
                       )}
                     </div>
                   </Link>
-                  {/* Open in new window — visible on hover */}
+                  {/* Otevřít jako interní záložku — viditelné při hoveru */}
                   <button
-                    onClick={e => { e.preventDefault(); window.open(item.href, '_blank') }}
+                    onClick={e => { e.preventDefault(); openTab(item.href, item.label, item.icon) }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-[6px] flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity hover:bg-white/20"
-                    title="Otevřít v novém okně"
+                    title="Otevřít jako záložku"
                     style={{ color: 'rgba(255,255,255,0.7)' }}
                   >
                     <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

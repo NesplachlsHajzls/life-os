@@ -7,6 +7,8 @@ import { cachedUser, setCachedUser } from '@/lib/authCache'
 import { BottomNav } from './BottomNav'
 import { Sidebar } from './Sidebar'
 import { FloatingNoteButton } from './FloatingNoteButton'
+import { TabBar } from './TabBar'
+import { TabsProvider } from '@/contexts/TabsContext'
 
 export function AuthWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -83,13 +85,17 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
   if (!authed) return null
 
   return (
-    <>
+    <TabsProvider>
       {/* ── PC layout (lg+): sidebar left + content right ── */}
       <div className="hidden lg:flex w-full min-h-screen">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-[#F4F6FA]">
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Interní záložkový pruh — zobrazí se jen pokud jsou otevřené záložky */}
+          <TabBar />
+          <main className="flex-1 overflow-y-auto bg-[#F4F6FA]">
+            {children}
+          </main>
+        </div>
       </div>
 
       {/* ── Mobile layout: content + bottom nav ── */}
@@ -102,6 +108,6 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
 
       {/* ── Global floating note button ── */}
       <FloatingNoteButton />
-    </>
+    </TabsProvider>
   )
 }

@@ -8,6 +8,7 @@ import { useUser } from '@/hooks/useUser'
 import { fetchRootNotes, insertNote, deleteNote, Note } from '@/features/notes/api'
 import { fetchCategories, AppCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
 import { fetchClients, Client } from '@/features/prace/api'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -48,6 +49,8 @@ export default function PoznamkyPage() {
   const [loading,    setLoading]    = useState(true)
   const [search,     setSearch]     = useState('')
   const [creating,   setCreating]   = useState(false)
+
+  useScrollRestoration('poznamky', !loading)
 
   useEffect(() => {
     if (!userId) return

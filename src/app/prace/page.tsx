@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/useUser'
 import { usePrace } from '@/features/prace/hooks/usePrace'
 import { CLIENT_COLORS, CLIENT_ICONS, CLIENT_STATUSES, ClientStatus, SUBJECT_TYPES, SubjectType, SUBJECT_TYPE_COLORS, FIRST_MEETING_COLORS } from '@/features/prace/api'
 import { fetchNoteCountsByClient } from '@/features/notes/api'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -22,6 +23,8 @@ export default function PracePage() {
   const userId = !authLoading ? (user?.id ?? DEMO_USER_ID) : null
 
   const { loading, toast, clients, openTasks, dueThisWeek, deals, addClient, getClientOpenTasks } = usePrace(userId)
+
+  useScrollRestoration('prace', !loading)
 
   const [noteCounts, setNoteCounts] = useState<Record<string, number>>({})
 
