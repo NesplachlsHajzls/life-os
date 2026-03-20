@@ -22,6 +22,7 @@ import { insertTask, updateTask, deleteTask, Task, DEFAULT_TODO_CATEGORIES } fro
 import { parseTaskInput } from '@/features/todo/utils'
 import { fetchAllClientNotes, insertNote, updateNote, deleteNote, Note } from '@/features/notes/api'
 import { CalendarEvent, insertEvent, fetchClientEvents } from '@/features/calendar/api'
+import { ImportedEmail, fetchClientEmails, updateEmail } from '@/features/emails/api'
 import { RichTextEditor } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -89,7 +90,7 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
   )
 }
 
-type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky' | 'poznamky'
+type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky' | 'poznamky' | 'emaily'
 
 export default function ClientPage() {
   const params = useParams()
@@ -104,6 +105,7 @@ export default function ClientPage() {
   const [activities, setActivities] = useState<ClientActivity[]>([])
   const [deals,      setDeals]      = useState<Deal[]>([])
   const [clientEvents,   setClientEvents]   = useState<CalendarEvent[]>([])
+  const [clientEmails,   setClientEmails]   = useState<ImportedEmail[]>([])
   const [orders,         setOrders]         = useState<ClientOrder[]>([])
   const [clientNotes,    setClientNotes]    = useState<Note[]>([])
   const [creatingCNote,  setCreatingCNote]  = useState(false)
@@ -271,13 +273,15 @@ export default function ClientPage() {
       fetchClientEvents(clientId),
       fetchOrders(clientId),
       fetchAllClientNotes(clientId),
-    ]).then(([cls, t, co, ac, d, evs, ord, cn]) => {
+      fetchClientEmails(clientId),
+    ]).then(([cls, t, co, ac, d, evs, ord, cn, em]) => {
       if (cancelled) return
       const foundClient = cls.find(c => c.id === clientId) ?? null
       setClient(foundClient)
       setTasks(t); setContacts(co); setActivities(ac); setDeals(d); setClientEvents(evs)
       setOrders(ord as ClientOrder[])
       setClientNotes(cn)
+      setClientEmails(em)
       setLoading(false)
     }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -530,6 +534,7 @@ export default function ClientPage() {
     { id: 'kontakty',    label: 'Kontakty',    count: contacts.length },
     { id: 'schuzky',     label: 'Schůzky',     count: clientEvents.length },
     { id: 'poznamky',    label: 'Poznámky',    count: clientNotes.length },
+    { id: 'emaily',      label: 'Emaily',      count: clientEmails.filter(e => e.status === 'pending').length || undefined },
   ]
 
   return (
@@ -1125,6 +1130,96 @@ export default function ClientPage() {
               )}
             </>
           )}
+
+          {/* ══ EMAILY ══ */}
+          {tab === 'emaily' && (() => {
+            const pending = clientEmails.filter(e => e.status === 'pending')
+            const done    = clientEmails.filter(e => e.status === 'done')
+
+            async function toggleDone(id: string) {
+              const em = clientEmails.find(e => e.id === id)
+              if (!em) return
+              const newStatus: 'pending' | 'done' = em.status === 'done' ? 'pending' : 'done'
+              setClientEmails(prev => prev.map(e => e.id === id ? { ...e, status: newStatus } : e))
+              await updateEmail(id, { status: newStatus })
+            }
+
+            function fmtEmailDate(iso: string | null) {
+              if (!iso) return '—'
+              return new Date(iso).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })
+            }
+
+            function EmailRow({ em }: { em: ImportedEmail }) {
+              const isDone = em.status === 'done'
+              return (
+                <div className={`bg-white rounded-[14px] p-4 flex gap-3 transition-opacity ${isDone ? 'opacity-50' : ''}`}
+                  style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className={`text-[14px] font-bold truncate ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                      {em.subject || '(bez předmětu)'}
+                    </div>
+                    <div className="text-[12px] text-gray-400 mt-0.5 flex items-center gap-2">
+                      <span className="truncate">{em.from_name || em.from_address}</span>
+                      <span className="text-gray-200">·</span>
+                      <span className="flex-shrink-0">{fmtEmailDate(em.received_at)}</span>
+                    </div>
+                    {em.body_preview && (
+                      <div className="text-[12px] text-gray-400 mt-1 line-clamp-2">{em.body_preview}</div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => toggleDone(em.id)}
+                    className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
+                      isDone ? 'bg-green-400 border-green-400' : 'border-gray-300 hover:border-green-400'
+                    }`}
+                    title={isDone ? 'Označit jako nevyřízené' : 'Označit jako vyřízené'}
+                  >
+                    {isDone && <span className="text-[10px] text-white font-bold">✓</span>}
+                  </button>
+                </div>
+              )
+            }
+
+            return (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-[12px] text-gray-400">
+                    {pending.length > 0
+                      ? <span className="font-semibold text-orange-500">{pending.length} nevyřízených</span>
+                      : <span className="text-green-500 font-semibold">Vše vyřízeno ✓</span>
+                    }
+                    {done.length > 0 && <span className="ml-2">· {done.length} vyřízených</span>}
+                  </div>
+                  <Link href="/emaily" className="text-[12px] font-semibold text-[var(--color-primary)] hover:underline">
+                    Všechny emaily →
+                  </Link>
+                </div>
+
+                {clientEmails.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-[48px] mb-3">📭</div>
+                    <p className="text-[14px] font-semibold text-gray-500 mb-1">Žádné emaily pro tohoto klienta</p>
+                    <p className="text-[12px] text-gray-400">Importuj emaily a přiřaď je ke klientovi v sekci Emaily</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {pending.length > 0 && (
+                      <>
+                        <div className="text-[10px] font-bold text-orange-500 uppercase tracking-wide px-1">Nevyřízené</div>
+                        {pending.map(em => <EmailRow key={em.id} em={em} />)}
+                      </>
+                    )}
+                    {done.length > 0 && (
+                      <>
+                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1 mt-2">Vyřízené</div>
+                        {done.map(em => <EmailRow key={em.id} em={em} />)}
+                      </>
+                    )}
+                  </div>
+                )}
+              </>
+            )
+          })()}
 
           {tab === 'schuzky' && (() => {
             const now = new Date()

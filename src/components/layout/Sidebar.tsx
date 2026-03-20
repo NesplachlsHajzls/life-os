@@ -15,6 +15,7 @@ const SIDEBAR_SECTIONS = [
       { href: '/finance',   icon: '💰', label: 'Finance'     },
       { href: '/prace',     icon: '💼', label: 'Práce'       },
       { href: '/kalendar',  icon: '📅', label: 'Kalendář'    },
+      { href: '/emaily',    icon: '✉️', label: 'Emaily'      },
     ],
   },
   {
