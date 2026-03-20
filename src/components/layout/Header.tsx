@@ -22,12 +22,16 @@ export function Header({ title, subtitle, backHref, backLabel, action, hideNotif
           <span>{backLabel ?? 'Zpět'}</span>
         </Link>
       )}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[22px] font-bold">{title}</h1>
-          {subtitle && <p className="text-[13px] text-white/75 mt-0.5">{subtitle}</p>}
+      <div className="relative flex items-center justify-between min-h-[36px]">
+        {/* Titulek absolutně vycentrovaný */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <h1 className="text-[22px] font-bold leading-tight">{title}</h1>
+          {subtitle && <p className="text-[13px] text-white/75">{subtitle}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        {/* Levá strana — prázdný placeholder pro symetrii */}
+        <div className="w-8 flex-shrink-0" />
+        {/* Pravá strana — akce + notifikace */}
+        <div className="flex items-center gap-2 relative z-10">
           {action && <div>{action}</div>}
           {!hideNotifications && !backHref && <NotificationCenter />}
         </div>

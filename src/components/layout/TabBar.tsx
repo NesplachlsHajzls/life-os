@@ -12,8 +12,8 @@ export function TabBar() {
 
   return (
     <div
-      className="flex items-center gap-1 px-3 py-1.5 bg-white border-b border-gray-100 overflow-x-auto flex-shrink-0"
-      style={{ scrollbarWidth: 'none' }}
+      className="flex items-center gap-1 px-3 py-2 overflow-x-auto flex-shrink-0"
+      style={{ background: 'var(--color-primary)', scrollbarWidth: 'none' }}
     >
       {tabs.map(tab => {
         const isActive =
@@ -27,8 +27,8 @@ export function TabBar() {
               href={tab.href}
               className="flex items-center gap-1.5 pl-3 pr-2 py-1 rounded-l-[8px] text-[12px] font-semibold transition-all"
               style={{
-                background: isActive ? 'var(--color-primary)' + '15' : '#f3f4f6',
-                color:      isActive ? 'var(--color-primary)' : '#6b7280',
+                background: isActive ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
+                color:      'rgba(255,255,255,' + (isActive ? '1' : '0.7') + ')',
               }}
             >
               <span className="text-[13px]">{tab.icon}</span>
@@ -36,10 +36,10 @@ export function TabBar() {
             </Link>
             <button
               onClick={() => closeTab(tab.id)}
-              className="px-1.5 py-1 rounded-r-[8px] text-[13px] leading-none transition-colors"
+              className="px-1.5 py-1 rounded-r-[8px] text-[13px] leading-none transition-all hover:bg-white/20"
               style={{
-                background: isActive ? 'var(--color-primary)' + '15' : '#f3f4f6',
-                color: '#9ca3af',
+                background: isActive ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.55)',
               }}
               title="Zavřít záložku"
             >
