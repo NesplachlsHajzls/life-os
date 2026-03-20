@@ -99,10 +99,20 @@ export function parseOutlookCSV(csvText: string): ParsedEmail[] {
   const lines = csvText.split('\n')
   if (lines.length < 2) return []
 
-  // Parse header
-  const header = parseCSVRow(lines[0]).map(h => h.trim().toLowerCase())
+  // Auto-detect delimiter: tab (Excel paste / TSV) or comma (CSV)
+  const firstLine = lines[0]
+  const tabCount   = (firstLine.match(/\t/g) ?? []).length
+  const commaCount = (firstLine.match(/,/g) ?? []).length
+  const delimiter  = tabCount >= commaCount ? '\t' : ','
 
-  // Map known column names (Outlook varies by language/version)
+  function splitRow(line: string): string[] {
+    return delimiter === '\t' ? line.split('\t').map(c => c.trim()) : parseCSVRow(line)
+  }
+
+  // Parse header
+  const header = splitRow(lines[0]).map(h => h.trim().toLowerCase())
+
+  // Map known column names (Outlook varies by language/version + Excel paste)
   function col(keys: string[]): number {
     for (const k of keys) {
       const i = header.findIndex(h => h.includes(k))
@@ -113,17 +123,17 @@ export function parseOutlookCSV(csvText: string): ParsedEmail[] {
 
   const iSubject  = col(['subject', 'předmět', 'betreff'])
   const iBody     = col(['body', 'tělo', 'text', 'inhalt'])
-  const iFromName = col(['from: (name)', 'od: (jméno)', 'von: (name)', 'from (name)'])
+  const iFromName = col(['from: (name)', 'od: (jméno)', 'von: (name)', 'from (name)', 'odesílatel'])
   const iFromAddr = col(['from: (address)', 'od: (adresa)', 'von: (adresse)', 'from (address)', 'from'])
-  const iToAddr   = col(['to: (address)', 'komu: (adresa)', 'to (address)', 'to'])
-  const iReceived = col(['received', 'přijato', 'empfangen', 'date'])
+  const iToAddr   = col(['to: (address)', 'komu: (adresa)', 'to (address)', 'to', 'komu'])
+  const iReceived = col(['received', 'přijato', 'empfangen', 'date', 'datum'])
 
   const results: ParsedEmail[] = []
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim()
     if (!line) continue
-    const cols = parseCSVRow(line)
+    const cols = splitRow(line)
 
     const subject   = iSubject  >= 0 ? cols[iSubject]?.trim()  || null : null
     const fromName  = iFromName >= 0 ? cols[iFromName]?.trim() || null : null

@@ -179,8 +179,9 @@ function ImportModal({ userId, onImported, onClose }: {
   const fileRef = useRef<HTMLInputElement>(null)
 
   function handleFile(file: File) {
-    if (!file.name.endsWith('.csv')) {
-      setError('Prosím nahraj soubor .csv z Outlooku')
+    const ok = file.name.endsWith('.csv') || file.name.endsWith('.txt') || file.name.endsWith('.tsv')
+    if (!ok) {
+      setError('Nahraj .csv, .tsv nebo .txt soubor (Excel/Outlook export)')
       return
     }
     setError('')
@@ -189,9 +190,14 @@ function ImportModal({ userId, onImported, onClose }: {
     reader.onload = e => {
       const text = e.target?.result as string
       const rows = parseOutlookCSV(text)
+      if (rows.length === 0) {
+        // Try again with UTF-8 assumption (some systems use UTF-8)
+        setError('Soubor načten, ale nebyly nalezeny žádné emaily. Zkus uložit jako CSV (UTF-8) z Excelu.')
+      }
       setParsed(rows)
     }
-    reader.readAsText(file, 'windows-1250') // Outlook often uses cp1250
+    // Try windows-1250 first (CZ Outlook default), fallback handled in UI
+    reader.readAsText(file, 'windows-1250')
   }
 
   async function handleImport() {
@@ -230,12 +236,17 @@ function ImportModal({ userId, onImported, onClose }: {
 
         {/* Instrukce */}
         <div className="bg-blue-50 rounded-[12px] p-4 mb-4 text-[13px] text-blue-700 leading-relaxed">
-          <div className="font-bold mb-1">Jak exportovat z Outlooku:</div>
+          <div className="font-bold mb-1.5">Možnost A — přes Excel (nejjednodušší):</div>
+          <ol className="list-decimal list-inside space-y-0.5 mb-3">
+            <li>V Outlooku vyber emaily (Ctrl+A nebo ručně)</li>
+            <li>Zkopíruj (Ctrl+C) a vlož do Excelu (Ctrl+V)</li>
+            <li>Soubor → Uložit jako → CSV UTF-8</li>
+          </ol>
+          <div className="font-bold mb-1.5">Možnost B — přímý export z Outlooku:</div>
           <ol className="list-decimal list-inside space-y-0.5">
-            <li>V Outlooku otevři složku s označenými emaily</li>
             <li>Soubor → Otevřít a exportovat → Importovat nebo exportovat</li>
-            <li>Exportovat do souboru → Hodnoty oddělené čárkami (.CSV)</li>
-            <li>Vyber složku a ulož soubor</li>
+            <li>Exportovat do souboru → Hodnoty oddělené čárkami</li>
+            <li>Vyber složku a ulož</li>
           </ol>
         </div>
 
@@ -252,7 +263,7 @@ function ImportModal({ userId, onImported, onClose }: {
           <input
             ref={fileRef}
             type="file"
-            accept=".csv"
+            accept=".csv,.tsv,.txt"
             className="hidden"
             onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
           />
@@ -268,8 +279,8 @@ function ImportModal({ userId, onImported, onClose }: {
           ) : (
             <>
               <div className="text-[32px] mb-2">📂</div>
-              <div className="text-[14px] font-semibold text-gray-600">Přetáhni CSV soubor sem</div>
-              <div className="text-[12px] text-gray-400 mt-1">nebo klikni pro výběr souboru</div>
+              <div className="text-[14px] font-semibold text-gray-600">Přetáhni soubor sem</div>
+              <div className="text-[12px] text-gray-400 mt-1">.csv, .tsv nebo .txt — nebo klikni pro výběr</div>
             </>
           )}
         </div>
