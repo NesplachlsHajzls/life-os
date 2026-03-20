@@ -392,7 +392,7 @@ export default function NoteDetailPage() {
                   <span className="text-[18px] flex-shrink-0">{sub.icon}</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-[14px] font-semibold text-gray-800 truncate">{sub.title}</div>
-                    {sub.content && <div className="text-[11px] text-gray-400 truncate">{sub.content.slice(0, 60)}</div>}
+                    {sub.content && <div className="text-[11px] text-gray-400 truncate">{sub.content.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60)}</div>}
                   </div>
                   <button onClick={e => handleDeleteSub(sub.id, e)}
                     className="w-6 h-6 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all text-[14px]">

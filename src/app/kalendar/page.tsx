@@ -116,6 +116,9 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
         {clientName && (
           <div className="text-[10px] font-semibold text-gray-400 mt-0.5 truncate">💼 {clientName}</div>
         )}
+        {event.description && (
+          <div className="text-[10px] text-gray-400 mt-0.5 truncate opacity-70">{event.description}</div>
+        )}
       </div>
     </div>
   )
@@ -159,6 +162,9 @@ function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFA
         <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
           {task.title}
         </div>
+        {task.note && (
+          <div className="text-[10px] text-gray-400 mt-0.5 truncate opacity-70">{task.note}</div>
+        )}
       </div>
     </div>
   )

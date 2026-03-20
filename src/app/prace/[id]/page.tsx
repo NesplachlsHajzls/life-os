@@ -1041,7 +1041,7 @@ export default function ClientPage() {
                           <div className="text-[14px] font-bold text-gray-900 truncate pr-6">{note.title}</div>
                           {note.content ? (
                             <div className="text-[12px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed">
-                              {note.content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)}
+                              {note.content.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim().slice(0, 120)}
                             </div>
                           ) : (
                             <div className="text-[12px] text-gray-300 mt-0.5 italic">Prázdná poznámka…</div>
