@@ -7,6 +7,7 @@ import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
 import { fmt } from '@/features/finance/utils'
 import { Wallet } from '@/features/finance/api'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -158,6 +159,7 @@ function TransferSheet({ wallets, onTransfer, onClose }: { wallets: Wallet[]; on
 export default function PenezenkyPage() {
   const { user } = useUser()
   const userId = user?.id ?? DEMO_USER_ID
+  const { hideAmounts } = usePrivacy()
 
   const { loading, wallets, totalWallets, handleTransfer, saveWallets, toast } = useFinance(userId)
 
@@ -184,7 +186,7 @@ export default function PenezenkyPage() {
           <div className="text-[11px] font-semibold opacity-70 uppercase tracking-wide mb-1">Celkový majetek</div>
           {loading
             ? <div className="text-[28px] font-bold animate-pulse">…</div>
-            : <div className="text-[32px] font-bold">{fmt(totalWallets)} <span className="text-[18px] opacity-70">Kč</span></div>
+            : <div className="text-[32px] font-bold">{hideAmounts ? '••••' : <>{fmt(totalWallets)} <span className="text-[18px] opacity-70">Kč</span></>}</div>
           }
           <div className="flex gap-3 mt-4">
             <button
@@ -215,8 +217,8 @@ export default function PenezenkyPage() {
                   <div className="text-[14px] font-semibold">{w.name}</div>
                   <div className="text-[11px] text-gray-400 mt-0.5 capitalize">{w.type ?? 'běžná'}</div>
                 </div>
-                <span className="text-[15px] font-bold mr-1" style={{ color: w.balance < 0 ? '#ef4444' : '#111827' }}>
-                  {fmt(w.balance)} Kč
+                <span className="text-[15px] font-bold mr-1" style={{ color: !hideAmounts && w.balance < 0 ? '#ef4444' : '#111827' }}>
+                  {hideAmounts ? '••••' : `${fmt(w.balance)} Kč`}
                 </span>
                 <button
                   onClick={() => setEditingWallet(w)}

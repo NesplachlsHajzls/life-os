@@ -7,6 +7,7 @@ import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
 import { fmt, todayStr } from '@/features/finance/utils'
 import type { Debt } from '@/features/finance/api'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -176,6 +177,9 @@ export default function ZavazkyPage() {
   const userId = user?.id ?? DEMO_USER_ID
 
   const { loading, debts, addDebt, removeDebt, editDebt, toast } = useFinance(userId)
+  const { hideAmounts } = usePrivacy()
+  const h = (n: number) => hideAmounts ? '••••' : `${fmt(n)} Kč`
+
 
   const [quickInput,  setQuickInput]  = useState('')
   const [quickError,  setQuickError]  = useState('')
@@ -230,7 +234,7 @@ export default function ZavazkyPage() {
           <div className="text-[11px] font-semibold opacity-70 uppercase tracking-wide mb-1">Dlužím celkem</div>
           {loading
             ? <div className="text-[28px] font-bold animate-pulse">…</div>
-            : <div className="text-[32px] font-bold">{fmt(totalOwed)} <span className="text-[18px] opacity-70">Kč</span></div>
+            : <div className="text-[32px] font-bold">{hideAmounts ? '••••' : <>{fmt(totalOwed)} <span className="text-[18px] opacity-70">Kč</span></>}</div>
           }
           <div className="text-[12px] opacity-60 mt-1">
             {Object.keys(grouped).length} {Object.keys(grouped).length === 1 ? 'osoba' : Object.keys(grouped).length < 5 ? 'osoby' : 'osob'}
@@ -289,7 +293,7 @@ export default function ZavazkyPage() {
                       {latestNote && <div className="text-[11px] text-gray-400 truncate">{latestNote}{entries.length > 1 ? ` +${entries.length - 1} další` : ''}</div>}
                     </div>
                     <div className="text-right flex-shrink-0 mr-2">
-                      <div className="text-[15px] font-bold text-red-500">−{fmt(total)} Kč</div>
+                      <div className="text-[15px] font-bold text-red-500">−{h(total)}</div>
                       {entries.length > 1 && <div className="text-[11px] text-gray-400">{entries.length} záznamy</div>}
                     </div>
                     <span className="text-gray-400 text-[12px]">{isOpen ? '▲' : '▼'}</span>
@@ -314,7 +318,7 @@ export default function ZavazkyPage() {
                                 {entry.date_to ? ` → ${formatDate(entry.date_to)}` : ''}
                               </div>
                             </div>
-                            <span className="text-[13px] font-bold text-red-500 flex-shrink-0">−{fmt(entry.amount)} Kč</span>
+                            <span className="text-[13px] font-bold text-red-500 flex-shrink-0">−{h(entry.amount)}</span>
                             <div className="flex gap-1 flex-shrink-0">
                               <button
                                 onClick={() => setEditingDebt(entry)}

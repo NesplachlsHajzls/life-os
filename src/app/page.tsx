@@ -8,6 +8,7 @@ import { fetchClients, fetchAllWorkTasks, Client } from '@/features/prace/api'
 import { fetchEventsInRange, CalendarEvent } from '@/features/calendar/api'
 import { loadFinanceData } from '@/features/finance/api'
 import { fetchRootNotes } from '@/features/notes/api'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -66,6 +67,8 @@ function Empty({ label }: { label: string }) {
 export default function DashboardPage() {
   const { user, loading: authLoading } = useUser()
   const userId = !authLoading ? (user?.id ?? DEMO_USER_ID) : null
+  const { hideAmounts } = usePrivacy()
+  const amt = (n: number) => hideAmounts ? '••••' : fmtCZK(n)
 
   const [tasks,   setTasks]   = useState<Task[]>([])
   const [clients, setClients] = useState<Client[]>([])
@@ -197,17 +200,17 @@ export default function DashboardPage() {
             ) : (
               <>
                 <div className="text-[22px] font-extrabold text-gray-900 leading-none">
-                  {fmtCZK(finance.balance)}
+                  {amt(finance.balance)}
                 </div>
                 <div className="text-[11px] text-gray-400">celkový zůstatek</div>
                 <div className="flex gap-3 mt-1">
                   <div className="flex items-center gap-1">
                     <span className="text-[10px] font-bold text-green-500">↑</span>
-                    <span className="text-[12px] font-semibold text-gray-600">{fmtCZK(finance.monthIncome)}</span>
+                    <span className="text-[12px] font-semibold text-gray-600">{amt(finance.monthIncome)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="text-[10px] font-bold text-red-400">↓</span>
-                    <span className="text-[12px] font-semibold text-gray-600">{fmtCZK(finance.monthExpenses)}</span>
+                    <span className="text-[12px] font-semibold text-gray-600">{amt(finance.monthExpenses)}</span>
                   </div>
                 </div>
               </>

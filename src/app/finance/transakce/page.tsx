@@ -9,12 +9,14 @@ import { AddExpenseSheet, AddIncomeSheet, EditExpenseSheet, EditIncomeSheet } fr
 import { fmt, mLabel, mKey, todayStr } from '@/features/finance/utils'
 import { FAB } from '@/components/ui/FAB'
 import type { Expense, Income } from '@/features/finance/api'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 export default function TransakcePage() {
   const { user } = useUser()
   const userId = user?.id ?? DEMO_USER_ID
+  const { hideAmounts } = usePrivacy()
 
   const {
     loading, toast,
@@ -116,7 +118,7 @@ export default function TransakcePage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <span className={`text-[14px] font-bold ${isExp ? 'text-gray-700' : 'text-green-600'}`}>
-                        {isExp ? '−' : '+'}{fmt(item.amount)} Kč
+                        {isExp ? '−' : '+'}{hideAmounts ? '••••' : `${fmt(item.amount)} Kč`}
                       </span>
                       <button
                         onClick={() => {

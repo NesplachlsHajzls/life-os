@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { AuthWrapper } from '@/components/layout/AuthWrapper'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
+import { PrivacyProvider } from '@/contexts/PrivacyContext'
 
 export const metadata: Metadata = {
   title: 'Life OS',
@@ -47,9 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Mobile: centered phone shell. PC (lg+): full-width sidebar layout */}
         <div className="min-h-screen flex justify-center bg-gray-100 lg:bg-[#F4F6FA]">
           <div className="relative w-full max-w-[390px] lg:max-w-none min-h-screen bg-[#F4F6FA] flex flex-col lg:flex-row shadow-2xl lg:shadow-none">
-            <AuthWrapper>
-              {children}
-            </AuthWrapper>
+            <PrivacyProvider>
+              <AuthWrapper>
+                {children}
+              </AuthWrapper>
+            </PrivacyProvider>
           </div>
         </div>
       </body>

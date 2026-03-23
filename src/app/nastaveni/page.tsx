@@ -6,6 +6,7 @@ import { applyTheme, applyFont, getSavedTheme, getSavedFont } from '@/components
 import { useUser } from '@/hooks/useUser'
 import { useCategories } from '@/hooks/useCategories'
 import { AppCategory } from '@/features/categories/api'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const THEMES = [
   { id: 'ocean',     name: 'Oceán',       color: '#1E4B8E' },
@@ -221,6 +222,7 @@ export default function NastaveniPage() {
   const [activeTheme, setActiveTheme] = useState('ocean')
   const [activeFont,  setActiveFont]  = useState('inter')
   const { user } = useUser()
+  const { hideAmounts, toggleHideAmounts } = usePrivacy()
 
   useEffect(() => {
     setActiveTheme(getSavedTheme())
@@ -288,6 +290,32 @@ export default function NastaveniPage() {
               </button>
             ))}
           </div>
+        </SettingsSection>
+
+        {/* Soukromí */}
+        <SettingsSection label="Soukromí">
+          <button
+            onClick={toggleHideAmounts}
+            className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+          >
+            <span className="text-[22px]">{hideAmounts ? '🙈' : '👁️'}</span>
+            <div className="flex-1">
+              <div className="text-[14px] font-semibold">Skrýt částky</div>
+              <div className="text-[12px] text-gray-400 mt-0.5">
+                {hideAmounts ? 'Částky jsou skryté — klepni pro zobrazení' : 'Částky jsou viditelné — klepni pro skrytí'}
+              </div>
+            </div>
+            {/* Toggle pill */}
+            <div
+              className="relative w-12 h-6 rounded-full transition-colors flex-shrink-0"
+              style={{ background: hideAmounts ? 'var(--color-primary)' : '#d1d5db' }}
+            >
+              <div
+                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                style={{ left: hideAmounts ? '26px' : '2px' }}
+              />
+            </div>
+          </button>
         </SettingsSection>
 
         {/* Finance */}

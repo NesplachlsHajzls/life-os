@@ -8,6 +8,7 @@ import { AddExpenseSheet, AddIncomeSheet, EditExpenseSheet, EditIncomeSheet } fr
 import { fmt, mLabel } from '@/features/finance/utils'
 import { FinanceTabs } from '@/features/finance/components/FinanceTabs'
 import type { Expense, Income } from '@/features/finance/api'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -15,6 +16,8 @@ const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 export default function FinancePage() {
   const { user } = useUser()
   const userId = user?.id ?? DEMO_USER_ID
+  const { hideAmounts } = usePrivacy()
+  const h = (n: number) => hideAmounts ? '••••' : `${fmt(n)} Kč`
 
   const {
     loading, toast,
@@ -86,20 +89,20 @@ export default function FinancePage() {
           <div className="text-[11px] font-semibold opacity-70 uppercase tracking-wide mb-1">Volné prostředky</div>
           {loading
             ? <div className="text-[28px] font-bold animate-pulse">…</div>
-            : <div className="text-[32px] font-bold">{fmt(volne)} <span className="text-[18px] opacity-70">Kč</span></div>
+            : <div className="text-[32px] font-bold">{hideAmounts ? '••••' : <>{fmt(volne)} <span className="text-[18px] opacity-70">Kč</span></>}</div>
           }
           <div className="flex gap-5 mt-4 text-sm">
             <div>
               <div className="text-[10px] opacity-60 uppercase tracking-wide">Příjmy</div>
-              <div className="text-[14px] font-bold text-green-300">+{fmt(totalInc)} Kč</div>
+              <div className="text-[14px] font-bold text-green-300">+{h(totalInc)}</div>
             </div>
             <div>
               <div className="text-[10px] opacity-60 uppercase tracking-wide">Závazky</div>
-              <div className="text-[14px] font-bold text-orange-300">−{fmt(totalCom)} Kč</div>
+              <div className="text-[14px] font-bold text-orange-300">−{h(totalCom)}</div>
             </div>
             <div>
               <div className="text-[10px] opacity-60 uppercase tracking-wide">Výdaje</div>
-              <div className="text-[14px] font-bold text-red-300">−{fmt(totalExp)} Kč</div>
+              <div className="text-[14px] font-bold text-red-300">−{h(totalExp)}</div>
             </div>
           </div>
         </div>
@@ -150,7 +153,7 @@ export default function FinancePage() {
                 <div key={name}>
                   <div className="flex justify-between mb-1">
                     <span className="text-[12px] font-semibold text-gray-700">{expCats[name]?.icon} {name}</span>
-                    <span className={`text-[12px] font-bold ${value > 0 ? 'text-gray-600' : 'text-gray-300'}`}>{value > 0 ? `${fmt(value)} Kč` : '—'}</span>
+                    <span className={`text-[12px] font-bold ${value > 0 ? 'text-gray-600' : 'text-gray-300'}`}>{value > 0 ? (hideAmounts ? '••••' : `${fmt(value)} Kč`) : '—'}</span>
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all" style={{ width: `${(value / maxCat) * 100}%`, background: color, opacity: value > 0 ? 1 : 0 }} />
@@ -189,7 +192,7 @@ export default function FinancePage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <span className={`text-[14px] font-bold ${isExp ? 'text-gray-700' : 'text-green-600'}`}>
-                        {isExp ? '−' : '+'}{fmt(item.amount)} Kč
+                        {isExp ? '−' : '+'}{hideAmounts ? '••••' : `${fmt(item.amount)} Kč`}
                       </span>
                       <button
                         onClick={() => {

@@ -8,6 +8,7 @@ import { useUser } from '@/hooks/useUser'
 import { fmt } from '@/features/finance/utils'
 import { Sheet } from '@/features/finance/components/Sheet'
 import { FAB } from '@/components/ui/FAB'
+import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -34,6 +35,7 @@ export default function OpakovAnePage() {
   const userId = user?.id ?? DEMO_USER_ID
 
   const { loading, recurring, expCats, toast, dueRecurring, confirmRecurring } = useFinance(userId)
+  const { hideAmounts } = usePrivacy()
 
   const [showAdd,  setShowAdd]  = useState(false)
   const [showDue,  setShowDue]  = useState(dueRecurring.length > 0)
@@ -56,7 +58,7 @@ export default function OpakovAnePage() {
         )}
 
         <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">
-          Celkem měsíčně: {loading ? '…' : `${fmt(totalMonthly)} Kč`}
+          Celkem měsíčně: {loading ? '…' : hideAmounts ? '••••' : `${fmt(totalMonthly)} Kč`}
         </div>
 
         {loading ? (
@@ -84,7 +86,7 @@ export default function OpakovAnePage() {
                     <div className="text-[11px] text-gray-400 mt-0.5">{FREQ_LABELS[r.category] ?? 'Každý měsíc'} · {r.category}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-red-500">−{fmt(r.amount)} Kč</span>
+                    <span className="text-[14px] font-bold text-red-500">−{hideAmounts ? '••••' : `${fmt(r.amount)} Kč`}</span>
                     {isDue && (
                       <button
                         onClick={() => confirmRecurring(r)}
