@@ -25,7 +25,7 @@ export function TabBar() {
         return (
           <div key={tab.id} className="flex items-stretch flex-shrink-0 rounded-[8px] overflow-hidden transition-all" style={{ background: bg }}>
             <Link
-              href={tab.href}
+              href={tab.currentHref}
               className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-[12px] font-semibold"
               style={{ color: 'rgba(255,255,255,' + (isActive ? '1' : '0.7') + ')' }}
             >
