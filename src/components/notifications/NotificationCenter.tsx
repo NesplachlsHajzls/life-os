@@ -146,7 +146,7 @@ export function NotificationCenter() {
                     className="px-2.5 py-1 rounded-[8px] text-[11px] font-semibold transition-all"
                     style={{
                       background: leadTime === opt.value ? 'var(--color-primary)' : 'var(--border)',
-                      color: leadTime === opt.value ? '#fff' : '#6b7280',
+                      color: leadTime === opt.value ? '#fff' : 'var(--text-secondary)',
                     }}
                   >
                     {opt.label}

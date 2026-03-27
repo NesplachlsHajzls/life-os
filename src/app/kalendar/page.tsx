@@ -390,7 +390,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                     className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-all"
                     style={isSelected
                       ? { background: catStyle.background, borderColor: catStyle.borderColor, color: catStyle.color }
-                      : { background: '#f9fafb', borderColor: 'var(--border)', color: '#6b7280' }
+                      : { background: 'var(--bg)', borderColor: 'var(--border)', color: 'var(--text-secondary)' }
                     }
                   >
                     {cat.icon} {cat.name}

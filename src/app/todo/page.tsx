@@ -61,7 +61,7 @@ function SectionDropdown({
               key={opt.value}
               onClick={() => { onChange(opt.value); setOpen(false) }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[14px] hover:bg-[var(--bg)] transition-colors"
-              style={{ fontWeight: opt.value === value ? 700 : 500, color: opt.value === value ? 'var(--color-primary)' : '#374151' }}
+              style={{ fontWeight: opt.value === value ? 700 : 500, color: opt.value === value ? 'var(--color-primary)' : 'var(--text-secondary)' }}
             >
               {opt.icon && <span className="text-[16px] w-5 text-center">{opt.icon}</span>}
               <span className="flex-1">{opt.label}</span>
@@ -293,7 +293,7 @@ export default function TodoPage() {
           ] as const).map(([id, label]) => (
             <button key={id} onClick={() => setMobileTab(id)}
               className="flex-1 py-3 text-[13px] font-bold border-b-2 transition-colors"
-              style={{ borderColor: mobileTab === id ? 'var(--color-primary)' : 'transparent', color: mobileTab === id ? 'var(--color-primary)' : '#9ca3af' }}>
+              style={{ borderColor: mobileTab === id ? 'var(--color-primary)' : 'transparent', color: mobileTab === id ? 'var(--color-primary)' : 'var(--text-tertiary)' }}>
               {label}
             </button>
           ))}
@@ -304,7 +304,7 @@ export default function TodoPage() {
             {catChips.map(cat => (
               <button key={cat} onClick={() => setMobileCat(cat)}
                 className="px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors"
-                style={{ background: mobileCat === cat ? 'var(--color-primary)' : 'var(--surface-raised)', color: mobileCat === cat ? '#fff' : '#6b7280' }}>
+                style={{ background: mobileCat === cat ? 'var(--color-primary)' : 'var(--surface-raised)', color: mobileCat === cat ? '#fff' : 'var(--text-secondary)' }}>
                 {categories.find(c => c.name === cat)?.icon ?? ''} {cat}
               </button>
             ))}

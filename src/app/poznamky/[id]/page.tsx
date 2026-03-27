@@ -271,7 +271,7 @@ export default function NoteDetailPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
                 style={activeCat
                   ? { background: activeCat.color + '18', borderColor: activeCat.color + '40', color: activeCat.color }
-                  : { background: 'var(--surface-raised)', borderColor: 'var(--border)', color: '#9ca3af' }
+                  : { background: 'var(--surface-raised)', borderColor: 'var(--border)', color: 'var(--text-tertiary)' }
                 }
               >
                 {activeCat ? <>{activeCat.icon} {activeCat.name}</> : '📦 Bez kategorie'}
@@ -283,7 +283,7 @@ export default function NoteDetailPage() {
                   style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
                   <button onClick={() => handleCategoryChange(null)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all hover:bg-[var(--bg)]"
-                    style={{ color: !category ? 'var(--color-primary)' : '#6b7280', background: !category ? 'var(--color-primary-light, #eff6ff)' : 'transparent' }}>
+                    style={{ color: !category ? 'var(--color-primary)' : 'var(--text-secondary)', background: !category ? 'var(--color-primary-light, #eff6ff)' : 'transparent' }}>
                     📦 Bez kategorie
                   </button>
                   {categories.map(cat => (
@@ -291,7 +291,7 @@ export default function NoteDetailPage() {
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all"
                       style={{
                         background: category === cat.id ? cat.color + '18' : 'transparent',
-                        color: category === cat.id ? cat.color : '#374151',
+                        color: category === cat.id ? cat.color : 'var(--text-secondary)',
                       }}
                     >
                       {cat.icon} {cat.name}
@@ -309,7 +309,7 @@ export default function NoteDetailPage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
                   style={clientId
                     ? { background: '#8b5cf618', borderColor: '#8b5cf640', color: '#8b5cf6' }
-                    : { background: 'var(--surface-raised)', borderColor: 'var(--border)', color: '#9ca3af' }
+                    : { background: 'var(--surface-raised)', borderColor: 'var(--border)', color: 'var(--text-tertiary)' }
                   }
                 >
                   👤 {clientName ?? 'Bez klienta'}
@@ -339,7 +339,7 @@ export default function NoteDetailPage() {
                           className="flex items-center gap-2 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all"
                           style={{
                             background: c.id === clientId ? c.color + '18' : 'transparent',
-                            color: c.id === clientId ? c.color : '#374151',
+                            color: c.id === clientId ? c.color : 'var(--text-secondary)',
                           }}
                         >
                           <span className="text-[14px]">{c.icon}</span>

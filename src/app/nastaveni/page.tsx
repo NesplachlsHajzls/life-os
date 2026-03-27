@@ -296,7 +296,7 @@ export default function NastaveniPage() {
             {/* Toggle pill */}
             <div
               className="relative w-12 h-6 rounded-full transition-colors flex-shrink-0"
-              style={{ background: hideAmounts ? 'var(--color-primary)' : '#d1d5db' }}
+              style={{ background: hideAmounts ? 'var(--color-primary)' : 'var(--border-strong)' }}
             >
               <div
                 className="absolute top-0.5 w-5 h-5 bg-[var(--surface)] rounded-full shadow transition-all"

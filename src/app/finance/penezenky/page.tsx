@@ -217,7 +217,7 @@ export default function PenezenkyPage() {
                   <div className="text-[14px] font-semibold">{w.name}</div>
                   <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5 capitalize">{w.type ?? 'běžná'}</div>
                 </div>
-                <span className="text-[15px] font-bold mr-1" style={{ color: !hideAmounts && w.balance < 0 ? '#ef4444' : '#111827' }}>
+                <span className="text-[15px] font-bold mr-1" style={{ color: !hideAmounts && w.balance < 0 ? '#ef4444' : 'var(--text-primary)' }}>
                   {hideAmounts ? '••••' : `${fmt(w.balance)} Kč`}
                 </span>
                 <button

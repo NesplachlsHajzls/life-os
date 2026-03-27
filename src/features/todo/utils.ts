@@ -145,7 +145,7 @@ export function parseTaskInput(
 // ── Priority display helpers ──────────────────────────────────────
 
 export const PRIORITY_DOTS = {
-  1: { label: '●',   color: '#d1d5db', title: 'Nízká'   },
+  1: { label: '●',   color: 'var(--border-strong)', title: 'Nízká'   },
   2: { label: '●●',  color: '#f59e0b', title: 'Střední'  },
   3: { label: '●●●', color: '#ef4444', title: 'Vysoká'  },
 } as const

@@ -85,7 +85,7 @@ export function BottomNav() {
                 </div>
                 <span
                   className="text-[10px] font-bold mt-0.5"
-                  style={{ color: dashActive ? 'var(--color-primary)' : '#9ca3af' }}
+                  style={{ color: dashActive ? 'var(--color-primary)' : 'var(--text-tertiary)' }}
                 >
                   Dashboard
                 </span>

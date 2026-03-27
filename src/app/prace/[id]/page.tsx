@@ -75,7 +75,7 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
           <span className="text-[12px] text-[var(--text-tertiary)]">📅 {dateStr}</span>
           {order.amount != null && (
-            <span className="text-[12px] font-semibold" style={{ color: order.invoiced ? '#9ca3af' : clientColor }}>
+            <span className="text-[12px] font-semibold" style={{ color: order.invoiced ? 'var(--text-tertiary)' : clientColor }}>
               {new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(order.amount)}
             </span>
           )}
@@ -556,7 +556,7 @@ export default function ClientPage() {
             <button onClick={cycleFirstMeeting} title={client.first_meeting_status ? FIRST_MEETING_LABELS[client.first_meeting_status] : 'Nastavit stav 1. schůzky'}
               className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] hover:bg-[var(--surface-raised)] transition-colors">
               <span className="w-3 h-3 rounded-full flex-shrink-0"
-                style={{ background: client.first_meeting_status ? FIRST_MEETING_COLORS[client.first_meeting_status] : '#d1d5db' }} />
+                style={{ background: client.first_meeting_status ? FIRST_MEETING_COLORS[client.first_meeting_status] : 'var(--border-strong)' }} />
               <span className="text-[10px] font-semibold text-[var(--text-tertiary)] hidden lg:block">
                 {client.first_meeting_status ? FIRST_MEETING_LABELS[client.first_meeting_status] : '1. schůzka'}
               </span>
@@ -575,7 +575,7 @@ export default function ClientPage() {
             setTab(t.id)
           }}
             className="flex-shrink-0 px-4 py-3 text-[13px] font-bold border-b-2 transition-colors whitespace-nowrap"
-            style={{ borderColor: tab === t.id ? clientColor : 'transparent', color: tab === t.id ? clientColor : '#9ca3af' }}>
+            style={{ borderColor: tab === t.id ? clientColor : 'transparent', color: tab === t.id ? clientColor : 'var(--text-tertiary)' }}>
             {t.label}{t.count !== undefined && t.count > 0 ? ` (${t.count})` : ''}
           </button>
         ))}
@@ -861,7 +861,7 @@ export default function ClientPage() {
                   {(['open', 'done'] as const).map(t => (
                     <button key={t} onClick={() => setTaskTab(t)}
                       className="px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-all"
-                      style={{ background: taskTab === t ? clientColor : 'var(--surface-raised)', color: taskTab === t ? '#fff' : '#6b7280' }}>
+                      style={{ background: taskTab === t ? clientColor : 'var(--surface-raised)', color: taskTab === t ? '#fff' : 'var(--text-secondary)' }}>
                       {t === 'open' ? `Otevřené (${openTasks.length})` : `Hotové (${doneTasks.length})`}
                     </button>
                   ))}
@@ -1238,7 +1238,7 @@ export default function ClientPage() {
                       <button key={String(isUp)}
                         onClick={() => setMSortUpcoming(isUp)}
                         className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-                        style={{ background: mSortUpcoming === isUp ? clientColor : 'var(--surface-raised)', color: mSortUpcoming === isUp ? '#fff' : '#6b7280' }}>
+                        style={{ background: mSortUpcoming === isUp ? clientColor : 'var(--surface-raised)', color: mSortUpcoming === isUp ? '#fff' : 'var(--text-secondary)' }}>
                         {isUp ? `Nadcházející (${upcoming.length})` : `Historické (${historical.length})`}
                       </button>
                     ))}
@@ -1457,7 +1457,7 @@ export default function ClientPage() {
                   {ACTIVITY_TYPES.map(t => (
                     <button key={t} onClick={() => setAType(t)}
                       className="flex-1 py-2 rounded-[10px] text-[13px] font-semibold transition-all flex flex-col items-center gap-1"
-                      style={{ background: aType === t ? clientColor : 'var(--surface-raised)', color: aType === t ? '#fff' : '#6b7280' }}>
+                      style={{ background: aType === t ? clientColor : 'var(--surface-raised)', color: aType === t ? '#fff' : 'var(--text-secondary)' }}>
                       <span>{ACTIVITY_ICONS[t]}</span>
                       <span className="text-[10px]">{ACTIVITY_LABELS[t]}</span>
                     </button>
@@ -1653,7 +1653,7 @@ export default function ClientPage() {
                   <button
                     onClick={() => setESubjectType('')}
                     className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-                    style={{ background: eSubjectType === '' ? '#6b7280' : 'var(--surface-raised)', color: eSubjectType === '' ? '#fff' : '#6b7280' }}>
+                    style={{ background: eSubjectType === '' ? 'var(--text-secondary)' : 'var(--surface-raised)', color: eSubjectType === '' ? '#fff' : 'var(--text-secondary)' }}>
                     Nezadáno
                   </button>
                   {SUBJECT_TYPES.map(t => (
@@ -1675,7 +1675,7 @@ export default function ClientPage() {
                   <div
                     onClick={() => setEIsPrague(v => !v)}
                     className="w-10 h-6 rounded-full transition-all flex-shrink-0 relative"
-                    style={{ background: eIsPrague ? '#0ea5e9' : '#d1d5db' }}>
+                    style={{ background: eIsPrague ? '#0ea5e9' : 'var(--border-strong)' }}>
                     <div className="absolute top-1 w-4 h-4 rounded-full bg-[var(--surface)] shadow transition-all"
                       style={{ left: eIsPrague ? 'calc(100% - 20px)' : '4px' }} />
                   </div>
@@ -1699,12 +1699,12 @@ export default function ClientPage() {
                 <label className={labelCls}>1. schůzka</label>
                 <div className="flex gap-2">
                   {([null, 'not_yet', 'scheduled', 'done'] as const).map(s => {
-                    const color = s ? FIRST_MEETING_COLORS[s] : '#d1d5db'
+                    const color = s ? FIRST_MEETING_COLORS[s] : 'var(--border-strong)'
                     const label = s ? FIRST_MEETING_LABELS[s] : 'Nenastaveno'
                     return (
                       <button key={String(s)} onClick={() => setEFirstMeeting(s)}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12px] font-semibold transition-all"
-                        style={{ background: eFirstMeeting === s ? color + '25' : 'var(--surface-raised)', color: eFirstMeeting === s ? color : '#9ca3af', outline: eFirstMeeting === s ? `2px solid ${color}` : 'none' }}>
+                        style={{ background: eFirstMeeting === s ? color + '25' : 'var(--surface-raised)', color: eFirstMeeting === s ? color : 'var(--text-tertiary)', outline: eFirstMeeting === s ? `2px solid ${color}` : 'none' }}>
                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
                         {label}
                       </button>

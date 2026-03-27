@@ -33,7 +33,7 @@ export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clients
         onClick={() => onToggle(task)}
         className="mt-0.5 flex-shrink-0 w-[22px] h-[22px] rounded-[6px] border-2 flex items-center justify-center transition-all"
         style={{
-          borderColor: done ? '#22c55e' : '#d1d5db',
+          borderColor: done ? '#22c55e' : 'var(--border-strong)',
           background: done ? '#22c55e' : 'transparent',
         }}
       >
@@ -73,7 +73,7 @@ export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clients
         <div
           className="text-[14px] font-semibold leading-snug"
           style={{
-            color: done ? '#9ca3af' : '#111827',
+            color: done ? 'var(--text-tertiary)' : 'var(--text-primary)',
             textDecoration: done ? 'line-through' : 'none',
           }}
         >

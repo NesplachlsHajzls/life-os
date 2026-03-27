@@ -130,7 +130,7 @@ export default function PoznamkyPage() {
           <button
             onClick={() => setActiveCat(null)}
             className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-            style={{ background: activeCat === null ? 'var(--color-primary)' : 'var(--surface-raised)', color: activeCat === null ? '#fff' : '#6b7280' }}
+            style={{ background: activeCat === null ? 'var(--color-primary)' : 'var(--surface-raised)', color: activeCat === null ? '#fff' : 'var(--text-secondary)' }}
           >
             Vše <span className="text-[10px] opacity-70">{notes.length}</span>
           </button>

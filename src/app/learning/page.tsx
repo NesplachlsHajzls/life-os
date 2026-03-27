@@ -303,7 +303,7 @@ export default function LearningPage() {
       <div className="flex px-4 pt-4 gap-1 border-b border-[var(--border)]">
         {([{ id: 'areas' as const, label: '🎯 Témata' }, { id: 'books' as const, label: '📚 Knihy' }]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} className="pb-3 px-2 text-[14px] font-semibold transition-colors"
-            style={{ color: tab === t.id ? 'var(--color-primary)' : '#9ca3af', borderBottom: tab === t.id ? '2px solid var(--color-primary)' : '2px solid transparent' }}>
+            style={{ color: tab === t.id ? 'var(--color-primary)' : 'var(--text-tertiary)', borderBottom: tab === t.id ? '2px solid var(--color-primary)' : '2px solid transparent' }}>
             {t.label}
           </button>
         ))}

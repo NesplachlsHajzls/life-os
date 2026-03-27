@@ -96,7 +96,7 @@ export default function BucketListPage() {
           <button
             onClick={() => setFilterCategory(null)}
             className="px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap"
-            style={{ background: !filterCategory ? 'var(--color-primary)' : 'var(--border)', color: !filterCategory ? 'white' : '#374151' }}
+            style={{ background: !filterCategory ? 'var(--color-primary)' : 'var(--border)', color: !filterCategory ? 'white' : 'var(--text-secondary)' }}
           >
             Všechny
           </button>
@@ -105,7 +105,7 @@ export default function BucketListPage() {
               key={cat.id}
               onClick={() => setFilterCategory(filterCategory === cat.id ? null : cat.id)}
               className="px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap"
-              style={{ background: filterCategory === cat.id ? 'var(--color-primary)' : 'var(--border)', color: filterCategory === cat.id ? 'white' : '#374151' }}
+              style={{ background: filterCategory === cat.id ? 'var(--color-primary)' : 'var(--border)', color: filterCategory === cat.id ? 'white' : 'var(--text-secondary)' }}
             >
               {cat.icon} {cat.label}
             </button>
@@ -137,13 +137,13 @@ export default function BucketListPage() {
                       className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-all"
                       style={{
                         background: item.status === 'done' ? 'var(--color-primary)' : 'white',
-                        borderColor: item.status === 'done' ? 'var(--color-primary)' : '#d1d5db',
+                        borderColor: item.status === 'done' ? 'var(--color-primary)' : 'var(--border-strong)',
                       }}
                     >
                       {item.status === 'done' && <span className="text-[11px] text-white font-bold">✓</span>}
                     </button>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-semibold" style={{ textDecoration: item.status === 'done' ? 'line-through' : 'none', color: item.status === 'done' ? '#9ca3af' : '#374151' }}>
+                      <div className="text-[13px] font-semibold" style={{ textDecoration: item.status === 'done' ? 'line-through' : 'none', color: item.status === 'done' ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
                         {item.title}
                       </div>
                       <div className="flex gap-2 mt-1">
@@ -175,17 +175,17 @@ export default function BucketListPage() {
                       className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center mt-0.5"
                       style={{
                         background: item.status === 'done' ? 'var(--color-primary)' : 'white',
-                        borderColor: item.status === 'done' ? 'var(--color-primary)' : '#d1d5db',
+                        borderColor: item.status === 'done' ? 'var(--color-primary)' : 'var(--border-strong)',
                       }}
                     >
                       {item.status === 'done' && <span className="text-[11px] text-white font-bold">✓</span>}
                     </button>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-semibold" style={{ textDecoration: item.status === 'done' ? 'line-through' : 'none', color: item.status === 'done' ? '#9ca3af' : '#374151' }}>
+                      <div className="text-[13px] font-semibold" style={{ textDecoration: item.status === 'done' ? 'line-through' : 'none', color: item.status === 'done' ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
                         {item.title}
                       </div>
                       <div className="flex gap-2 mt-1">
-                        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--border)', color: '#374151' }}>
+                        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--border)', color: 'var(--text-secondary)' }}>
                           {cat?.icon} {cat?.label}
                         </span>
                       </div>

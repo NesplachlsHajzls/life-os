@@ -160,7 +160,7 @@ export default function TripDetailPage() {
                   onChange={() => toggleItemDone(item.id, item.done)}
                   className="w-4 h-4"
                 />
-                <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#374151' }}>
+                <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
                   {item.title}
                 </span>
                 <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
@@ -181,7 +181,7 @@ export default function TripDetailPage() {
                   onChange={() => toggleItemDone(item.id, item.done)}
                   className="w-4 h-4"
                 />
-                <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#374151' }}>
+                <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
                   {item.title}
                 </span>
                 <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
@@ -202,7 +202,7 @@ export default function TripDetailPage() {
                   onChange={() => toggleItemDone(item.id, item.done)}
                   className="w-4 h-4"
                 />
-                <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#374151' }}>
+                <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}>
                   {item.title}
                 </span>
                 {item.price && <span className="text-[12px] text-[var(--text-secondary)]">{item.price} Kč</span>}
@@ -225,7 +225,7 @@ export default function TripDetailPage() {
                     className="flex-1 px-3 py-2 rounded-[8px] text-[12px] font-semibold transition-colors"
                     style={{
                       background: itemType === type ? 'var(--color-primary)' : 'var(--surface-raised)',
-                      color: itemType === type ? 'white' : '#374151',
+                      color: itemType === type ? 'white' : 'var(--text-secondary)',
                     }}
                   >
                     {type === 'pack' ? '🎒' : type === 'activity' ? '🗺️' : '💰'}

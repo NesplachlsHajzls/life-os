@@ -412,7 +412,7 @@ export default function EmalyPage() {
               className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all"
               style={{
                 background: filter === f.id ? 'var(--color-primary)' : 'var(--surface-raised)',
-                color: filter === f.id ? '#fff' : '#6b7280',
+                color: filter === f.id ? '#fff' : 'var(--text-secondary)',
               }}
             >
               {f.label}

@@ -73,7 +73,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
   // Auth check probíhá — only shown on FIRST load (subsequent navigations skip this)
   if (!checked) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#F4F6FA]">
+      <div className="flex items-center justify-center h-screen" style={{ background: "var(--bg)" }}>
         <div className="flex flex-col items-center gap-3">
           <div className="text-[40px]">🌀</div>
           <div className="text-[var(--text-tertiary)] text-[14px] animate-pulse">Načítám…</div>
@@ -92,7 +92,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Interní záložkový pruh — zobrazí se jen pokud jsou otevřené záložky */}
           <TabBar />
-          <main className="flex-1 overflow-y-auto bg-[#F4F6FA]">
+          <main className="flex-1 overflow-y-auto" style={{ background: "var(--bg)" }}>
             {children}
           </main>
         </div>

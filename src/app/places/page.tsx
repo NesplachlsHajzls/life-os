@@ -21,7 +21,7 @@ function TabNav({ tab, onTab }: { tab: string; onTab: (t: string) => void }) {
           onClick={() => onTab(t.id)}
           className="pb-3 text-[14px] font-semibold transition-colors"
           style={{
-            color: tab === t.id ? 'var(--color-primary)' : '#9ca3af',
+            color: tab === t.id ? 'var(--color-primary)' : 'var(--text-tertiary)',
             borderBottom: tab === t.id ? '2px solid var(--color-primary)' : 'none',
           }}
         >

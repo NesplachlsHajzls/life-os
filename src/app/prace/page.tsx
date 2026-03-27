@@ -191,7 +191,7 @@ export default function PracePage() {
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
                 style={{
                   background: statusFilter === s ? (s === 'Vše' ? 'var(--color-primary)' : STATUS_COLORS[s]) : 'var(--surface-raised)',
-                  color: statusFilter === s ? '#fff' : '#6b7280',
+                  color: statusFilter === s ? '#fff' : 'var(--text-secondary)',
                 }}>
                 {s}
               </button>
@@ -203,7 +203,7 @@ export default function PracePage() {
             <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide flex-shrink-0">Typ:</span>
             <button onClick={() => { setSubjectFilter('Vše'); try { localStorage.setItem('prace_subject_filter', 'Vše') } catch {} }}
               className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
-              style={{ background: subjectFilter === 'Vše' ? 'var(--color-primary)' : 'var(--surface-raised)', color: subjectFilter === 'Vše' ? '#fff' : '#6b7280' }}>
+              style={{ background: subjectFilter === 'Vše' ? 'var(--color-primary)' : 'var(--surface-raised)', color: subjectFilter === 'Vše' ? '#fff' : 'var(--text-secondary)' }}>
               Vše
             </button>
             {SUBJECT_TYPES.map(t => (
@@ -234,7 +234,7 @@ export default function PracePage() {
                 onMouseDown={e => e.stopPropagation()}
                 onClick={() => { setKrajFilter(new Set()); try { localStorage.setItem('prace_kraj_filter', '[]') } catch {} }}
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0"
-                style={{ background: krajFilter.size === 0 ? 'var(--color-primary)' : 'var(--surface-raised)', color: krajFilter.size === 0 ? '#fff' : '#6b7280' }}>
+                style={{ background: krajFilter.size === 0 ? 'var(--color-primary)' : 'var(--surface-raised)', color: krajFilter.size === 0 ? '#fff' : 'var(--text-secondary)' }}>
                 Vše
               </button>
               {availableKraje.map(k => (

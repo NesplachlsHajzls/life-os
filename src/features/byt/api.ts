@@ -25,7 +25,7 @@ export const ROOM_PRESETS: { name: string; icon: string; color: string }[] = [
   { name: 'Kuchyň',             icon: '🍳', color: '#f59e0b' },
   { name: 'Koupelna',           icon: '🚿', color: '#0ea5e9' },
   { name: 'WC',                 icon: '🚽', color: '#06b6d4' },
-  { name: 'Chodba',             icon: '🚪', color: '#6b7280' },
+  { name: 'Chodba',             icon: '🚪', color: 'var(--text-secondary)' },
   { name: 'Pracovna',           icon: '🖥️', color: '#3b82f6' },
   { name: 'Balkón',             icon: '🌅', color: '#10b981' },
   { name: 'Terasa',             icon: '☀️', color: '#22c55e' },

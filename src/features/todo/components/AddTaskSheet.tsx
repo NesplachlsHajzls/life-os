@@ -8,7 +8,7 @@ const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[1
 const labelCls = 'block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5'
 
 const PRIORITY_OPTIONS: Array<{ value: 1 | 2 | 3; label: string; color: string }> = [
-  { value: 1, label: '● Nízká',   color: '#d1d5db' },
+  { value: 1, label: '● Nízká',   color: 'var(--border-strong)' },
   { value: 2, label: '●● Střední', color: '#f59e0b' },
   { value: 3, label: '●●● Vysoká', color: '#ef4444' },
 ]
@@ -146,7 +146,7 @@ export function AddTaskSheet({
               className="flex-1 py-2 rounded-[12px] text-[12px] font-bold border-2 transition-all"
               style={{
                 borderColor: priority === p.value ? p.color : 'var(--border)',
-                color:       priority === p.value ? p.color : '#9ca3af',
+                color:       priority === p.value ? p.color : 'var(--text-tertiary)',
                 background:  priority === p.value ? p.color + '18' : 'transparent',
               }}
             >

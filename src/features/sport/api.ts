@@ -59,7 +59,7 @@ export const WORKOUT_TYPES: { id: WorkoutType; label: string; icon: string; colo
   { id: 'gym', label: 'Posilovna', icon: '🏋️', color: '#8b5cf6' },
   { id: 'bike', label: 'Kolo', icon: '🚴', color: '#f59e0b' },
   { id: 'yoga', label: 'Yoga', icon: '🧘', color: '#ec4899' },
-  { id: 'other', label: 'Ostatní', icon: '⚽', color: '#6b7280' },
+  { id: 'other', label: 'Ostatní', icon: '⚽', color: 'var(--text-secondary)' },
 ]
 
 export async function fetchWorkouts(userId: string): Promise<Workout[]> {

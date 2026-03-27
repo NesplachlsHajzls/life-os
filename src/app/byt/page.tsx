@@ -38,7 +38,7 @@ function TabNav({ tab, onTab }: { tab: string; onTab: (t: string) => void }) {
           onClick={() => onTab(t.id)}
           className="pb-3 text-[14px] font-semibold transition-colors"
           style={{
-            color: tab === t.id ? 'var(--color-primary)' : '#9ca3af',
+            color: tab === t.id ? 'var(--color-primary)' : 'var(--text-tertiary)',
             borderBottom: tab === t.id ? '2px solid var(--color-primary)' : '2px solid transparent',
           }}
         >
@@ -165,7 +165,7 @@ function RoomModal({
               <button
                 onClick={() => { if (name.trim()) onSave(name.trim(), icon, color) }}
                 className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white"
-                style={{ background: name.trim() ? color : '#d1d5db' }}
+                style={{ background: name.trim() ? color : 'var(--border-strong)' }}
               >
                 {initial ? 'Uložit' : 'Přidat'}
               </button>
@@ -389,7 +389,7 @@ function RoomsTab({ userId }: { userId: string }) {
                       />
                       <span
                         className="flex-1 text-[13px]"
-                        style={{ textDecoration: todo.done ? 'line-through' : 'none', color: todo.done ? '#9ca3af' : '#374151' }}
+                        style={{ textDecoration: todo.done ? 'line-through' : 'none', color: todo.done ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
                       >
                         {todo.title}
                       </span>
@@ -413,7 +413,7 @@ function RoomsTab({ userId }: { userId: string }) {
                       />
                       <span
                         className="flex-1 text-[13px]"
-                        style={{ textDecoration: todo.done ? 'line-through' : 'none', color: todo.done ? '#9ca3af' : '#374151' }}
+                        style={{ textDecoration: todo.done ? 'line-through' : 'none', color: todo.done ? 'var(--text-tertiary)' : 'var(--text-secondary)' }}
                       >
                         {todo.title}
                       </span>
@@ -561,7 +561,7 @@ function ContractsTab({ userId }: { userId: string }) {
 
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     {contract.renewal_date && (
-                      <span className="text-[12px] font-semibold" style={{ color: isOverdue ? '#dc2626' : isUrgent ? '#ea580c' : '#6b7280' }}>
+                      <span className="text-[12px] font-semibold" style={{ color: isOverdue ? '#dc2626' : isUrgent ? '#ea580c' : 'var(--text-secondary)' }}>
                         {isOverdue ? '⚠️ Prošlé' : isUrgent ? `⏰ Za ${days} dní` : `📅 ${new Date(contract.renewal_date).toLocaleDateString('cs-CZ')}`}
                       </span>
                     )}
@@ -611,8 +611,8 @@ function ContractsTab({ userId }: { userId: string }) {
                   onClick={() => setForm({ ...form, type: t.id as any })}
                   className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-[13px] font-semibold transition-all"
                   style={{
-                    background: form.type === t.id ? 'var(--color-primary)' : '#f9fafb',
-                    color: form.type === t.id ? 'white' : '#374151',
+                    background: form.type === t.id ? 'var(--color-primary)' : 'var(--bg)',
+                    color: form.type === t.id ? 'white' : 'var(--text-secondary)',
                     borderColor: form.type === t.id ? 'var(--color-primary)' : 'var(--border)',
                   }}
                 >
@@ -665,7 +665,7 @@ function ContractsTab({ userId }: { userId: string }) {
             <label className="flex items-center gap-3">
               <div
                 className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
-                style={{ background: form.auto_renew ? 'var(--color-primary)' : '#d1d5db' }}
+                style={{ background: form.auto_renew ? 'var(--color-primary)' : 'var(--border-strong)' }}
                 onClick={() => setForm({ ...form, auto_renew: !form.auto_renew })}
               >
                 <div className="absolute top-0.5 w-4 h-4 bg-[var(--surface)] rounded-full shadow transition-all" style={{ left: form.auto_renew ? '22px' : '2px' }} />
