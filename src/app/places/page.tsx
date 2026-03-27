@@ -136,14 +136,14 @@ function PlacesTab({ userId }: { userId: string }) {
           <div key={place.id} className="rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)]">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
-                <div className="text-[14px] font-semibold text-gray-800">{place.name}</div>
+                <div className="text-[14px] font-semibold text-[var(--text-primary)]">{place.name}</div>
                 {(place.city || place.country) && (
-                  <div className="text-[12px] text-gray-500">
+                  <div className="text-[12px] text-[var(--text-secondary)]">
                     {place.city}{place.city && place.country ? ', ' : ''}{place.country}
                   </div>
                 )}
               </div>
-              <button onClick={() => deleteHandler(place.id)} className="text-[12px] text-gray-400">✕</button>
+              <button onClick={() => deleteHandler(place.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
             </div>
             <div className="flex gap-2 mb-2">
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: '#e0e7ff', color: '#3730a3' }}>
@@ -153,8 +153,8 @@ function PlacesTab({ userId }: { userId: string }) {
                 {place.status === 'visited' ? '✓ Byl jsem' : 'Chci jít'}
               </span>
             </div>
-            {place.rating && <div className="text-[12px] text-gray-600">⭐ {place.rating}/5</div>}
-            {place.notes && <div className="text-[12px] text-gray-500 mt-1">{place.notes}</div>}
+            {place.rating && <div className="text-[12px] text-[var(--text-secondary)]">⭐ {place.rating}/5</div>}
+            {place.notes && <div className="text-[12px] text-[var(--text-secondary)] mt-1">{place.notes}</div>}
           </div>
         ))}
       </div>
@@ -188,7 +188,7 @@ function PlacesTab({ userId }: { userId: string }) {
             <textarea placeholder="Poznámky" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <input type="url" placeholder="URL (web)" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addPlace} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>
@@ -267,8 +267,8 @@ function TripsTab({ userId }: { userId: string }) {
                 <div className="flex items-center gap-2">
                   <span className="text-[20px]">{trip.cover_emoji}</span>
                   <div>
-                    <div className="text-[14px] font-semibold text-gray-800">{trip.name}</div>
-                    <div className="text-[12px] text-gray-500">{trip.destination}</div>
+                    <div className="text-[14px] font-semibold text-[var(--text-primary)]">{trip.name}</div>
+                    <div className="text-[12px] text-[var(--text-secondary)]">{trip.destination}</div>
                   </div>
                 </div>
               </div>
@@ -277,12 +277,12 @@ function TripsTab({ userId }: { userId: string }) {
                   e.stopPropagation()
                   deleteHandler(trip.id)
                 }}
-                className="text-[12px] text-gray-400"
+                className="text-[12px] text-[var(--text-tertiary)]"
               >
                 ✕
               </button>
             </div>
-            <div className="flex gap-2 text-[12px] text-gray-500">
+            <div className="flex gap-2 text-[12px] text-[var(--text-secondary)]">
               <span>📅 {new Date(trip.start_date).toLocaleDateString('cs-CZ')} - {new Date(trip.end_date).toLocaleDateString('cs-CZ')}</span>
               {trip.budget_estimated && <span>💰 {trip.budget_estimated} Kč</span>}
               <span className="px-1.5 py-0.5 rounded-full" style={{ background: trip.status === 'done' ? '#dcfce7' : '#fef3c7', color: trip.status === 'done' ? '#166534' : '#92400e' }}>
@@ -308,14 +308,14 @@ function TripsTab({ userId }: { userId: string }) {
                   key={emoji}
                   onClick={() => setForm({ ...form, cover_emoji: emoji })}
                   className="text-[24px] p-2 rounded-[10px]"
-                  style={{ background: form.cover_emoji === emoji ? 'var(--color-primary-light)' : '#f3f4f6' }}
+                  style={{ background: form.cover_emoji === emoji ? 'var(--color-primary-light)' : 'var(--surface-raised)' }}
                 >
                   {emoji}
                 </button>
               ))}
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addTrip} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>

@@ -115,7 +115,7 @@ export function NotificationCenter() {
         <div className="absolute right-0 top-12 w-[320px] max-h-[520px] bg-[var(--surface)] rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col z-50 overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
-            <span className="text-[14px] font-bold text-gray-800">
+            <span className="text-[14px] font-bold text-[var(--text-primary)]">
               Notifikace {unread > 0 && <span className="ml-1 text-[11px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">{unread} nových</span>}
             </span>
             <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export function NotificationCenter() {
               )}
               <button
                 onClick={() => setShowSettings(v => !v)}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center text-[14px] transition-colors ${showSettings ? 'bg-[var(--surface-raised)] text-gray-700' : 'text-gray-400 hover:bg-[var(--surface-raised)] hover:text-gray-600'}`}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-[14px] transition-colors ${showSettings ? 'bg-[var(--surface-raised)] text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] hover:text-[var(--text-secondary)]'}`}
                 title="Nastavení upozornění"
               >
                 ⚙️
@@ -137,7 +137,7 @@ export function NotificationCenter() {
           {/* Settings panel */}
           {showSettings && (
             <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg)]">
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Upozornit mě</p>
+              <p className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">Upozornit mě</p>
               <div className="flex flex-wrap gap-1.5">
                 {NOTIF_LEAD_OPTIONS.map(opt => (
                   <button
@@ -145,7 +145,7 @@ export function NotificationCenter() {
                     onClick={() => handleLeadChange(opt.value)}
                     className="px-2.5 py-1 rounded-[8px] text-[11px] font-semibold transition-all"
                     style={{
-                      background: leadTime === opt.value ? 'var(--color-primary)' : '#e5e7eb',
+                      background: leadTime === opt.value ? 'var(--color-primary)' : 'var(--border)',
                       color: leadTime === opt.value ? '#fff' : '#6b7280',
                     }}
                   >
@@ -153,14 +153,14 @@ export function NotificationCenter() {
                   </button>
                 ))}
               </div>
-              <p className="text-[10px] text-gray-400 mt-2">Upozornění se generují při otevření appky.</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] mt-2">Upozornění se generují při otevření appky.</p>
             </div>
           )}
 
           {/* List */}
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-10 text-[var(--text-tertiary)]">
                 <span className="text-3xl mb-2">🔕</span>
                 <span className="text-[13px]">Žádné notifikace</span>
               </div>
@@ -173,18 +173,18 @@ export function NotificationCenter() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p className={`text-[13px] font-semibold leading-snug ${!n.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                      <p className={`text-[13px] font-semibold leading-snug ${!n.read ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                         {n.title}
                       </p>
                       <button
                         onClick={e => { e.stopPropagation(); handleDelete(n.id) }}
-                        className="text-gray-300 hover:text-gray-500 text-[12px] shrink-0 mt-0.5"
+                        className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-[12px] shrink-0 mt-0.5"
                       >
                         ✕
                       </button>
                     </div>
-                    <p className="text-[12px] text-gray-500 mt-0.5">{n.message}</p>
-                    <p className="text-[11px] text-gray-400 mt-1">{fmtRelative(n.created_at)}</p>
+                    <p className="text-[12px] text-[var(--text-secondary)] mt-0.5">{n.message}</p>
+                    <p className="text-[11px] text-[var(--text-tertiary)] mt-1">{fmtRelative(n.created_at)}</p>
                   </div>
                   {!n.read && (
                     <div className="w-2 h-2 rounded-full bg-[var(--color-primary)] shrink-0 mt-1.5" />

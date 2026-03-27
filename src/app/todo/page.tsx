@@ -39,12 +39,12 @@ function SectionDropdown({
         onClick={() => setOpen(v => !v)}
         className="flex items-center gap-2 group"
       >
-        <span className="text-[17px] font-extrabold text-gray-800">
+        <span className="text-[17px] font-extrabold text-[var(--text-primary)]">
           {selected?.icon && <span className="mr-1">{selected.icon}</span>}
           {selected?.label ?? value}
         </span>
         <span
-          className="text-[11px] text-gray-400 transition-transform duration-200"
+          className="text-[11px] text-[var(--text-tertiary)] transition-transform duration-200"
           style={{ display: 'inline-block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
           ▾
@@ -194,24 +194,24 @@ export default function TodoPage() {
     emptyIcon: string
     emptyText: string
   }) {
-    if (loading) return <div className="text-center py-10 text-gray-400 text-[13px]">Načítám…</div>
+    if (loading) return <div className="text-center py-10 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
 
     const hasOverdue = (overdue?.length ?? 0) > 0
 
     if (tasks.length === 0 && !hasOverdue) return (
       <div className="text-center py-10">
         <div className="text-[36px] mb-2">{emptyIcon}</div>
-        <p className="text-[14px] font-semibold text-gray-500">{emptyText}</p>
+        <p className="text-[14px] font-semibold text-[var(--text-secondary)]">{emptyText}</p>
       </div>
     )
     return (
       <div className="flex flex-col gap-3">
         {/* Overdue collapsible */}
         {hasOverdue && (
-          <div className="rounded-[16px] overflow-hidden border border-red-200" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <div className="rounded-[16px] overflow-hidden" style={{ border: '1px solid rgba(239,68,68,0.3)', boxShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>
             <button
               onClick={() => setOverdueOpen(v => !v)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-red-50 text-left"
+              className="w-full flex items-center justify-between px-4 py-3 text-left" style={{ background: 'var(--surface-raised)' }}
             >
               <span className="text-[12px] font-bold text-red-500 uppercase tracking-wide">
                 🔴 Prošlé · {overdue!.length}
@@ -251,9 +251,9 @@ export default function TodoPage() {
           const items = routines.filter(r => r.frequency === freq)
           return (
             <div key={freq} className="mb-4">
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">{FREQ_LABELS[freq]}</div>
+              <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">{FREQ_LABELS[freq]}</div>
               {items.length === 0 ? (
-                <div className="bg-[var(--surface)] rounded-[16px] px-4 py-3 text-[13px] text-gray-400" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[16px] px-4 py-3 text-[13px] text-[var(--text-tertiary)]" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   Žádné rutiny
                 </div>
               ) : (
@@ -264,7 +264,7 @@ export default function TodoPage() {
                       <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < items.length - 1 ? 'border-b border-[var(--border)]' : ''}`}>
                         <span className="text-[18px]">{cat?.icon ?? '🔄'}</span>
                         <div className="flex-1">
-                          <div className="text-[14px] font-semibold text-gray-800">{r.title}</div>
+                          <div className="text-[14px] font-semibold text-[var(--text-primary)]">{r.title}</div>
                           {cat && <div className="text-[11px]" style={{ color: cat.color }}>{cat.name}</div>}
                         </div>
                       </div>
@@ -304,7 +304,7 @@ export default function TodoPage() {
             {catChips.map(cat => (
               <button key={cat} onClick={() => setMobileCat(cat)}
                 className="px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors"
-                style={{ background: mobileCat === cat ? 'var(--color-primary)' : '#f3f4f6', color: mobileCat === cat ? '#fff' : '#6b7280' }}>
+                style={{ background: mobileCat === cat ? 'var(--color-primary)' : 'var(--surface-raised)', color: mobileCat === cat ? '#fff' : '#6b7280' }}>
                 {categories.find(c => c.name === cat)?.icon ?? ''} {cat}
               </button>
             ))}
@@ -316,7 +316,7 @@ export default function TodoPage() {
             <>
               {showQuickAdd && mobileTab === 'ukoly' && (
                 <div className="bg-[var(--surface)] rounded-[16px] p-3 mb-3" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
+                  <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
                     💡 koupit trička p2 · zavolat !3 zítra · logo https://...
                   </div>
                   <div className="flex gap-2">
@@ -325,7 +325,7 @@ export default function TodoPage() {
                       onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
                       placeholder="Napiš úkol..." autoFocus />
                     <button onClick={handleQuickAdd} className="px-4 py-2 rounded-[12px] text-white text-[13px] font-bold" style={{ background: 'var(--color-primary)' }}>+</button>
-                    <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-[var(--border)] text-gray-400 text-[13px]">✕</button>
+                    <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-[var(--border)] text-[var(--text-tertiary)] text-[13px]">✕</button>
                   </div>
                   {quickError && <p className="text-[11px] text-red-500 mt-1">⚠️ {quickError}</p>}
                 </div>
@@ -345,7 +345,7 @@ export default function TodoPage() {
 
         {showQuickAdd && (
           <div className="mx-6 mt-5 bg-[var(--surface)] rounded-[16px] p-3" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
+            <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
               💡 koupit trička p2 · zavolat !3 zítra · animinimal logo https://...
             </div>
             <div className="flex gap-2">
@@ -354,7 +354,7 @@ export default function TodoPage() {
                 onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
                 placeholder="Napiš úkol..." autoFocus />
               <button onClick={handleQuickAdd} className="px-5 py-2 rounded-[12px] text-white text-[13px] font-bold" style={{ background: 'var(--color-primary)' }}>Přidat</button>
-              <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-[var(--border)] text-gray-400 text-[13px]">✕</button>
+              <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-[var(--border)] text-[var(--text-tertiary)] text-[13px]">✕</button>
             </div>
             {quickError && <p className="text-[11px] text-red-500 mt-1">⚠️ {quickError}</p>}
           </div>
@@ -377,7 +377,7 @@ export default function TodoPage() {
                     onChange={setSection}
                     options={pcOptions}
                   />
-                  <span className="text-[12px] font-semibold text-gray-400 bg-[var(--surface-raised)] px-2.5 py-0.5 rounded-full">
+                  <span className="text-[12px] font-semibold text-[var(--text-tertiary)] bg-[var(--surface-raised)] px-2.5 py-0.5 rounded-full">
                     {count}
                   </span>
                 </div>
@@ -400,7 +400,7 @@ export default function TodoPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
           {toast}
         </div>
       )}

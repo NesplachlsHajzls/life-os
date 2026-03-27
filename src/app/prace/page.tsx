@@ -145,8 +145,8 @@ export default function PracePage() {
             <div key={s.label} className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <span className="text-[22px]">{s.icon}</span>
               <div>
-                <div className="text-[20px] font-extrabold text-gray-900 leading-tight">{s.value}</div>
-                <div className="text-[11px] text-gray-400">{s.label}</div>
+                <div className="text-[20px] font-extrabold text-[var(--text-primary)] leading-tight">{s.value}</div>
+                <div className="text-[11px] text-[var(--text-tertiary)]">{s.label}</div>
               </div>
             </div>
           ))}
@@ -157,7 +157,7 @@ export default function PracePage() {
           {/* Row 1: Search + Pipeline + Add */}
           <div className="flex gap-3">
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[15px]">🔍</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] text-[15px]">🔍</span>
               <input
                 className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
                 placeholder="Hledat klienta…"
@@ -185,12 +185,12 @@ export default function PracePage() {
 
           {/* Row 2: Status filter */}
           <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Status:</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide flex-shrink-0">Status:</span>
             {(['Vše', ...CLIENT_STATUSES] as const).map(s => (
               <button key={s} onClick={() => { setStatusFilter(s); try { localStorage.setItem('prace_status_filter', s) } catch {} }}
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
                 style={{
-                  background: statusFilter === s ? (s === 'Vše' ? 'var(--color-primary)' : STATUS_COLORS[s]) : '#f3f4f6',
+                  background: statusFilter === s ? (s === 'Vše' ? 'var(--color-primary)' : STATUS_COLORS[s]) : 'var(--surface-raised)',
                   color: statusFilter === s ? '#fff' : '#6b7280',
                 }}>
                 {s}
@@ -200,10 +200,10 @@ export default function PracePage() {
 
           {/* Row 3: Subject type filter */}
           <div className="flex gap-2 overflow-x-auto items-center" style={{ scrollbarWidth: 'none' }}>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Typ:</span>
+            <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide flex-shrink-0">Typ:</span>
             <button onClick={() => { setSubjectFilter('Vše'); try { localStorage.setItem('prace_subject_filter', 'Vše') } catch {} }}
               className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all"
-              style={{ background: subjectFilter === 'Vše' ? 'var(--color-primary)' : '#f3f4f6', color: subjectFilter === 'Vše' ? '#fff' : '#6b7280' }}>
+              style={{ background: subjectFilter === 'Vše' ? 'var(--color-primary)' : 'var(--surface-raised)', color: subjectFilter === 'Vše' ? '#fff' : '#6b7280' }}>
               Vše
             </button>
             {SUBJECT_TYPES.map(t => (
@@ -229,12 +229,12 @@ export default function PracePage() {
               onMouseUp={onKrajMouseUp}
               onMouseLeave={onKrajMouseUp}
             >
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wide flex-shrink-0">Kraj:</span>
+              <span className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide flex-shrink-0">Kraj:</span>
               <button
                 onMouseDown={e => e.stopPropagation()}
                 onClick={() => { setKrajFilter(new Set()); try { localStorage.setItem('prace_kraj_filter', '[]') } catch {} }}
                 className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0"
-                style={{ background: krajFilter.size === 0 ? 'var(--color-primary)' : '#f3f4f6', color: krajFilter.size === 0 ? '#fff' : '#6b7280' }}>
+                style={{ background: krajFilter.size === 0 ? 'var(--color-primary)' : 'var(--surface-raised)', color: krajFilter.size === 0 ? '#fff' : '#6b7280' }}>
                 Vše
               </button>
               {availableKraje.map(k => (
@@ -257,16 +257,16 @@ export default function PracePage() {
 
         {/* Client list */}
         {loading ? (
-          <div className="text-center py-12 text-gray-400">Načítám…</div>
+          <div className="text-center py-12 text-[var(--text-tertiary)]">Načítám…</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-[40px] mb-2">🔍</div>
-            <p className="text-[14px] font-semibold text-gray-500">{search ? 'Žádný klient nenalezen' : 'Zatím žádní klienti'}</p>
+            <p className="text-[14px] font-semibold text-[var(--text-secondary)]">{search ? 'Žádný klient nenalezen' : 'Zatím žádní klienti'}</p>
           </div>
         ) : (
           <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
             {/* Table header */}
-            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-[var(--border)] text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-[var(--border)] text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">
               <span>Klient</span>
               <span>Kontakt</span>
               <span className="text-center">Úkoly</span>
@@ -293,7 +293,7 @@ export default function PracePage() {
                       {client.icon}
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[14px] font-bold text-gray-900 truncate">{client.name}</div>
+                      <div className="text-[14px] font-bold text-[var(--text-primary)] truncate">{client.name}</div>
                       <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
                         {client.subject_type && subjColor && (
                           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]"
@@ -314,7 +314,7 @@ export default function PracePage() {
                           ) : null
                         })()}
                         {!client.subject_type && !getKraj(client.tags ?? []) && !client.is_prague && client.address && (
-                          <span className="text-[11px] text-gray-400 truncate hidden lg:block">{client.address}</span>
+                          <span className="text-[11px] text-[var(--text-tertiary)] truncate hidden lg:block">{client.address}</span>
                         )}
                       </div>
                     </div>
@@ -322,30 +322,30 @@ export default function PracePage() {
 
                   {/* Contact info */}
                   <div className="hidden lg:block min-w-0">
-                    {client.phone && <div className="text-[12px] text-gray-600 truncate">📞 {client.phone}</div>}
-                    {client.email && <div className="text-[12px] text-gray-400 truncate">✉️ {client.email}</div>}
-                    {!client.phone && !client.email && <span className="text-[12px] text-gray-300">—</span>}
+                    {client.phone && <div className="text-[12px] text-[var(--text-secondary)] truncate">📞 {client.phone}</div>}
+                    {client.email && <div className="text-[12px] text-[var(--text-tertiary)] truncate">✉️ {client.email}</div>}
+                    {!client.phone && !client.email && <span className="text-[12px] text-[var(--text-tertiary)]">—</span>}
                   </div>
 
                   {/* Open tasks */}
                   <div className="hidden lg:flex justify-center">
                     {openCount > 0
                       ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{openCount}</span>
-                      : <span className="text-[12px] text-gray-300">—</span>}
+                      : <span className="text-[12px] text-[var(--text-tertiary)]">—</span>}
                   </div>
 
                   {/* Active deals */}
                   <div className="hidden lg:flex justify-center">
                     {dealCount > 0
                       ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-600">{dealCount}</span>
-                      : <span className="text-[12px] text-gray-300">—</span>}
+                      : <span className="text-[12px] text-[var(--text-tertiary)]">—</span>}
                   </div>
 
                   {/* Notes count */}
                   <div className="hidden lg:flex justify-center">
                     {noteCount > 0
                       ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">📝 {noteCount}</span>
-                      : <span className="text-[12px] text-gray-300">—</span>}
+                      : <span className="text-[12px] text-[var(--text-tertiary)]">—</span>}
                   </div>
 
                   {/* Status + first meeting dot */}
@@ -364,7 +364,7 @@ export default function PracePage() {
                   </div>
 
                   {/* Arrow */}
-                  <div className="hidden lg:flex justify-center text-gray-300 text-[16px]">→</div>
+                  <div className="hidden lg:flex justify-center text-[var(--text-tertiary)] text-[16px]">→</div>
                 </Link>
               )
             })}
@@ -373,7 +373,7 @@ export default function PracePage() {
 
         {/* Count */}
         {!loading && filtered.length > 0 && (
-          <p className="text-[12px] text-gray-400 text-center mt-3">
+          <p className="text-[12px] text-[var(--text-tertiary)] text-center mt-3">
             {filtered.length} z {clients.length} klientů
           </p>
         )}
@@ -386,12 +386,12 @@ export default function PracePage() {
           onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">👥 Nový klient</h2>
-              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">👥 Nový klient</h2>
+              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Název *</label>
+                <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Název *</label>
                 <input className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
                   value={newName} onChange={e => setNewName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
@@ -399,7 +399,7 @@ export default function PracePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Status</label>
+                <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Status</label>
                 <div className="flex gap-2 flex-wrap">
                   {CLIENT_STATUSES.map(s => (
                     <button key={s} onClick={() => setNewStatus(s)}
@@ -412,12 +412,12 @@ export default function PracePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Ikona</label>
+                <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Ikona</label>
                 <div className="flex flex-wrap gap-2">
                   {CLIENT_ICONS.map(icon => (
                     <button key={icon} onClick={() => setNewIcon(icon)}
                       className="w-9 h-9 rounded-[10px] text-[18px] flex items-center justify-center transition-all"
-                      style={{ background: newIcon === icon ? newColor + '20' : '#f3f4f6', border: `2px solid ${newIcon === icon ? newColor : 'transparent'}` }}>
+                      style={{ background: newIcon === icon ? newColor + '20' : 'var(--surface-raised)', border: `2px solid ${newIcon === icon ? newColor : 'transparent'}` }}>
                       {icon}
                     </button>
                   ))}
@@ -425,7 +425,7 @@ export default function PracePage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Barva</label>
+                <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Barva</label>
                 <div className="flex gap-2 flex-wrap">
                   {CLIENT_COLORS.map(color => (
                     <button key={color} onClick={() => setNewColor(color)}
@@ -444,7 +444,7 @@ export default function PracePage() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleAdd} disabled={!newName.trim()}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: newColor }}>Přidat klienta</button>
@@ -455,7 +455,7 @@ export default function PracePage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
           {toast}
         </div>
       )}

@@ -19,7 +19,7 @@ export default function LoginPage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const inputCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[14px] px-4 py-3 text-[15px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] transition-colors'
+  const inputCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[14px] px-4 py-3 text-[15px] text-[var(--text-primary)] placeholder-gray-400 outline-none focus:border-[var(--color-primary)] transition-colors'
 
   // ── Google OAuth ─────────────────────────────────────────────────
   async function handleGoogle() {
@@ -80,8 +80,8 @@ export default function LoginPage() {
 
         <div className="text-center mb-8">
           <div className="text-[56px] mb-3">🌀</div>
-          <h1 className="text-[26px] font-extrabold text-gray-900">Life OS</h1>
-          <p className="text-[14px] text-gray-400 mt-1">Přihlaš se pro pokračování</p>
+          <h1 className="text-[26px] font-extrabold text-[var(--text-primary)]">Life OS</h1>
+          <p className="text-[14px] text-[var(--text-tertiary)] mt-1">Přihlaš se pro pokračování</p>
         </div>
 
         <div className="bg-[var(--surface)] rounded-[20px] shadow-lg p-6 flex flex-col gap-4">
@@ -92,7 +92,7 @@ export default function LoginPage() {
               <button
                 onClick={handleGoogle}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-[14px] border-2 border-[var(--border)] bg-[var(--surface)] text-[15px] font-bold text-gray-700 hover:bg-[var(--bg)] transition-colors disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-[14px] border-2 border-[var(--border)] bg-[var(--surface)] text-[15px] font-bold text-[var(--text-secondary)] hover:bg-[var(--bg)] transition-colors disabled:opacity-40"
               >
                 {/* Google logo SVG */}
                 <svg width="20" height="20" viewBox="0 0 48 48">
@@ -106,13 +106,13 @@ export default function LoginPage() {
 
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-[var(--surface-raised)]" />
-                <span className="text-[12px] text-gray-400">nebo</span>
+                <span className="text-[12px] text-[var(--text-tertiary)]">nebo</span>
                 <div className="flex-1 h-px bg-[var(--surface-raised)]" />
               </div>
 
               <button
                 onClick={() => setMethod('email')}
-                className="w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500 hover:bg-[var(--bg)] transition-colors"
+                className="w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg)] transition-colors"
               >
                 ✉️ Přihlásit se emailem
               </button>
@@ -131,7 +131,7 @@ export default function LoginPage() {
               </button>
 
               <div>
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Email</label>
+                <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Email</label>
                 <input
                   type="email" className={inputCls} value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -147,15 +147,15 @@ export default function LoginPage() {
                 style={{ background: 'var(--color-primary)' }}>
                 {loading ? 'Odesílám…' : '✉️ Odeslat kód'}
               </button>
-              <p className="text-[12px] text-center text-gray-400">Na email přijde 6místný kód.</p>
+              <p className="text-[12px] text-center text-[var(--text-tertiary)]">Na email přijde 6místný kód.</p>
             </>
           )}
 
           {/* ── OTP code entry ── */}
           {method === 'email' && step === 'code' && (
             <>
-              <p className="text-[13px] text-gray-500 text-center">
-                Kód byl odeslán na <strong className="text-gray-800">{email}</strong>
+              <p className="text-[13px] text-[var(--text-secondary)] text-center">
+                Kód byl odeslán na <strong className="text-[var(--text-primary)]">{email}</strong>
               </p>
 
               <div className="flex gap-2 justify-center" onPaste={handlePaste}>
@@ -165,7 +165,7 @@ export default function LoginPage() {
                     onChange={e => handleDigit(i, e.target.value)}
                     onKeyDown={e => handleDigitKey(i, e)}
                     className="w-11 h-14 text-center text-[22px] font-bold bg-[var(--bg)] border-2 rounded-[12px] outline-none transition-colors"
-                    style={{ borderColor: digit ? 'var(--color-primary)' : '#e5e7eb', color: 'var(--color-primary)' }}
+                    style={{ borderColor: digit ? 'var(--color-primary)' : 'var(--border)', color: 'var(--color-primary)' }}
                   />
                 ))}
               </div>

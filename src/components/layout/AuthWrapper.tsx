@@ -76,7 +76,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
       <div className="flex items-center justify-center h-screen bg-[#F4F6FA]">
         <div className="flex flex-col items-center gap-3">
           <div className="text-[40px]">🌀</div>
-          <div className="text-gray-400 text-[14px] animate-pulse">Načítám…</div>
+          <div className="text-[var(--text-tertiary)] text-[14px] animate-pulse">Načítám…</div>
         </div>
       </div>
     )

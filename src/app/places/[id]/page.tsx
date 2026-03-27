@@ -106,7 +106,7 @@ export default function TripDetailPage() {
         {/* Trip header */}
         <div className="rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)] mb-4">
           <div className="text-[14px] font-semibold mb-2">{trip.destination}</div>
-          <div className="text-[12px] text-gray-500 mb-3">
+          <div className="text-[12px] text-[var(--text-secondary)] mb-3">
             📅 {new Date(trip.start_date).toLocaleDateString('cs-CZ')} - {new Date(trip.end_date).toLocaleDateString('cs-CZ')}
           </div>
           <div className="flex items-center justify-between">
@@ -128,7 +128,7 @@ export default function TripDetailPage() {
         {/* Budget overview */}
         {(trip.budget_estimated || trip.status === 'done') && (
           <div className="rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)] mb-4">
-            <div className="text-[12px] font-bold text-gray-500 mb-2">ROZPOČET</div>
+            <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2">ROZPOČET</div>
             {trip.budget_estimated && (
               <div className="mb-2">
                 <div className="flex justify-between mb-1">
@@ -150,7 +150,7 @@ export default function TripDetailPage() {
 
         {/* Pack section */}
         <div className="mb-4">
-          <div className="text-[13px] font-bold text-gray-600 mb-2">🎒 Co sbalit</div>
+          <div className="text-[13px] font-bold text-[var(--text-secondary)] mb-2">🎒 Co sbalit</div>
           <div className="space-y-2">
             {packItems.map(item => (
               <div key={item.id} className="flex items-center gap-2 p-2 bg-[var(--bg)] rounded-[10px]">
@@ -163,7 +163,7 @@ export default function TripDetailPage() {
                 <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#374151' }}>
                   {item.title}
                 </span>
-                <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-gray-400">✕</button>
+                <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
               </div>
             ))}
           </div>
@@ -171,7 +171,7 @@ export default function TripDetailPage() {
 
         {/* Activity section */}
         <div className="mb-4">
-          <div className="text-[13px] font-bold text-gray-600 mb-2">🗺️ Aktivity</div>
+          <div className="text-[13px] font-bold text-[var(--text-secondary)] mb-2">🗺️ Aktivity</div>
           <div className="space-y-2">
             {activityItems.map(item => (
               <div key={item.id} className="flex items-center gap-2 p-2 bg-[var(--bg)] rounded-[10px]">
@@ -184,7 +184,7 @@ export default function TripDetailPage() {
                 <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#374151' }}>
                   {item.title}
                 </span>
-                <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-gray-400">✕</button>
+                <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
               </div>
             ))}
           </div>
@@ -192,7 +192,7 @@ export default function TripDetailPage() {
 
         {/* Expense section */}
         <div className="mb-4">
-          <div className="text-[13px] font-bold text-gray-600 mb-2">💰 Výdaje ({expenseTotal} Kč)</div>
+          <div className="text-[13px] font-bold text-[var(--text-secondary)] mb-2">💰 Výdaje ({expenseTotal} Kč)</div>
           <div className="space-y-2">
             {expenseItems.map(item => (
               <div key={item.id} className="flex items-center gap-2 p-2 bg-[var(--bg)] rounded-[10px]">
@@ -205,8 +205,8 @@ export default function TripDetailPage() {
                 <span className="flex-1 text-[13px]" style={{ textDecoration: item.done ? 'line-through' : 'none', color: item.done ? '#9ca3af' : '#374151' }}>
                   {item.title}
                 </span>
-                {item.price && <span className="text-[12px] text-gray-500">{item.price} Kč</span>}
-                <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-gray-400">✕</button>
+                {item.price && <span className="text-[12px] text-[var(--text-secondary)]">{item.price} Kč</span>}
+                <button onClick={() => deleteItemHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
               </div>
             ))}
           </div>
@@ -224,7 +224,7 @@ export default function TripDetailPage() {
                     onClick={() => setItemType(type as any)}
                     className="flex-1 px-3 py-2 rounded-[8px] text-[12px] font-semibold transition-colors"
                     style={{
-                      background: itemType === type ? 'var(--color-primary)' : '#f3f4f6',
+                      background: itemType === type ? 'var(--color-primary)' : 'var(--surface-raised)',
                       color: itemType === type ? 'white' : '#374151',
                     }}
                   >
@@ -251,7 +251,7 @@ export default function TripDetailPage() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]"
+                  className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]"
                 >
                   Zrušit
                 </button>
@@ -279,7 +279,7 @@ export default function TripDetailPage() {
         {/* Back button */}
         <button
           onClick={() => router.back()}
-          className="fixed top-4 left-4 text-[14px] font-semibold text-gray-600 hover:text-gray-800"
+          className="fixed top-4 left-4 text-[14px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
           ← Zpět
         </button>

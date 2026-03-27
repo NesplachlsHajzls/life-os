@@ -187,37 +187,37 @@ export default function NoteDetailPage() {
       {/* ── Top bar ── */}
       <div className="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <Link href={backHref}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[18px] transition-colors flex-shrink-0">
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-[var(--text-tertiary)] text-[18px] transition-colors flex-shrink-0">
           ←
         </Link>
-        <div className="flex items-center gap-1.5 flex-1 min-w-0 text-[12px] text-gray-400">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0 text-[12px] text-[var(--text-tertiary)]">
           {isMeeting ? (
             <>
-              <Link href="/prace" className="hover:text-gray-600 flex-shrink-0">Práce</Link>
-              {clientName && (<><span className="flex-shrink-0">/</span><Link href={`/prace/${note.client_id}`} className="hover:text-gray-600 truncate max-w-[140px]">{clientName}</Link></>)}
+              <Link href="/prace" className="hover:text-[var(--text-secondary)] flex-shrink-0">Práce</Link>
+              {clientName && (<><span className="flex-shrink-0">/</span><Link href={`/prace/${note.client_id}`} className="hover:text-[var(--text-secondary)] truncate max-w-[140px]">{clientName}</Link></>)}
               <span className="flex-shrink-0">/</span>
-              <span className="text-gray-600 font-semibold truncate">{title || 'Schůzka'}</span>
+              <span className="text-[var(--text-secondary)] font-semibold truncate">{title || 'Schůzka'}</span>
             </>
           ) : (
             <>
-              <Link href="/poznamky" className="hover:text-gray-600 flex-shrink-0">Poznámky</Link>
-              {hasClient && clientName && (<><span className="flex-shrink-0">/</span><Link href={`/prace/${clientId}`} className="hover:text-gray-600 truncate max-w-[120px]">{clientName}</Link></>)}
-              {parent && (<><span className="flex-shrink-0">/</span><Link href={`/poznamky/${parent.id}`} className="hover:text-gray-600 truncate max-w-[120px]">{parent.title}</Link></>)}
+              <Link href="/poznamky" className="hover:text-[var(--text-secondary)] flex-shrink-0">Poznámky</Link>
+              {hasClient && clientName && (<><span className="flex-shrink-0">/</span><Link href={`/prace/${clientId}`} className="hover:text-[var(--text-secondary)] truncate max-w-[120px]">{clientName}</Link></>)}
+              {parent && (<><span className="flex-shrink-0">/</span><Link href={`/poznamky/${parent.id}`} className="hover:text-[var(--text-secondary)] truncate max-w-[120px]">{parent.title}</Link></>)}
               <span className="flex-shrink-0">/</span>
-              <span className="text-gray-600 font-semibold truncate">{title || 'Nová poznámka'}</span>
+              <span className="text-[var(--text-secondary)] font-semibold truncate">{title || 'Nová poznámka'}</span>
             </>
           )}
         </div>
         <div className="flex-shrink-0 text-[11px] font-medium">
           {saveState === 'saving'  && <span className="text-amber-400">Ukládám…</span>}
-          {saveState === 'saved'   && <span className="text-gray-300">Uloženo</span>}
+          {saveState === 'saved'   && <span className="text-[var(--text-tertiary)]">Uloženo</span>}
           {saveState === 'unsaved' && <span className="text-red-400">●</span>}
         </div>
         {note.is_meeting && (
           <span className="flex-shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">🤝 Schůzka</span>
         )}
         <button onClick={() => setConfirmDelete(true)}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0 text-[16px]">
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50 text-[var(--text-tertiary)] hover:text-red-400 transition-colors flex-shrink-0 text-[16px]">
           🗑
         </button>
       </div>
@@ -227,10 +227,10 @@ export default function NoteDetailPage() {
 
         {note.is_meeting && (
           <div className="flex items-center gap-2">
-            <span className="text-[12px] text-gray-400 font-semibold">Datum schůzky:</span>
+            <span className="text-[12px] text-[var(--text-tertiary)] font-semibold">Datum schůzky:</span>
             <input type="date" value={note.meeting_date ?? ''}
               onChange={e => { const val = e.target.value; setNote(prev => prev ? { ...prev, meeting_date: val } : prev); if (note) updateNote(note.id, { meeting_date: val || null }) }}
-              className="text-[12px] bg-transparent border-none outline-none text-gray-600 font-semibold"
+              className="text-[12px] bg-transparent border-none outline-none text-[var(--text-secondary)] font-semibold"
             />
           </div>
         )}
@@ -257,7 +257,7 @@ export default function NoteDetailPage() {
           </div>
           <input value={title} onChange={e => handleTitleChange(e.target.value)}
             placeholder="Nadpis…"
-            className="flex-1 text-[28px] lg:text-[32px] font-extrabold text-gray-900 bg-transparent border-none outline-none placeholder-gray-200 leading-tight"
+            className="flex-1 text-[28px] lg:text-[32px] font-extrabold text-[var(--text-primary)] bg-transparent border-none outline-none placeholder-gray-200 leading-tight"
           />
         </div>
 
@@ -271,7 +271,7 @@ export default function NoteDetailPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
                 style={activeCat
                   ? { background: activeCat.color + '18', borderColor: activeCat.color + '40', color: activeCat.color }
-                  : { background: '#f3f4f6', borderColor: 'var(--border)', color: '#9ca3af' }
+                  : { background: 'var(--surface-raised)', borderColor: 'var(--border)', color: '#9ca3af' }
                 }
               >
                 {activeCat ? <>{activeCat.icon} {activeCat.name}</> : '📦 Bez kategorie'}
@@ -309,7 +309,7 @@ export default function NoteDetailPage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
                   style={clientId
                     ? { background: '#8b5cf618', borderColor: '#8b5cf640', color: '#8b5cf6' }
-                    : { background: '#f3f4f6', borderColor: 'var(--border)', color: '#9ca3af' }
+                    : { background: 'var(--surface-raised)', borderColor: 'var(--border)', color: '#9ca3af' }
                   }
                 >
                   👤 {clientName ?? 'Bez klienta'}
@@ -328,7 +328,7 @@ export default function NoteDetailPage() {
                     />
                     {clientId && (
                       <button onClick={() => handleClientChange(null)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left hover:bg-[var(--bg)] text-gray-500">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left hover:bg-[var(--bg)] text-[var(--text-secondary)]">
                         ✕ Odebrat klienta
                       </button>
                     )}
@@ -348,7 +348,7 @@ export default function NoteDetailPage() {
                       ))
                     }
                     {clients.filter(c => !clientSearch || c.name.toLowerCase().includes(clientSearch.toLowerCase())).length === 0 && (
-                      <p className="text-[12px] text-gray-300 px-3 py-2">Žádný klient nenalezen</p>
+                      <p className="text-[12px] text-[var(--text-tertiary)] px-3 py-2">Žádný klient nenalezen</p>
                     )}
                   </div>
                 )}
@@ -372,7 +372,7 @@ export default function NoteDetailPage() {
         {/* Sub-notes */}
         <div className="mt-4 pt-4 border-t border-[var(--border)]">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">
+            <span className="text-[12px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">
               Podstránky {subNotes.length > 0 && `(${subNotes.length})`}
             </span>
             <button onClick={handleNewSubNote} disabled={creating}
@@ -382,7 +382,7 @@ export default function NoteDetailPage() {
             </button>
           </div>
           {subNotes.length === 0 ? (
-            <p className="text-[13px] text-gray-300 italic">Žádné podstránky. Stránky lze zanořovat jako v Notion.</p>
+            <p className="text-[13px] text-[var(--text-tertiary)] italic">Žádné podstránky. Stránky lze zanořovat jako v Notion.</p>
           ) : (
             <div className="flex flex-col gap-2">
               {subNotes.map(sub => (
@@ -391,11 +391,11 @@ export default function NoteDetailPage() {
                   style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
                   <span className="text-[18px] flex-shrink-0">{sub.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-semibold text-gray-800 truncate">{sub.title}</div>
-                    {sub.content && <div className="text-[11px] text-gray-400 truncate">{sub.content.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60)}</div>}
+                    <div className="text-[14px] font-semibold text-[var(--text-primary)] truncate">{sub.title}</div>
+                    {sub.content && <div className="text-[11px] text-[var(--text-tertiary)] truncate">{sub.content.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60)}</div>}
                   </div>
                   <button onClick={e => handleDeleteSub(sub.id, e)}
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all text-[14px]">
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all text-[14px]">
                     ×
                   </button>
                 </Link>
@@ -411,11 +411,11 @@ export default function NoteDetailPage() {
           style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
           onClick={() => setConfirmDelete(false)}>
           <div className="bg-[var(--surface)] rounded-[20px] p-6 mx-4 w-full max-w-[360px] shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="text-[18px] font-extrabold text-gray-900 mb-2">Smazat poznámku?</div>
-            <p className="text-[13px] text-gray-500 mb-5">Smaže se i všechny podstránky. Tuto akci nelze vrátit.</p>
+            <div className="text-[18px] font-extrabold text-[var(--text-primary)] mb-2">Smazat poznámku?</div>
+            <p className="text-[13px] text-[var(--text-secondary)] mb-5">Smaže se i všechny podstránky. Tuto akci nelze vrátit.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmDelete(false)}
-                className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
               <button onClick={handleDelete}
                 className="flex-1 py-3 rounded-[14px] bg-red-500 text-white text-[14px] font-bold">Smazat</button>
             </div>

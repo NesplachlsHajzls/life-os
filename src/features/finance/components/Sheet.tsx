@@ -43,10 +43,10 @@ export function Sheet({ title, onClose, children }: SheetProps) {
 
         {/* Title */}
         <div className="px-5 pt-2 pb-4 flex items-center justify-between border-b border-[var(--border)]">
-          <h2 className="text-[16px] font-bold text-gray-800">{title}</h2>
+          <h2 className="text-[16px] font-bold text-[var(--text-primary)]">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-raised)] text-gray-500 text-[18px] leading-none"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)] text-[18px] leading-none"
           >
             ×
           </button>

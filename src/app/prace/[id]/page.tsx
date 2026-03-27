@@ -42,7 +42,7 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]'
-const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
+const labelCls = 'block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5'
 
 // ── OrderRow ──────────────────────────────────────────────────────
 
@@ -69,11 +69,11 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className={`text-[14px] font-bold ${order.invoiced ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+        <div className={`text-[14px] font-bold ${order.invoiced ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
           {order.subject}
         </div>
         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-          <span className="text-[12px] text-gray-400">📅 {dateStr}</span>
+          <span className="text-[12px] text-[var(--text-tertiary)]">📅 {dateStr}</span>
           {order.amount != null && (
             <span className="text-[12px] font-semibold" style={{ color: order.invoiced ? '#9ca3af' : clientColor }}>
               {new Intl.NumberFormat('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 }).format(order.amount)}
@@ -81,11 +81,11 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
           )}
           {order.invoiced && <span className="text-[11px] font-semibold text-green-500">Fakturováno</span>}
         </div>
-        {order.note && <div className="text-[12px] text-gray-400 mt-0.5 truncate">{order.note}</div>}
+        {order.note && <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 truncate">{order.note}</div>}
       </div>
 
       {/* Edit */}
-      <button onClick={onEdit} className="text-gray-300 hover:text-gray-500 text-[15px] transition-colors flex-shrink-0 px-1">✏️</button>
+      <button onClick={onEdit} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-[15px] transition-colors flex-shrink-0 px-1">✏️</button>
     </div>
   )
 }
@@ -542,13 +542,13 @@ export default function ClientPage() {
       {/* Header */}
       <div className="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-4 lg:px-6">
         <div className="flex items-center gap-3">
-          <Link href="/prace" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[18px] transition-colors">←</Link>
+          <Link href="/prace" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-[var(--text-tertiary)] text-[18px] transition-colors">←</Link>
           <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-[20px]" style={{ background: clientColor + '18' }}>{client?.icon ?? '💼'}</div>
           <div className="flex-1 min-w-0">
-            <div className="text-[17px] font-extrabold text-gray-900 truncate">{client?.name ?? '…'}</div>
+            <div className="text-[17px] font-extrabold text-[var(--text-primary)] truncate">{client?.name ?? '…'}</div>
             <div className="flex items-center gap-2">
               {client && <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: STATUS_COLORS[client.status] + '18', color: STATUS_COLORS[client.status] }}>{client.status}</span>}
-              {client?.phone && <span className="text-[12px] text-gray-400">{client.phone}</span>}
+              {client?.phone && <span className="text-[12px] text-[var(--text-tertiary)]">{client.phone}</span>}
             </div>
           </div>
           {/* První schůzka — klikatelný dot pro rychlou změnu */}
@@ -557,13 +557,13 @@ export default function ClientPage() {
               className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] hover:bg-[var(--surface-raised)] transition-colors">
               <span className="w-3 h-3 rounded-full flex-shrink-0"
                 style={{ background: client.first_meeting_status ? FIRST_MEETING_COLORS[client.first_meeting_status] : '#d1d5db' }} />
-              <span className="text-[10px] font-semibold text-gray-400 hidden lg:block">
+              <span className="text-[10px] font-semibold text-[var(--text-tertiary)] hidden lg:block">
                 {client.first_meeting_status ? FIRST_MEETING_LABELS[client.first_meeting_status] : '1. schůzka'}
               </span>
             </button>
           )}
           <button onClick={openEditClient}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[16px] transition-colors flex-shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-[var(--text-tertiary)] text-[16px] transition-colors flex-shrink-0"
             title="Upravit klienta">✏️</button>
         </div>
       </div>
@@ -581,7 +581,7 @@ export default function ClientPage() {
         ))}
       </div>
 
-      {loading ? <div className="text-center py-12 text-gray-400">Načítám…</div> : (
+      {loading ? <div className="text-center py-12 text-[var(--text-tertiary)]">Načítám…</div> : (
         <div className="p-4 lg:p-6">
 
           {/* ══ PŘEHLED ══ */}
@@ -595,7 +595,7 @@ export default function ClientPage() {
                   {/* Informace o společnosti */}
                   <div className="bg-[var(--surface)] rounded-[16px] p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">Společnost</div>
+                      <div className="text-[12px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">Společnost</div>
                       <div className="flex items-center gap-1.5">
                         {client?.subject_type && (
                           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-[6px]"
@@ -611,8 +611,8 @@ export default function ClientPage() {
                     <div className="flex flex-col gap-3">
                       {client?.partner_id && (
                         <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-[var(--bg)] border border-[var(--border)]">
-                          <span className="text-[11px] font-bold text-gray-400 uppercase">PP:</span>
-                          <span className="text-[13px] font-bold text-gray-800 font-mono">{client.partner_id}</span>
+                          <span className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase">PP:</span>
+                          <span className="text-[13px] font-bold text-[var(--text-primary)] font-mono">{client.partner_id}</span>
                         </div>
                       )}
                       {[
@@ -625,32 +625,32 @@ export default function ClientPage() {
                         <div key={row.label} className="flex items-start gap-3">
                           <span className="text-[16px] mt-0.5">{row.icon}</span>
                           <div>
-                            <div className="text-[10px] font-bold text-gray-400 uppercase">{row.label}</div>
-                            <div className="text-[14px] text-gray-800">{row.value}</div>
+                            <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">{row.label}</div>
+                            <div className="text-[14px] text-[var(--text-primary)]">{row.value}</div>
                           </div>
                         </div>
                       ))}
                       {client?.tags && client.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {client.tags.map(tag => (
-                            <span key={tag} className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-600">{tag}</span>
+                            <span key={tag} className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)]">{tag}</span>
                           ))}
                         </div>
                       )}
-                      {client?.notes && <div className="text-[13px] text-gray-600 bg-[var(--bg)] rounded-[10px] p-3 mt-1">{client.notes}</div>}
+                      {client?.notes && <div className="text-[13px] text-[var(--text-secondary)] bg-[var(--bg)] rounded-[10px] p-3 mt-1">{client.notes}</div>}
                     </div>
                   </div>
 
                   {/* Kontaktní osoby */}
                   <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
-                      <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">Kontaktní osoby</div>
+                      <div className="text-[12px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">Kontaktní osoby</div>
                       <button onClick={() => openAddContact()}
                         className="w-7 h-7 flex items-center justify-center rounded-full text-white text-[16px] font-bold leading-none"
                         style={{ background: clientColor }}>+</button>
                     </div>
                     {contacts.length === 0 ? (
-                      <div className="px-5 py-4 text-[13px] text-gray-400">Zatím žádné kontaktní osoby</div>
+                      <div className="px-5 py-4 text-[13px] text-[var(--text-tertiary)]">Zatím žádné kontaktní osoby</div>
                     ) : (
                       <div className="flex flex-col">
                         {contacts.map((c, i) => (
@@ -659,16 +659,16 @@ export default function ClientPage() {
                               style={{ background: clientColor }}>{c.name[0].toUpperCase()}</div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-[13px] font-bold text-gray-900">{c.name}</span>
+                                <span className="text-[13px] font-bold text-[var(--text-primary)]">{c.name}</span>
                                 {c.is_primary && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">Primární</span>}
-                                {c.role && <span className="text-[11px] text-gray-500">{c.role}</span>}
+                                {c.role && <span className="text-[11px] text-[var(--text-secondary)]">{c.role}</span>}
                               </div>
                               <div className="flex gap-3 mt-0.5">
-                                {c.phone && <span className="text-[11px] text-gray-500">📞 {c.phone}</span>}
-                                {c.email && <span className="text-[11px] text-gray-500 truncate">✉️ {c.email}</span>}
+                                {c.phone && <span className="text-[11px] text-[var(--text-secondary)]">📞 {c.phone}</span>}
+                                {c.email && <span className="text-[11px] text-[var(--text-secondary)] truncate">✉️ {c.email}</span>}
                               </div>
                             </div>
-                            <button onClick={e => { e.stopPropagation(); handleDeleteContact(c.id) }} className="text-gray-300 hover:text-red-400 text-[16px] transition-colors flex-shrink-0">×</button>
+                            <button onClick={e => { e.stopPropagation(); handleDeleteContact(c.id) }} className="text-[var(--text-tertiary)] hover:text-red-400 text-[16px] transition-colors flex-shrink-0">×</button>
                           </div>
                         ))}
                       </div>
@@ -678,19 +678,19 @@ export default function ClientPage() {
 
                 {/* Pravý sloupec: Interní data */}
                 <div className="bg-[var(--surface)] rounded-[16px] p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                  <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide mb-4">Interní data</div>
+                  <div className="text-[12px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-4">Interní data</div>
                   <div className="flex flex-col gap-0">
 
                     {/* Měsíční průměr — nahoře, velký */}
                     <div className="pb-3 mb-3 border-b border-[var(--border)]">
-                      <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Měsíční průměr fakturace</div>
+                      <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase mb-1">Měsíční průměr fakturace</div>
                       <div className="text-[24px] font-extrabold leading-tight" style={{ color: clientColor }}>
-                        {client?.monthly_avg_invoice != null ? fmtCZK(client.monthly_avg_invoice) : <span className="text-gray-300 text-[18px]">—</span>}
+                        {client?.monthly_avg_invoice != null ? fmtCZK(client.monthly_avg_invoice) : <span className="text-[var(--text-tertiary)] text-[18px]">—</span>}
                       </div>
                       {/* RA — malý řádek pod fakturací */}
                       {client?.ra_count != null && (
-                        <div className="text-[11px] text-gray-400 mt-1">
-                          🏛️ <span className="font-semibold text-gray-600">{client.ra_count}</span> registračních autorit
+                        <div className="text-[11px] text-[var(--text-tertiary)] mt-1">
+                          🏛️ <span className="font-semibold text-[var(--text-secondary)]">{client.ra_count}</span> registračních autorit
                         </div>
                       )}
                     </div>
@@ -704,7 +704,7 @@ export default function ClientPage() {
                           { name: client.price_list.hw_2_name, price: client.price_list.hw_2_price },
                         ].map((hw, i) => (hw.name || hw.price != null) && (
                           <div key={i} className="flex items-center justify-between py-2 border-b border-gray-50">
-                            <span className="text-[12px] font-semibold text-gray-700">
+                            <span className="text-[12px] font-semibold text-[var(--text-secondary)]">
                               HW {hw.name ? `— ${hw.name}` : ''}
                             </span>
                             <span className="text-[13px] font-bold" style={{ color: clientColor }}>
@@ -718,7 +718,7 @@ export default function ClientPage() {
                           if (val == null) return null
                           return (
                             <div key={key} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                              <span className="text-[12px] text-gray-600">{CERT_PRICE_LABELS[key]}</span>
+                              <span className="text-[12px] text-[var(--text-secondary)]">{CERT_PRICE_LABELS[key]}</span>
                               <span className="text-[13px] font-bold" style={{ color: clientColor }}>{fmtCZK(val)}</span>
                             </div>
                           )
@@ -757,12 +757,12 @@ export default function ClientPage() {
                         style={{ background: clientColor + '22' }}>🤝</div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-wide mb-0.5" style={{ color: clientColor }}>Příští schůzka</div>
-                        <div className="text-[15px] font-extrabold text-gray-900 truncate">{nextMeeting.title}</div>
+                        <div className="text-[15px] font-extrabold text-[var(--text-primary)] truncate">{nextMeeting.title}</div>
                         <div className="text-[12px] font-semibold mt-0.5" style={{ color: clientColor }}>
                           📅 {dayLabel}{!nextMeeting.is_all_day ? ` v ${evDate.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}` : ''}
                         </div>
                         {nextMeeting.description && (
-                          <div className="text-[12px] text-gray-500 mt-0.5 truncate">{nextMeeting.description}</div>
+                          <div className="text-[12px] text-[var(--text-secondary)] mt-0.5 truncate">{nextMeeting.description}</div>
                         )}
                       </div>
                     </div>
@@ -775,10 +775,10 @@ export default function ClientPage() {
                 <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg)] transition-colors" onClick={() => setTab('ukoly')}>
                   <div className="flex items-center gap-2.5">
                     <span className="text-[18px]">✅</span>
-                    <span className="text-[14px] font-extrabold text-gray-900">Úkoly</span>
+                    <span className="text-[14px] font-extrabold text-[var(--text-primary)]">Úkoly</span>
                     {openTasks.length > 0 && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#3b82f6' }}>{openTasks.length}</span>}
                   </div>
-                  <span className="text-gray-300 text-[16px]">→</span>
+                  <span className="text-[var(--text-tertiary)] text-[16px]">→</span>
                 </button>
                 {openTasks.length > 0 ? (
                   <div className="border-t border-gray-50">
@@ -787,14 +787,14 @@ export default function ClientPage() {
                       return (
                         <div key={task.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-50 first:border-0">
                           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PDOT[task.priority] ?? '#f59e0b' }} />
-                          <span className="text-[13px] text-gray-800 flex-1 truncate">{task.title}</span>
-                          {task.due_date && <span className="text-[11px] text-gray-400 flex-shrink-0">{new Date(task.due_date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}</span>}
+                          <span className="text-[13px] text-[var(--text-primary)] flex-1 truncate">{task.title}</span>
+                          {task.due_date && <span className="text-[11px] text-[var(--text-tertiary)] flex-shrink-0">{new Date(task.due_date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}</span>}
                         </div>
                       )
                     })}
                     {openTasks.length > 3 && <button onClick={() => setTab('ukoly')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-[var(--bg)] transition-colors" style={{ color: clientColor }}>+ {openTasks.length - 3} dalších úkolů</button>}
                   </div>
-                ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-gray-400">Žádné otevřené úkoly</div>}
+                ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-[var(--text-tertiary)]">Žádné otevřené úkoly</div>}
               </div>
 
               {/* Klikací sekce — Aktivity */}
@@ -802,23 +802,23 @@ export default function ClientPage() {
                 <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg)] transition-colors" onClick={() => setTab('aktivity')}>
                   <div className="flex items-center gap-2.5">
                     <span className="text-[18px]">📋</span>
-                    <span className="text-[14px] font-extrabold text-gray-900">Aktivity</span>
+                    <span className="text-[14px] font-extrabold text-[var(--text-primary)]">Aktivity</span>
                     {activities.length > 0 && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#10b981' }}>{activities.length}</span>}
                   </div>
-                  <span className="text-gray-300 text-[16px]">→</span>
+                  <span className="text-[var(--text-tertiary)] text-[16px]">→</span>
                 </button>
                 {activities.length > 0 ? (
                   <div className="border-t border-gray-50">
                     {activities.slice(0, 3).map(a => (
                       <div key={a.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-50 first:border-0">
                         <span className="text-[16px] flex-shrink-0">{ACTIVITY_ICONS[a.type]}</span>
-                        <span className="text-[13px] text-gray-800 flex-1 truncate">{a.title}</span>
-                        <span className="text-[11px] text-gray-400 flex-shrink-0">{fmtDate(a.activity_date)}</span>
+                        <span className="text-[13px] text-[var(--text-primary)] flex-1 truncate">{a.title}</span>
+                        <span className="text-[11px] text-[var(--text-tertiary)] flex-shrink-0">{fmtDate(a.activity_date)}</span>
                       </div>
                     ))}
                     {activities.length > 3 && <button onClick={() => setTab('aktivity')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-[var(--bg)] transition-colors" style={{ color: clientColor }}>+ {activities.length - 3} dalších aktivit</button>}
                   </div>
-                ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-gray-400">Žádné aktivity</div>}
+                ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-[var(--text-tertiary)]">Žádné aktivity</div>}
               </div>
 
               {/* Klikací sekce — Obchody */}
@@ -829,23 +829,23 @@ export default function ClientPage() {
                     <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg)] transition-colors" onClick={() => setTab('obchody')}>
                       <div className="flex items-center gap-2.5">
                         <span className="text-[18px]">💰</span>
-                        <span className="text-[14px] font-extrabold text-gray-900">Obchody</span>
+                        <span className="text-[14px] font-extrabold text-[var(--text-primary)]">Obchody</span>
                         {activeDeals.length > 0 && <span className="text-[11px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: '#8b5cf6' }}>{activeDeals.length} aktivní</span>}
                       </div>
-                      <span className="text-gray-300 text-[16px]">→</span>
+                      <span className="text-[var(--text-tertiary)] text-[16px]">→</span>
                     </button>
                     {activeDeals.length > 0 ? (
                       <div className="border-t border-gray-50">
                         {activeDeals.slice(0, 3).map(deal => (
                           <div key={deal.id} className="flex items-center gap-3 px-5 py-3 border-t border-gray-50 first:border-0">
                             <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: DEAL_STAGE_COLORS[deal.stage] }} />
-                            <span className="text-[13px] text-gray-800 flex-1 truncate">{deal.title}</span>
+                            <span className="text-[13px] text-[var(--text-primary)] flex-1 truncate">{deal.title}</span>
                             <span className="text-[12px] font-bold flex-shrink-0" style={{ color: DEAL_STAGE_COLORS[deal.stage] }}>{fmtCZK(deal.value)}</span>
                           </div>
                         ))}
                         {activeDeals.length > 3 && <button onClick={() => setTab('obchody')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-[var(--bg)] transition-colors" style={{ color: clientColor }}>+ {activeDeals.length - 3} dalších obchodů</button>}
                       </div>
-                    ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-gray-400">Žádné aktivní obchody</div>}
+                    ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-[var(--text-tertiary)]">Žádné aktivní obchody</div>}
                   </div>
                 )
               })()}
@@ -861,7 +861,7 @@ export default function ClientPage() {
                   {(['open', 'done'] as const).map(t => (
                     <button key={t} onClick={() => setTaskTab(t)}
                       className="px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-all"
-                      style={{ background: taskTab === t ? clientColor : '#f3f4f6', color: taskTab === t ? '#fff' : '#6b7280' }}>
+                      style={{ background: taskTab === t ? clientColor : 'var(--surface-raised)', color: taskTab === t ? '#fff' : '#6b7280' }}>
                       {t === 'open' ? `Otevřené (${openTasks.length})` : `Hotové (${doneTasks.length})`}
                     </button>
                   ))}
@@ -877,13 +877,13 @@ export default function ClientPage() {
                       placeholder="Napiš úkol… (p2, zítra, …)" value={quickInput} onChange={e => setQuickInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(); if (e.key === 'Escape') setShowQuickAdd(false) }}/>
                     <button onClick={handleQuickAdd} className="px-4 py-2 rounded-[10px] text-white text-[13px] font-bold" style={{ background: clientColor }}>+</button>
-                    <button onClick={() => setShowQuickAdd(false)} className="px-3 py-2 rounded-[10px] border border-[var(--border)] text-gray-400">✕</button>
+                    <button onClick={() => setShowQuickAdd(false)} className="px-3 py-2 rounded-[10px] border border-[var(--border)] text-[var(--text-tertiary)]">✕</button>
                   </div>
                 </div>
               )}
               {(taskTab === 'open' ? openTasks : doneTasks).length === 0 ? (
                 <div className="text-center py-10"><div className="text-[36px] mb-2">{taskTab === 'done' ? '📭' : '✅'}</div>
-                  <p className="text-[14px] font-semibold text-gray-500">{taskTab === 'done' ? 'Zatím nic hotového' : 'Žádné úkoly'}</p></div>
+                  <p className="text-[14px] font-semibold text-[var(--text-secondary)]">{taskTab === 'done' ? 'Zatím nic hotového' : 'Žádné úkoly'}</p></div>
               ) : (
                 <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   {(taskTab === 'open' ? openTasks : doneTasks).map((task, i) => (
@@ -907,7 +907,7 @@ export default function ClientPage() {
               </div>
               {activities.length === 0 ? (
                 <div className="text-center py-10"><div className="text-[36px] mb-2">📋</div>
-                  <p className="text-[14px] font-semibold text-gray-500">Zatím žádné aktivity</p></div>
+                  <p className="text-[14px] font-semibold text-[var(--text-secondary)]">Zatím žádné aktivity</p></div>
               ) : (
                 <div className="flex flex-col gap-3">
                   {activities.map(a => (
@@ -915,13 +915,13 @@ export default function ClientPage() {
                       <span className="text-[22px] mt-0.5">{ACTIVITY_ICONS[a.type]}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[14px] font-bold text-gray-900">{a.title}</span>
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-500">{ACTIVITY_LABELS[a.type]}</span>
+                          <span className="text-[14px] font-bold text-[var(--text-primary)]">{a.title}</span>
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)]">{ACTIVITY_LABELS[a.type]}</span>
                         </div>
-                        {a.description && <div className="text-[13px] text-gray-600 mb-1">{a.description}</div>}
-                        <div className="text-[11px] text-gray-400">{fmtDateTime(a.activity_date)}</div>
+                        {a.description && <div className="text-[13px] text-[var(--text-secondary)] mb-1">{a.description}</div>}
+                        <div className="text-[11px] text-[var(--text-tertiary)]">{fmtDateTime(a.activity_date)}</div>
                       </div>
-                      <button onClick={() => handleDeleteActivity(a.id)} className="text-gray-300 hover:text-red-400 text-[18px] transition-colors flex-shrink-0">×</button>
+                      <button onClick={() => handleDeleteActivity(a.id)} className="text-[var(--text-tertiary)] hover:text-red-400 text-[18px] transition-colors flex-shrink-0">×</button>
                     </div>
                   ))}
                 </div>
@@ -939,7 +939,7 @@ export default function ClientPage() {
               </div>
               {deals.length === 0 ? (
                 <div className="text-center py-10"><div className="text-[36px] mb-2">💰</div>
-                  <p className="text-[14px] font-semibold text-gray-500">Zatím žádné obchody</p></div>
+                  <p className="text-[14px] font-semibold text-[var(--text-secondary)]">Zatím žádné obchody</p></div>
               ) : (
                 <div className="flex flex-col gap-3">
                   {deals.map(deal => (
@@ -947,14 +947,14 @@ export default function ClientPage() {
                       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)', borderLeft: `4px solid ${DEAL_STAGE_COLORS[deal.stage]}` }}
                       onClick={() => openEditDeal(deal)}>
                       <div className="flex items-center justify-between mb-1">
-                        <div className="text-[15px] font-bold text-gray-900">{deal.title}</div>
+                        <div className="text-[15px] font-bold text-[var(--text-primary)]">{deal.title}</div>
                         <div className="text-[14px] font-bold" style={{ color: DEAL_STAGE_COLORS[deal.stage] }}>{fmtCZK(deal.value)}</div>
                       </div>
                       <div className="flex items-center gap-3 flex-wrap">
                         <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
                           style={{ background: DEAL_STAGE_COLORS[deal.stage] + '18', color: DEAL_STAGE_COLORS[deal.stage] }}>{deal.stage}</span>
-                        <span className="text-[12px] text-gray-500">{deal.probability}% pravděpodobnost</span>
-                        {deal.expected_close && <span className="text-[12px] text-gray-400">📅 {fmtDate(deal.expected_close)}</span>}
+                        <span className="text-[12px] text-[var(--text-secondary)]">{deal.probability}% pravděpodobnost</span>
+                        {deal.expected_close && <span className="text-[12px] text-[var(--text-tertiary)]">📅 {fmtDate(deal.expected_close)}</span>}
                       </div>
                     </div>
                   ))}
@@ -973,7 +973,7 @@ export default function ClientPage() {
               </div>
               {contacts.length === 0 ? (
                 <div className="text-center py-10"><div className="text-[36px] mb-2">👤</div>
-                  <p className="text-[14px] font-semibold text-gray-500">Zatím žádné kontaktní osoby</p></div>
+                  <p className="text-[14px] font-semibold text-[var(--text-secondary)]">Zatím žádné kontaktní osoby</p></div>
               ) : (
                 <div className="flex flex-col gap-3">
                   {contacts.map(c => (
@@ -982,16 +982,16 @@ export default function ClientPage() {
                         style={{ background: clientColor }}>{c.name[0].toUpperCase()}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[14px] font-bold text-gray-900">{c.name}</span>
+                          <span className="text-[14px] font-bold text-[var(--text-primary)]">{c.name}</span>
                           {c.is_primary && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-green-50 text-green-600">Primární</span>}
-                          {c.role && <span className="text-[12px] text-gray-500">{c.role}</span>}
+                          {c.role && <span className="text-[12px] text-[var(--text-secondary)]">{c.role}</span>}
                         </div>
                         <div className="flex flex-col gap-0.5 mt-1">
-                          {c.phone && <span className="text-[13px] text-gray-600">📞 {c.phone}</span>}
-                          {c.email && <span className="text-[13px] text-gray-600">✉️ {c.email}</span>}
+                          {c.phone && <span className="text-[13px] text-[var(--text-secondary)]">📞 {c.phone}</span>}
+                          {c.email && <span className="text-[13px] text-[var(--text-secondary)]">✉️ {c.email}</span>}
                         </div>
                       </div>
-                      <button onClick={e => { e.stopPropagation(); handleDeleteContact(c.id) }} className="text-gray-300 hover:text-red-400 text-[18px] transition-colors">×</button>
+                      <button onClick={e => { e.stopPropagation(); handleDeleteContact(c.id) }} className="text-[var(--text-tertiary)] hover:text-red-400 text-[18px] transition-colors">×</button>
                     </div>
                   ))}
                 </div>
@@ -1021,8 +1021,8 @@ export default function ClientPage() {
               {orders.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-[48px] mb-3">📦</div>
-                  <p className="text-[14px] font-semibold text-gray-500 mb-1">Zatím žádné objednávky</p>
-                  <p className="text-[12px] text-gray-400">Zaznamenej co si klient odebral, ať nezapomeneš fakturovat</p>
+                  <p className="text-[14px] font-semibold text-[var(--text-secondary)] mb-1">Zatím žádné objednávky</p>
+                  <p className="text-[12px] text-[var(--text-tertiary)]">Zaznamenej co si klient odebral, ať nezapomeneš fakturovat</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -1049,7 +1049,7 @@ export default function ClientPage() {
                   {/* Fakturované */}
                   {orders.filter(o => o.invoiced).length > 0 && (
                     <div>
-                      <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1 mb-2 mt-2">
+                      <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide px-1 mb-2 mt-2">
                         Fakturováno
                       </div>
                       <div className="flex flex-col gap-2">
@@ -1085,8 +1085,8 @@ export default function ClientPage() {
               {clientNotes.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-[48px] mb-3">📝</div>
-                  <p className="text-[14px] font-semibold text-gray-500 mb-1">Zatím žádné poznámky</p>
-                  <p className="text-[12px] text-gray-400">Přidej první poznámku ke klientovi</p>
+                  <p className="text-[14px] font-semibold text-[var(--text-secondary)] mb-1">Zatím žádné poznámky</p>
+                  <p className="text-[12px] text-[var(--text-tertiary)]">Přidej první poznámku ke klientovi</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
@@ -1095,21 +1095,21 @@ export default function ClientPage() {
                       className="group bg-[var(--surface)] rounded-[16px] p-4 hover:shadow-md transition-all relative"
                       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                       <button onClick={e => handleDeleteClientNote(note.id, e)}
-                        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">
+                        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">
                         ×
                       </button>
                       <div className="flex items-start gap-3">
                         <span className="text-[22px] flex-shrink-0 mt-0.5">{note.icon}</span>
                         <div className="flex-1 min-w-0">
-                          <div className="text-[14px] font-bold text-gray-900 truncate pr-6">{note.title}</div>
+                          <div className="text-[14px] font-bold text-[var(--text-primary)] truncate pr-6">{note.title}</div>
                           {note.content ? (
-                            <div className="text-[12px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed">
+                            <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 line-clamp-2 leading-relaxed">
                               {note.content.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\s+/g, ' ').trim().slice(0, 120)}
                             </div>
                           ) : (
-                            <div className="text-[12px] text-gray-300 mt-0.5 italic">Prázdná poznámka…</div>
+                            <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 italic">Prázdná poznámka…</div>
                           )}
-                          <span className="text-[11px] text-gray-300 mt-1.5 block">
+                          <span className="text-[11px] text-[var(--text-tertiary)] mt-1.5 block">
                             {(() => {
                               const diff = Date.now() - new Date(note.updated_at).getTime()
                               const mins = Math.floor(diff / 60_000)
@@ -1155,16 +1155,16 @@ export default function ClientPage() {
                 <div className={`bg-[var(--surface)] rounded-[14px] p-4 flex gap-3 transition-opacity ${isDone ? 'opacity-50' : ''}`}
                   style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                   <div className="flex-1 min-w-0">
-                    <div className={`text-[14px] font-bold truncate ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+                    <div className={`text-[14px] font-bold truncate ${isDone ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
                       {em.subject || '(bez předmětu)'}
                     </div>
-                    <div className="text-[12px] text-gray-400 mt-0.5 flex items-center gap-2">
+                    <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 flex items-center gap-2">
                       <span className="truncate">{em.from_name || em.from_address}</span>
                       <span className="text-gray-200">·</span>
                       <span className="flex-shrink-0">{fmtEmailDate(em.received_at)}</span>
                     </div>
                     {em.body_preview && (
-                      <div className="text-[12px] text-gray-400 mt-1 line-clamp-2">{em.body_preview}</div>
+                      <div className="text-[12px] text-[var(--text-tertiary)] mt-1 line-clamp-2">{em.body_preview}</div>
                     )}
                   </div>
                   <button
@@ -1183,7 +1183,7 @@ export default function ClientPage() {
             return (
               <>
                 <div className="flex items-center justify-between mb-4">
-                  <div className="text-[12px] text-gray-400">
+                  <div className="text-[12px] text-[var(--text-tertiary)]">
                     {pending.length > 0
                       ? <span className="font-semibold text-orange-500">{pending.length} nevyřízených</span>
                       : <span className="text-green-500 font-semibold">Vše vyřízeno ✓</span>
@@ -1198,8 +1198,8 @@ export default function ClientPage() {
                 {clientEmails.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-[48px] mb-3">📭</div>
-                    <p className="text-[14px] font-semibold text-gray-500 mb-1">Žádné emaily pro tohoto klienta</p>
-                    <p className="text-[12px] text-gray-400">Importuj emaily a přiřaď je ke klientovi v sekci Emaily</p>
+                    <p className="text-[14px] font-semibold text-[var(--text-secondary)] mb-1">Žádné emaily pro tohoto klienta</p>
+                    <p className="text-[12px] text-[var(--text-tertiary)]">Importuj emaily a přiřaď je ke klientovi v sekci Emaily</p>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
@@ -1211,7 +1211,7 @@ export default function ClientPage() {
                     )}
                     {done.length > 0 && (
                       <>
-                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide px-1 mt-2">Vyřízené</div>
+                        <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide px-1 mt-2">Vyřízené</div>
                         {done.map(em => <EmailRow key={em.id} em={em} />)}
                       </>
                     )}
@@ -1238,7 +1238,7 @@ export default function ClientPage() {
                       <button key={String(isUp)}
                         onClick={() => setMSortUpcoming(isUp)}
                         className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-                        style={{ background: mSortUpcoming === isUp ? clientColor : '#f3f4f6', color: mSortUpcoming === isUp ? '#fff' : '#6b7280' }}>
+                        style={{ background: mSortUpcoming === isUp ? clientColor : 'var(--surface-raised)', color: mSortUpcoming === isUp ? '#fff' : '#6b7280' }}>
                         {isUp ? `Nadcházející (${upcoming.length})` : `Historické (${historical.length})`}
                       </button>
                     ))}
@@ -1251,10 +1251,10 @@ export default function ClientPage() {
                 {shown.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-[48px] mb-3">🤝</div>
-                    <p className="text-[14px] font-semibold text-gray-500 mb-1">
+                    <p className="text-[14px] font-semibold text-[var(--text-secondary)] mb-1">
                       {mSortUpcoming ? 'Žádné nadcházející schůzky' : 'Žádné historické schůzky'}
                     </p>
-                    <p className="text-[12px] text-gray-400">Přidej schůzku a bude vidět i v kalendáři</p>
+                    <p className="text-[12px] text-[var(--text-tertiary)]">Přidej schůzku a bude vidět i v kalendáři</p>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
@@ -1266,9 +1266,9 @@ export default function ClientPage() {
                         <div key={ev.id} className="bg-[var(--surface)] rounded-[14px] p-4 flex items-center gap-4"
                           style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)', borderLeft: isFuture ? `3px solid ${clientColor}` : '3px solid #e5e7eb' }}>
                           <div className="flex-1 min-w-0">
-                            <div className="text-[14px] font-bold text-gray-900 truncate">{ev.emoji ?? '🤝'} {ev.title}</div>
+                            <div className="text-[14px] font-bold text-[var(--text-primary)] truncate">{ev.emoji ?? '🤝'} {ev.title}</div>
                             <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                              <span className={`text-[12px] font-semibold ${isToday ? 'text-green-600' : isFuture ? '' : 'text-gray-400'}`}
+                              <span className={`text-[12px] font-semibold ${isToday ? 'text-green-600' : isFuture ? '' : 'text-[var(--text-tertiary)]'}`}
                                 style={isFuture && !isToday ? { color: clientColor } : undefined}>
                                 📅 {ev.is_all_day
                                   ? evDate.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })
@@ -1278,7 +1278,7 @@ export default function ClientPage() {
                               </span>
                             </div>
                             {ev.description && (
-                              <div className="text-[12px] text-gray-400 mt-1 truncate">{ev.description}</div>
+                              <div className="text-[12px] text-[var(--text-tertiary)] mt-1 truncate">{ev.description}</div>
                             )}
                           </div>
                         </div>
@@ -1298,8 +1298,8 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) setShowAddMeeting(false) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">🤝 Nová schůzka</h2>
-              <button onClick={() => setShowAddMeeting(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">🤝 Nová schůzka</h2>
+              <button onClick={() => setShowAddMeeting(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
@@ -1313,7 +1313,7 @@ export default function ClientPage() {
               </div>
               {/* All day toggle */}
               <div className="flex items-center justify-between">
-                <label className="text-[13px] font-medium text-gray-700">Celý den</label>
+                <label className="text-[13px] font-medium text-[var(--text-secondary)]">Celý den</label>
                 <button onClick={() => setMAllDay(v => !v)}
                   className={`relative w-11 h-6 rounded-full transition-colors ${mAllDay ? 'bg-[var(--color-primary)]' : 'bg-[var(--border)]'}`}>
                   <span className={`absolute top-0.5 w-5 h-5 bg-[var(--surface)] rounded-full shadow transition-all ${mAllDay ? 'left-5.5' : 'left-0.5'}`} />
@@ -1337,11 +1337,11 @@ export default function ClientPage() {
                   placeholder="Poznámka ke schůzce…"
                   value={mDesc} onChange={e => setMDesc(e.target.value)} />
               </div>
-              <p className="text-[12px] text-gray-400 -mt-1">
+              <p className="text-[12px] text-[var(--text-tertiary)] -mt-1">
                 Schůzka se zobrazí i v kalendáři.
               </p>
               <div className="flex gap-3">
-                <button onClick={() => setShowAddMeeting(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddMeeting(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleAddMeeting} disabled={!mTitle.trim() || creatingMeeting}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: clientColor }}>
@@ -1359,10 +1359,10 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) setShowAddOrder(false) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">
                 📦 {editingOrder ? 'Upravit objednávku' : 'Nová objednávka'}
               </h2>
-              <button onClick={() => setShowAddOrder(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <button onClick={() => setShowAddOrder(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">
@@ -1394,7 +1394,7 @@ export default function ClientPage() {
                     🗑️
                   </button>
                 )}
-                <button onClick={() => setShowAddOrder(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddOrder(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleSaveOrder} disabled={!oSubject.trim()}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: clientColor }}>
@@ -1412,8 +1412,8 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) { setShowAddContact(false); setEditingContact(null) } }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">{editingContact ? '✏️ Upravit kontakt' : '👤 Nová kontaktní osoba'}</h2>
-              <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">{editingContact ? '✏️ Upravit kontakt' : '👤 Nová kontaktní osoba'}</h2>
+              <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Jméno *</label><input className={fieldCls} value={cName} onChange={e => setCName(e.target.value)} placeholder="Jméno a příjmení"/></div>
@@ -1424,7 +1424,7 @@ export default function ClientPage() {
               </div>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={cPrimary} onChange={e => setCPrimary(e.target.checked)} className="w-4 h-4 rounded" />
-                <span className="text-[13px] font-medium text-gray-700">Primární kontakt</span>
+                <span className="text-[13px] font-medium text-[var(--text-secondary)]">Primární kontakt</span>
               </label>
               {editingContact && (
                 <button onClick={() => handleDeleteContact(editingContact.id)}
@@ -1433,7 +1433,7 @@ export default function ClientPage() {
                 </button>
               )}
               <div className="flex gap-3 pt-1">
-                <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleSaveContact} disabled={!cName.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>{editingContact ? 'Uložit' : 'Přidat'}</button>
               </div>
             </div>
@@ -1447,8 +1447,8 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) setShowAddActivity(false) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">📋 Nová aktivita</h2>
-              <button onClick={() => setShowAddActivity(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">📋 Nová aktivita</h2>
+              <button onClick={() => setShowAddActivity(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div>
@@ -1457,7 +1457,7 @@ export default function ClientPage() {
                   {ACTIVITY_TYPES.map(t => (
                     <button key={t} onClick={() => setAType(t)}
                       className="flex-1 py-2 rounded-[10px] text-[13px] font-semibold transition-all flex flex-col items-center gap-1"
-                      style={{ background: aType === t ? clientColor : '#f3f4f6', color: aType === t ? '#fff' : '#6b7280' }}>
+                      style={{ background: aType === t ? clientColor : 'var(--surface-raised)', color: aType === t ? '#fff' : '#6b7280' }}>
                       <span>{ACTIVITY_ICONS[t]}</span>
                       <span className="text-[10px]">{ACTIVITY_LABELS[t]}</span>
                     </button>
@@ -1468,7 +1468,7 @@ export default function ClientPage() {
               <div><label className={labelCls}>Podrobnosti</label><textarea className={fieldCls + ' resize-none'} rows={2} value={aDesc} onChange={e => setADesc(e.target.value)} placeholder="Volitelné podrobnosti…" /></div>
               <div><label className={labelCls}>Datum a čas</label><input className={fieldCls} type="datetime-local" value={aDate} onChange={e => setADate(e.target.value)} /></div>
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setShowAddActivity(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddActivity(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleAddActivity} disabled={!aTitle.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>Přidat</button>
               </div>
             </div>
@@ -1482,8 +1482,8 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) setShowAddDeal(false) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 460, maxHeight: '90vh' }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">{editingDeal ? '✏️ Upravit obchod' : '💰 Nový obchod'}</h2>
-              <button onClick={() => setShowAddDeal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">{editingDeal ? '✏️ Upravit obchod' : '💰 Nový obchod'}</h2>
+              <button onClick={() => setShowAddDeal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Název *</label><input className={fieldCls} value={dTitle} onChange={e => setDTitle(e.target.value)} placeholder="Název zakázky nebo projektu"/></div>
@@ -1507,7 +1507,7 @@ export default function ClientPage() {
               <div><label className={labelCls}>Poznámky</label><textarea className={fieldCls + ' resize-none'} rows={2} value={dNotes} onChange={e => setDNotes(e.target.value)} placeholder="…" /></div>
               <div className="flex gap-3 pt-1">
                 {editingDeal && <button onClick={() => handleDeleteDeal(editingDeal.id)} className="px-4 py-3 rounded-[14px] border border-red-200 text-red-500 text-[13px] font-semibold hover:bg-red-50 transition-colors">Smazat</button>}
-                <button onClick={() => setShowAddDeal(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddDeal(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleSaveDeal} disabled={!dTitle.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: DEAL_STAGE_COLORS[dStage] }}>
                   {editingDeal ? 'Uložit' : 'Přidat'}
                 </button>
@@ -1523,8 +1523,8 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) setEditingTask(null) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">✏️ Upravit úkol</h2>
-              <button onClick={() => setEditingTask(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">✏️ Upravit úkol</h2>
+              <button onClick={() => setEditingTask(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
@@ -1560,7 +1560,7 @@ export default function ClientPage() {
                 <input className={fieldCls} value={tNote} onChange={e => setTNote(e.target.value)} placeholder="Volitelná poznámka…" />
               </div>
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setEditingTask(null)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setEditingTask(null)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleSaveTask} disabled={!tTitle.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>Uložit</button>
               </div>
             </div>
@@ -1574,8 +1574,8 @@ export default function ClientPage() {
           onClick={e => { if (e.target === e.currentTarget) setShowEditClient(false) }}>
           <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 480, maxHeight: '90vh' }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-[18px] font-extrabold text-gray-900">✏️ Upravit klienta</h2>
-              <button onClick={() => setShowEditClient(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+              <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">✏️ Upravit klienta</h2>
+              <button onClick={() => setShowEditClient(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
 
@@ -1609,7 +1609,7 @@ export default function ClientPage() {
                   {CLIENT_ICONS.map(ic => (
                     <button key={ic} onClick={() => setEIcon(ic)}
                       className="w-10 h-10 text-[20px] rounded-[10px] flex items-center justify-center transition-all"
-                      style={{ background: eIcon === ic ? eColor+'25' : '#f3f4f6', outline: eIcon === ic ? `2px solid ${eColor}` : 'none' }}>
+                      style={{ background: eIcon === ic ? eColor+'25' : 'var(--surface-raised)', outline: eIcon === ic ? `2px solid ${eColor}` : 'none' }}>
                       {ic}
                     </button>
                   ))}
@@ -1632,13 +1632,13 @@ export default function ClientPage() {
               <div className="flex items-center gap-3 p-3 bg-[var(--bg)] rounded-[12px]">
                 <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-[20px]" style={{ background: eColor + '25' }}>{eIcon}</div>
                 <div>
-                  <div className="text-[14px] font-bold text-gray-900">{eName || 'Název klienta'}</div>
+                  <div className="text-[14px] font-bold text-[var(--text-primary)]">{eName || 'Název klienta'}</div>
                   <div className="text-[11px] font-semibold" style={{ color: eColor }}>{eStatus}</div>
                 </div>
               </div>
 
               {/* Kategorizace */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide border-t border-[var(--border)] pt-1">Kategorizace</div>
+              <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide border-t border-[var(--border)] pt-1">Kategorizace</div>
 
               {/* PP číslo */}
               <div>
@@ -1653,7 +1653,7 @@ export default function ClientPage() {
                   <button
                     onClick={() => setESubjectType('')}
                     className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-                    style={{ background: eSubjectType === '' ? '#6b7280' : '#f3f4f6', color: eSubjectType === '' ? '#fff' : '#6b7280' }}>
+                    style={{ background: eSubjectType === '' ? '#6b7280' : 'var(--surface-raised)', color: eSubjectType === '' ? '#fff' : '#6b7280' }}>
                     Nezadáno
                   </button>
                   {SUBJECT_TYPES.map(t => (
@@ -1679,12 +1679,12 @@ export default function ClientPage() {
                     <div className="absolute top-1 w-4 h-4 rounded-full bg-[var(--surface)] shadow transition-all"
                       style={{ left: eIsPrague ? 'calc(100% - 20px)' : '4px' }} />
                   </div>
-                  <span className="text-[13px] font-semibold text-gray-700">🏙️ Zákazník je z Prahy</span>
+                  <span className="text-[13px] font-semibold text-[var(--text-secondary)]">🏙️ Zákazník je z Prahy</span>
                 </label>
               </div>
 
               {/* Kontaktní sekce */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide border-t border-[var(--border)] pt-1">Kontaktní údaje</div>
+              <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide border-t border-[var(--border)] pt-1">Kontaktní údaje</div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className={labelCls}>Email</label><input className={fieldCls} value={eEmail} onChange={e => setEEmail(e.target.value)} placeholder="email@firma.cz" /></div>
                 <div><label className={labelCls}>Telefon</label><input className={fieldCls} value={ePhone} onChange={e => setEPhone(e.target.value)} placeholder="+420…" /></div>
@@ -1704,7 +1704,7 @@ export default function ClientPage() {
                     return (
                       <button key={String(s)} onClick={() => setEFirstMeeting(s)}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12px] font-semibold transition-all"
-                        style={{ background: eFirstMeeting === s ? color + '25' : '#f3f4f6', color: eFirstMeeting === s ? color : '#9ca3af', outline: eFirstMeeting === s ? `2px solid ${color}` : 'none' }}>
+                        style={{ background: eFirstMeeting === s ? color + '25' : 'var(--surface-raised)', color: eFirstMeeting === s ? color : '#9ca3af', outline: eFirstMeeting === s ? `2px solid ${color}` : 'none' }}>
                         <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: color }} />
                         {label}
                       </button>
@@ -1714,7 +1714,7 @@ export default function ClientPage() {
               </div>
 
               {/* Interní sekce */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1 border-t border-[var(--border)]">Interní data</div>
+              <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide pt-1 border-t border-[var(--border)]">Interní data</div>
 
               {/* Produkty */}
               <div>
@@ -1754,7 +1754,7 @@ export default function ClientPage() {
               </div>
 
               {/* Ceník */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1 border-t border-[var(--border)]">Ceník služeb (CZK / ks)</div>
+              <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide pt-1 border-t border-[var(--border)]">Ceník služeb (CZK / ks)</div>
 
               {/* HW položky — každá má název + cenu */}
               {([1, 2] as const).map(n => {
@@ -1803,7 +1803,7 @@ export default function ClientPage() {
                   <div className="flex flex-col gap-2">
                     <div className="text-[13px] text-red-600 font-semibold text-center">Opravdu smazat? Tato akce je nevratná.</div>
                     <div className="flex gap-2">
-                      <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-[12px] border border-[var(--border)] text-[13px] font-semibold text-gray-500">Zrušit</button>
+                      <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-[12px] border border-[var(--border)] text-[13px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                       <button onClick={handleDeleteClient} className="flex-1 py-2.5 rounded-[12px] bg-red-500 text-[13px] font-bold text-white">Smazat</button>
                     </div>
                   </div>
@@ -1811,7 +1811,7 @@ export default function ClientPage() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setShowEditClient(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowEditClient(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
                 <button onClick={handleSaveClient} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white" style={{ background: clientColor }}>Uložit</button>
               </div>
             </div>
@@ -1820,7 +1820,7 @@ export default function ClientPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">{toast}</div>
+        <div className="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">{toast}</div>
       )}
     </>
   )

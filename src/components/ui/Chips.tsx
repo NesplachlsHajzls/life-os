@@ -20,7 +20,7 @@ export function Chips({ items, defaultActive = 0, onChange }: ChipsProps) {
           className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
             active === i
               ? 'bg-[var(--color-primary)] text-white'
-              : 'bg-[var(--surface-raised)] text-gray-500'
+              : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'
           }`}
         >
           {item}

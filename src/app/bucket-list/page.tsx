@@ -86,9 +86,9 @@ export default function BucketListPage() {
       <div className="flex-1 overflow-y-auto px-5 py-4 pb-20">
         {/* Progress */}
         <div className="rounded-[14px] bg-[var(--surface)] p-4 mb-4 border border-[var(--border)]">
-          <div className="text-[12px] font-bold text-gray-500 mb-2">{progress}% splněno</div>
+          <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2">{progress}% splněno</div>
           <div className="w-full bg-[var(--border)] rounded-full h-2.5"><div className="h-2.5 rounded-full transition-all" style={{ width: `${progress}%`, background: 'var(--color-primary)' }} /></div>
-          <div className="text-[11px] text-gray-600 mt-2">{done} z {total} cílů</div>
+          <div className="text-[11px] text-[var(--text-secondary)] mt-2">{done} z {total} cílů</div>
         </div>
 
         {/* Filters */}
@@ -96,7 +96,7 @@ export default function BucketListPage() {
           <button
             onClick={() => setFilterCategory(null)}
             className="px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap"
-            style={{ background: !filterCategory ? 'var(--color-primary)' : '#e5e7eb', color: !filterCategory ? 'white' : '#374151' }}
+            style={{ background: !filterCategory ? 'var(--color-primary)' : 'var(--border)', color: !filterCategory ? 'white' : '#374151' }}
           >
             Všechny
           </button>
@@ -105,7 +105,7 @@ export default function BucketListPage() {
               key={cat.id}
               onClick={() => setFilterCategory(filterCategory === cat.id ? null : cat.id)}
               className="px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap"
-              style={{ background: filterCategory === cat.id ? 'var(--color-primary)' : '#e5e7eb', color: filterCategory === cat.id ? 'white' : '#374151' }}
+              style={{ background: filterCategory === cat.id ? 'var(--color-primary)' : 'var(--border)', color: filterCategory === cat.id ? 'white' : '#374151' }}
             >
               {cat.icon} {cat.label}
             </button>
@@ -120,13 +120,13 @@ export default function BucketListPage() {
             onChange={(e) => setShowDone(e.target.checked)}
             className="w-4 h-4"
           />
-          <span className="text-[13px] text-gray-700">Zobrazit splněné</span>
+          <span className="text-[13px] text-[var(--text-secondary)]">Zobrazit splněné</span>
         </label>
 
         {/* Big goals */}
         {big.length > 0 && (
           <div className="mb-5">
-            <div className="text-[14px] font-bold text-gray-800 mb-3">🏔️ Velké cíle</div>
+            <div className="text-[14px] font-bold text-[var(--text-primary)] mb-3">🏔️ Velké cíle</div>
             <div className="space-y-2">
               {big.map(item => {
                 const cat = BUCKET_CATEGORIES.find(c => c.id === item.category)
@@ -151,9 +151,9 @@ export default function BucketListPage() {
                           {cat?.icon} {cat?.label}
                         </span>
                       </div>
-                      {item.done_at && <div className="text-[11px] text-gray-500 mt-1">✓ {new Date(item.done_at).toLocaleDateString('cs-CZ')}</div>}
+                      {item.done_at && <div className="text-[11px] text-[var(--text-secondary)] mt-1">✓ {new Date(item.done_at).toLocaleDateString('cs-CZ')}</div>}
                     </div>
-                    <button onClick={() => deleteHandler(item.id)} className="text-[12px] text-gray-400 flex-shrink-0">✕</button>
+                    <button onClick={() => deleteHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)] flex-shrink-0">✕</button>
                   </div>
                 )
               })}
@@ -164,7 +164,7 @@ export default function BucketListPage() {
         {/* Small goals */}
         {small.length > 0 && (
           <div className="mb-5">
-            <div className="text-[14px] font-bold text-gray-800 mb-3">✨ Malé cíle</div>
+            <div className="text-[14px] font-bold text-[var(--text-primary)] mb-3">✨ Malé cíle</div>
             <div className="space-y-2">
               {small.map(item => {
                 const cat = BUCKET_CATEGORIES.find(c => c.id === item.category)
@@ -185,12 +185,12 @@ export default function BucketListPage() {
                         {item.title}
                       </div>
                       <div className="flex gap-2 mt-1">
-                        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: '#e5e7eb', color: '#374151' }}>
+                        <span className="text-[11px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--border)', color: '#374151' }}>
                           {cat?.icon} {cat?.label}
                         </span>
                       </div>
                     </div>
-                    <button onClick={() => deleteHandler(item.id)} className="text-[12px] text-gray-400 flex-shrink-0">✕</button>
+                    <button onClick={() => deleteHandler(item.id)} className="text-[12px] text-[var(--text-tertiary)] flex-shrink-0">✕</button>
                   </div>
                 )
               })}
@@ -214,8 +214,8 @@ export default function BucketListPage() {
                   }}
                   className="text-left p-3 rounded-[10px] border border-[var(--border)] hover:bg-[var(--bg)] transition-colors"
                 >
-                  <div className="text-[13px] font-semibold text-gray-800">{s.title}</div>
-                  <div className="text-[11px] text-gray-500">{BUCKET_CATEGORIES.find(c => c.id === s.category)?.label} • {s.size === 'big' ? '🏔️ Velký' : '✨ Malý'}</div>
+                  <div className="text-[13px] font-semibold text-[var(--text-primary)]">{s.title}</div>
+                  <div className="text-[11px] text-[var(--text-secondary)]">{BUCKET_CATEGORIES.find(c => c.id === s.category)?.label} • {s.size === 'big' ? '🏔️ Velký' : '✨ Malý'}</div>
                 </button>
               ))}
             </div>
@@ -238,7 +238,7 @@ export default function BucketListPage() {
             </select>
             <textarea placeholder="Poznámky" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-3">
-              <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={() => { addItem(form.title, form.category, form.size); setShowAddModal(false); setForm({ title: '', size: 'big', category: 'travel', notes: '' }) }} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>

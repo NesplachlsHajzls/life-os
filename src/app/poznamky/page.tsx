@@ -109,7 +109,7 @@ export default function PoznamkyPage() {
         {/* Toolbar */}
         <div className="flex gap-3 mb-4">
           <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]">🔍</span>
             <input
               className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
               placeholder="Hledat v poznámkách…"
@@ -130,7 +130,7 @@ export default function PoznamkyPage() {
           <button
             onClick={() => setActiveCat(null)}
             className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-            style={{ background: activeCat === null ? 'var(--color-primary)' : '#f3f4f6', color: activeCat === null ? '#fff' : '#6b7280' }}
+            style={{ background: activeCat === null ? 'var(--color-primary)' : 'var(--surface-raised)', color: activeCat === null ? '#fff' : '#6b7280' }}
           >
             Vše <span className="text-[10px] opacity-70">{notes.length}</span>
           </button>
@@ -150,7 +150,7 @@ export default function PoznamkyPage() {
           {uncategorised > 0 && (
             <button onClick={() => setActiveCat('__none__')}
               className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all"
-              style={{ background: activeCat === '__none__' ? '#94a3b8' : '#f3f4f6', color: activeCat === '__none__' ? '#fff' : '#94a3b8' }}
+              style={{ background: activeCat === '__none__' ? '#94a3b8' : 'var(--surface-raised)', color: activeCat === '__none__' ? '#fff' : '#94a3b8' }}
             >
               📦 Bez kategorie <span className="text-[10px] opacity-70">{uncategorised}</span>
             </button>
@@ -159,15 +159,15 @@ export default function PoznamkyPage() {
 
         {/* Notes grid */}
         {loading ? (
-          <div className="text-center py-16 text-gray-400">Načítám…</div>
+          <div className="text-center py-16 text-[var(--text-tertiary)]">Načítám…</div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-[48px] mb-3">📝</div>
-            <p className="text-[15px] font-bold text-gray-500 mb-1">
+            <p className="text-[15px] font-bold text-[var(--text-secondary)] mb-1">
               {search || activeCat ? 'Nic nenalezeno' : 'Zatím žádné poznámky'}
             </p>
             {!search && !activeCat && (
-              <p className="text-[13px] text-gray-400 mt-1">Klikni na &quot;+ Nová&quot; nebo stiskni ✏️ kdekoliv v appce</p>
+              <p className="text-[13px] text-[var(--text-tertiary)] mt-1">Klikni na &quot;+ Nová&quot; nebo stiskni ✏️ kdekoliv v appce</p>
             )}
           </div>
         ) : (
@@ -180,22 +180,22 @@ export default function PoznamkyPage() {
                   className="group bg-[var(--surface)] rounded-[16px] p-4 hover:shadow-md transition-all relative"
                   style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                   <button onClick={e => handleDelete(note.id, e)}
-                    className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">
+                    className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">
                     ×
                   </button>
                   <div className="flex items-start gap-3">
                     <span className="text-[24px] flex-shrink-0 mt-0.5">{note.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[15px] font-bold text-gray-900 truncate pr-6">{note.title}</div>
+                      <div className="text-[15px] font-bold text-[var(--text-primary)] truncate pr-6">{note.title}</div>
                       {note.content ? (
-                        <div className="text-[12px] text-gray-400 mt-0.5 leading-relaxed line-clamp-2">
+                        <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 leading-relaxed line-clamp-2">
                           {stripHtml(note.content).slice(0, 120)}
                         </div>
                       ) : (
-                        <div className="text-[12px] text-gray-300 mt-0.5 italic">Prázdná poznámka…</div>
+                        <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 italic">Prázdná poznámka…</div>
                       )}
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        <span className="text-[11px] text-gray-300">{fmtRelative(note.updated_at)}</span>
+                        <span className="text-[11px] text-[var(--text-tertiary)]">{fmtRelative(note.updated_at)}</span>
                         {cat && (
                           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]"
                             style={{ background: cat.color + '18', color: cat.color }}>

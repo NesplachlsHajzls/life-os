@@ -42,7 +42,7 @@ const CAT_ICONS = [
 function SettingsSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mb-5">
-      <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide px-1 mb-2">{label}</div>
+      <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide px-1 mb-2">{label}</div>
       <div className="bg-[var(--surface)] rounded-[14px] shadow-card overflow-hidden">{children}</div>
     </div>
   )
@@ -102,7 +102,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
           style={{ background: color + '18', borderColor: color, color }}
         >{icon} {name || 'Náhled'}</span>
         <div className="flex-1" />
-        <button onClick={onCancel} className="px-3 py-1.5 text-[12px] text-gray-500 rounded-lg hover:bg-[var(--border)]">Zrušit</button>
+        <button onClick={onCancel} className="px-3 py-1.5 text-[12px] text-[var(--text-secondary)] rounded-lg hover:bg-[var(--border)]">Zrušit</button>
         <button
           onClick={() => name.trim() && onSave({ name: name.trim(), icon, color })}
           disabled={!name.trim()}
@@ -126,7 +126,7 @@ function CategoryManager({ userId }: { userId: string }) {
   const [showAdd,    setShowAdd]    = useState(false)
 
   if (loading) {
-    return <div className="px-4 py-4 text-[13px] text-gray-400">Načítám…</div>
+    return <div className="px-4 py-4 text-[13px] text-[var(--text-tertiary)]">Načítám…</div>
   }
 
   return (
@@ -157,24 +157,24 @@ function CategoryManager({ userId }: { userId: string }) {
               <button
                 onClick={() => reorder(idx, idx - 1)}
                 disabled={idx === 0}
-                className="w-6 h-6 flex items-center justify-center text-gray-300 disabled:opacity-20 hover:text-gray-600 text-[12px]"
+                className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] disabled:opacity-20 hover:text-[var(--text-secondary)] text-[12px]"
               >▲</button>
               <button
                 onClick={() => reorder(idx, idx + 1)}
                 disabled={idx === categories.length - 1}
-                className="w-6 h-6 flex items-center justify-center text-gray-300 disabled:opacity-20 hover:text-gray-600 text-[12px]"
+                className="w-6 h-6 flex items-center justify-center text-[var(--text-tertiary)] disabled:opacity-20 hover:text-[var(--text-secondary)] text-[12px]"
               >▼</button>
 
               {/* Edit */}
               <button
                 onClick={() => setEditingId(cat.id)}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-[var(--surface-raised)] text-[13px]"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[13px]"
               >✏️</button>
 
               {/* Delete */}
               <button
                 onClick={() => removeCategory(cat.id)}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 text-[14px]"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 text-[14px]"
               >×</button>
             </div>
           )}
@@ -236,7 +236,7 @@ export default function NastaveniPage() {
         <SettingsSection label="Kategorie">
           {user
             ? <CategoryManager userId={user.id} />
-            : <div className="px-4 py-3 text-[13px] text-gray-400">Přihlas se pro správu kategorií.</div>
+            : <div className="px-4 py-3 text-[13px] text-[var(--text-tertiary)]">Přihlas se pro správu kategorií.</div>
           }
         </SettingsSection>
 
@@ -254,7 +254,7 @@ export default function NastaveniPage() {
                       outlineOffset: '2px',
                       boxShadow: activeTheme === t.id ? `0 0 0 5px ${t.color}22` : 'none',
                     }} />
-                  <span className="text-[9px] font-semibold text-gray-500 text-center leading-tight">{t.name}</span>
+                  <span className="text-[9px] font-semibold text-[var(--text-secondary)] text-center leading-tight">{t.name}</span>
                 </button>
               ))}
             </div>
@@ -268,8 +268,8 @@ export default function NastaveniPage() {
               <button key={f.id} onClick={() => handleFont(f.id)}
                 className={`flex items-center justify-between px-4 py-3.5 transition-colors ${i > 0 ? 'border-t border-[var(--border)]' : ''} ${activeFont === f.id ? 'bg-[var(--color-primary-pale)]' : 'hover:bg-[var(--bg)]'}`}>
                 <div className="text-left">
-                  <div className="text-[14px] font-semibold text-gray-900" style={{ fontFamily: `'${f.name}', sans-serif` }}>{f.name}</div>
-                  <div className="text-[11px] text-gray-400 mt-0.5" style={{ fontFamily: `'${f.name}', sans-serif` }}>{f.sample}</div>
+                  <div className="text-[14px] font-semibold text-[var(--text-primary)]" style={{ fontFamily: `'${f.name}', sans-serif` }}>{f.name}</div>
+                  <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5" style={{ fontFamily: `'${f.name}', sans-serif` }}>{f.sample}</div>
                 </div>
                 {activeFont === f.id && (
                   <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[11px] font-bold"
@@ -289,7 +289,7 @@ export default function NastaveniPage() {
             <span className="text-[22px]">{hideAmounts ? '🙈' : '👁️'}</span>
             <div className="flex-1">
               <div className="text-[14px] font-semibold">Skrýt částky</div>
-              <div className="text-[12px] text-gray-400 mt-0.5">
+              <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5">
                 {hideAmounts ? 'Částky jsou skryté — klepni pro zobrazení' : 'Částky jsou viditelné — klepni pro skrytí'}
               </div>
             </div>
@@ -312,9 +312,9 @@ export default function NastaveniPage() {
             <span className="text-[20px]">💱</span>
             <div className="flex-1">
               <div className="text-[14px] font-semibold">Měna</div>
-              <div className="text-[12px] text-gray-400 mt-0.5">CZK — Česká koruna</div>
+              <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5">CZK — Česká koruna</div>
             </div>
-            <span className="text-gray-300 text-lg">›</span>
+            <span className="text-[var(--text-tertiary)] text-lg">›</span>
           </div>
         </SettingsSection>
 
@@ -325,7 +325,7 @@ export default function NastaveniPage() {
             <div className="flex-1">
               <div className="text-[14px] font-semibold text-red-500">Smazat účet</div>
             </div>
-            <span className="text-gray-300 text-lg">›</span>
+            <span className="text-[var(--text-tertiary)] text-lg">›</span>
           </div>
         </SettingsSection>
 

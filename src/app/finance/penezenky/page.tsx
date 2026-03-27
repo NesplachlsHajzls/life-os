@@ -15,8 +15,8 @@ const WALLET_ICONS = ['💵', '💳', '🏦', '💰', '🪙', '💸', '🏧', '�
 const WALLET_TYPES = ['běžná', 'spořicí', 'investiční', 'hotovost', 'kreditní', 'stravenky']
 const WALLET_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#64748b']
 
-const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
-const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
+const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
+const labelCls = 'block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5'
 
 // ── EditWalletSheet ────────────────────────────────────────────────
 function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: (w: Wallet) => void; onClose: () => void }) {
@@ -92,7 +92,7 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${type === t ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--surface-raised)] text-gray-600'}`}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${type === t ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'}`}
                 >
                   {t}
                 </button>
@@ -101,7 +101,7 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
           </div>
 
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
             <button
               onClick={handleSave}
               disabled={!valid}
@@ -129,22 +129,22 @@ function TransferSheet({ wallets, onTransfer, onClose }: { wallets: Wallet[]; on
         <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
         <h2 className="text-[16px] font-bold mb-4">💸 Přesun peněz</h2>
         <div className="flex flex-col gap-3">
-          <div><label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Z</label>
+          <div><label className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide block mb-1">Z</label>
             <select className={sel} value={from} onChange={e => setFrom(e.target.value)}>
               {wallets.map(w => <option key={w.id} value={w.id}>{w.icon} {w.name} — {fmt(w.balance)} Kč</option>)}
             </select>
           </div>
-          <div><label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Na</label>
+          <div><label className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide block mb-1">Na</label>
             <select className={sel} value={to} onChange={e => setTo(e.target.value)}>
               {wallets.map(w => <option key={w.id} value={w.id}>{w.icon} {w.name} — {fmt(w.balance)} Kč</option>)}
             </select>
           </div>
-          <div><label className="text-[11px] font-bold text-gray-400 uppercase tracking-wide block mb-1">Částka (Kč)</label>
+          <div><label className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide block mb-1">Částka (Kč)</label>
             <input type="number" className={sel} value={amt} onChange={e => setAmt(e.target.value)} placeholder="0" />
           </div>
         </div>
         <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
           <button
             onClick={() => { onTransfer(from, to, +amt); onClose() }}
             disabled={!valid}
@@ -199,10 +199,10 @@ export default function PenezenkyPage() {
         </div>
 
         {/* Wallets list */}
-        <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">💵 Peněženky</div>
+        <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">💵 Peněženky</div>
 
         {loading ? (
-          <div className="text-center py-6 text-gray-400 text-[13px]">Načítám…</div>
+          <div className="text-center py-6 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : (
           <div className="flex flex-col gap-2">
             {wallets.map(w => (
@@ -215,21 +215,21 @@ export default function PenezenkyPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[14px] font-semibold">{w.name}</div>
-                  <div className="text-[11px] text-gray-400 mt-0.5 capitalize">{w.type ?? 'běžná'}</div>
+                  <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5 capitalize">{w.type ?? 'běžná'}</div>
                 </div>
                 <span className="text-[15px] font-bold mr-1" style={{ color: !hideAmounts && w.balance < 0 ? '#ef4444' : '#111827' }}>
                   {hideAmounts ? '••••' : `${fmt(w.balance)} Kč`}
                 </span>
                 <button
                   onClick={() => setEditingWallet(w)}
-                  className="w-7 h-7 flex items-center justify-center rounded-full text-gray-300 hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[14px] transition-colors flex-shrink-0"
+                  className="w-7 h-7 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[14px] transition-colors flex-shrink-0"
                   title="Upravit peněženku"
                 >✏️</button>
               </div>
             ))}
 
             {wallets.length === 0 && (
-              <div className="text-center py-6 text-gray-400 text-[13px]">Žádné peněženky</div>
+              <div className="text-center py-6 text-[var(--text-tertiary)] text-[13px]">Žádné peněženky</div>
             )}
           </div>
         )}
@@ -237,7 +237,7 @@ export default function PenezenkyPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
           {toast}
         </div>
       )}

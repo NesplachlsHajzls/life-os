@@ -67,21 +67,21 @@ function EmailCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <div className={`text-[14px] font-bold truncate ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+            <div className={`text-[14px] font-bold truncate ${isDone ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
               {email.subject || '(bez předmětu)'}
             </div>
-            <div className="text-[12px] text-gray-400 truncate mt-0.5">
+            <div className="text-[12px] text-[var(--text-tertiary)] truncate mt-0.5">
               {email.from_name
-                ? <>{email.from_name} <span className="text-gray-300">·</span> {email.from_address}</>
+                ? <>{email.from_name} <span className="text-[var(--text-tertiary)]">·</span> {email.from_address}</>
                 : email.from_address
               }
             </div>
           </div>
-          <span className="text-[11px] text-gray-300 flex-shrink-0">{fmtDate(email.received_at)}</span>
+          <span className="text-[11px] text-[var(--text-tertiary)] flex-shrink-0">{fmtDate(email.received_at)}</span>
         </div>
 
         {email.body_preview && (
-          <div className="text-[12px] text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
+          <div className="text-[12px] text-[var(--text-tertiary)] mt-1.5 line-clamp-2 leading-relaxed">
             {email.body_preview}
           </div>
         )}
@@ -95,7 +95,7 @@ function EmailCard({
               className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${
                 clientName
                   ? 'text-white border-transparent'
-                  : 'text-gray-400 border-[var(--border)] hover:border-[var(--border-strong)]'
+                  : 'text-[var(--text-tertiary)] border-[var(--border)] hover:border-[var(--border-strong)]'
               }`}
               style={clientName && clientColor ? { background: clientColor, borderColor: clientColor } : undefined}
             >
@@ -121,12 +121,12 @@ function EmailCard({
                   </button>
                 )}
                 {filtered.length === 0 ? (
-                  <div className="px-3 py-2 text-[12px] text-gray-400">Nenalezen</div>
+                  <div className="px-3 py-2 text-[12px] text-[var(--text-tertiary)]">Nenalezen</div>
                 ) : filtered.map(c => (
                   <button
                     key={c.id}
                     onClick={() => { onAssignClient(email.id, c.id); setShowClientPicker(false); setSearch('') }}
-                    className={`w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--bg)] flex items-center gap-2 ${email.client_id === c.id ? 'font-bold' : 'text-gray-700'}`}
+                    className={`w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--bg)] flex items-center gap-2 ${email.client_id === c.id ? 'font-bold' : 'text-[var(--text-secondary)]'}`}
                   >
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
                     {c.name}
@@ -144,7 +144,7 @@ function EmailCard({
             className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${
               isDone
                 ? 'bg-green-50 border-green-200 text-green-600'
-                : 'border-[var(--border)] text-gray-400 hover:border-green-300 hover:text-green-600'
+                : 'border-[var(--border)] text-[var(--text-tertiary)] hover:border-green-300 hover:text-green-600'
             }`}
           >
             {isDone ? '✓ Vyřízeno' : 'Vyřídit'}
@@ -153,7 +153,7 @@ function EmailCard({
           {/* Smazat */}
           <button
             onClick={() => onDelete(email.id)}
-            className="text-[11px] text-gray-300 hover:text-red-400 transition-colors px-1"
+            className="text-[11px] text-[var(--text-tertiary)] hover:text-red-400 transition-colors px-1"
             title="Smazat email"
           >
             ×
@@ -230,8 +230,8 @@ function ImportModal({ userId, onImported, onClose }: {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full mx-4 shadow-2xl" style={{ maxWidth: 480 }}>
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-[18px] font-extrabold text-gray-900">📥 Import emailů z Outlooku</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
+          <h2 className="text-[18px] font-extrabold text-[var(--text-primary)]">📥 Import emailů z Outlooku</h2>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-[20px]">×</button>
         </div>
 
         {/* Instrukce */}
@@ -270,17 +270,17 @@ function ImportModal({ userId, onImported, onClose }: {
           {parsed.length > 0 ? (
             <>
               <div className="text-[32px] mb-2">✅</div>
-              <div className="text-[14px] font-bold text-gray-800">{fileName}</div>
+              <div className="text-[14px] font-bold text-[var(--text-primary)]">{fileName}</div>
               <div className="text-[13px] text-green-600 font-semibold mt-1">
                 Načteno {parsed.length} emailů
               </div>
-              <div className="text-[12px] text-gray-400 mt-1">Klikni pro výběr jiného souboru</div>
+              <div className="text-[12px] text-[var(--text-tertiary)] mt-1">Klikni pro výběr jiného souboru</div>
             </>
           ) : (
             <>
               <div className="text-[32px] mb-2">📂</div>
-              <div className="text-[14px] font-semibold text-gray-600">Přetáhni soubor sem</div>
-              <div className="text-[12px] text-gray-400 mt-1">.csv, .tsv nebo .txt — nebo klikni pro výběr</div>
+              <div className="text-[14px] font-semibold text-[var(--text-secondary)]">Přetáhni soubor sem</div>
+              <div className="text-[12px] text-[var(--text-tertiary)] mt-1">.csv, .tsv nebo .txt — nebo klikni pro výběr</div>
             </>
           )}
         </div>
@@ -290,19 +290,19 @@ function ImportModal({ userId, onImported, onClose }: {
         )}
 
         {parsed.length > 0 && (
-          <div className="mt-4 bg-[var(--bg)] rounded-[12px] p-3 text-[12px] text-gray-600 max-h-40 overflow-y-auto">
-            <div className="font-bold text-gray-700 mb-2">Náhled ({Math.min(3, parsed.length)} z {parsed.length}):</div>
+          <div className="mt-4 bg-[var(--bg)] rounded-[12px] p-3 text-[12px] text-[var(--text-secondary)] max-h-40 overflow-y-auto">
+            <div className="font-bold text-[var(--text-secondary)] mb-2">Náhled ({Math.min(3, parsed.length)} z {parsed.length}):</div>
             {parsed.slice(0, 3).map((e, i) => (
               <div key={i} className="mb-2 pb-2 border-b border-[var(--border)] last:border-0">
-                <div className="font-semibold text-gray-800 truncate">{e.subject || '(bez předmětu)'}</div>
-                <div className="text-gray-400">{e.from_name || e.from_address} · {e.received_at ? new Date(e.received_at).toLocaleDateString('cs-CZ') : '—'}</div>
+                <div className="font-semibold text-[var(--text-primary)] truncate">{e.subject || '(bez předmětu)'}</div>
+                <div className="text-[var(--text-tertiary)]">{e.from_name || e.from_address} · {e.received_at ? new Date(e.received_at).toLocaleDateString('cs-CZ') : '—'}</div>
               </div>
             ))}
           </div>
         )}
 
         <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
           <button
             onClick={handleImport}
             disabled={parsed.length === 0 || importing}
@@ -411,7 +411,7 @@ export default function EmalyPage() {
               onClick={() => setFilter(f.id)}
               className="text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all"
               style={{
-                background: filter === f.id ? 'var(--color-primary)' : '#f3f4f6',
+                background: filter === f.id ? 'var(--color-primary)' : 'var(--surface-raised)',
                 color: filter === f.id ? '#fff' : '#6b7280',
               }}
             >
@@ -430,15 +430,15 @@ export default function EmalyPage() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
         {loading ? (
-          <div className="text-center py-16 text-gray-400 text-[13px]">Načítám…</div>
+          <div className="text-center py-16 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : displayed.length === 0 ? (
           <div className="text-center py-16">
             <div className="text-[48px] mb-3">📭</div>
-            <p className="text-[14px] font-semibold text-gray-500 mb-1">
+            <p className="text-[14px] font-semibold text-[var(--text-secondary)] mb-1">
               {emails.length === 0 ? 'Zatím žádné emaily' : 'Žádné emaily odpovídají filtru'}
             </p>
             {emails.length === 0 && (
-              <p className="text-[12px] text-gray-400 mb-4">Importuj emaily z Outlooku a přiřaď je ke klientům</p>
+              <p className="text-[12px] text-[var(--text-tertiary)] mb-4">Importuj emaily z Outlooku a přiřaď je ke klientům</p>
             )}
             {emails.length === 0 && (
               <button

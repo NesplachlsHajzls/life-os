@@ -64,7 +64,7 @@ function WorkoutsTab({ userId }: { userId: string }) {
       {/* Weekly dots */}
       <div className="flex gap-1 mb-4">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="flex-1 aspect-square rounded-full" style={{ background: Math.random() > 0.5 ? 'var(--color-primary)' : '#e5e7eb' }} />
+          <div key={i} className="flex-1 aspect-square rounded-full" style={{ background: Math.random() > 0.5 ? 'var(--color-primary)' : 'var(--border)' }} />
         ))}
       </div>
 
@@ -76,10 +76,10 @@ function WorkoutsTab({ userId }: { userId: string }) {
                 <span className="text-[16px]">{WORKOUT_TYPES.find(t => t.id === w.type)?.icon}</span>
                 <span className="text-[13px] font-semibold">{w.title}</span>
               </div>
-              <div className="text-[11px] text-gray-500">{new Date(w.date).toLocaleDateString('cs-CZ')} • {w.duration_min} minut</div>
-              {w.distance_km && <div className="text-[11px] text-gray-500">{w.distance_km} km</div>}
+              <div className="text-[11px] text-[var(--text-secondary)]">{new Date(w.date).toLocaleDateString('cs-CZ')} • {w.duration_min} minut</div>
+              {w.distance_km && <div className="text-[11px] text-[var(--text-secondary)]">{w.distance_km} km</div>}
             </div>
-            <button onClick={() => deleteHandler(w.id)} className="text-[12px] text-gray-400">✕</button>
+            <button onClick={() => deleteHandler(w.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
           </div>
         ))}
       </div>
@@ -96,7 +96,7 @@ function WorkoutsTab({ userId }: { userId: string }) {
             <input type="number" placeholder="Délka (minut)" value={form.duration_min} onChange={(e) => setForm({ ...form, duration_min: parseInt(e.target.value) })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <input type="number" placeholder="Vzdálenost (km)" value={form.distance_km} onChange={(e) => setForm({ ...form, distance_km: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addWorkout} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>
@@ -153,16 +153,16 @@ function MealsTab({ userId }: { userId: string }) {
   return (
     <div className="flex-1 overflow-y-auto px-5 py-4 pb-20">
       <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px] mb-4" />
-      {totalCalories > 0 && <div className="text-[13px] font-semibold text-gray-800 mb-4">Celkem: {totalCalories} kcal</div>}
+      {totalCalories > 0 && <div className="text-[13px] font-semibold text-[var(--text-primary)] mb-4">Celkem: {totalCalories} kcal</div>}
 
       <div className="space-y-4">
         {mealTypes.map(type => (
           <div key={type}>
-            <div className="text-[12px] font-bold text-gray-500 mb-2 capitalize">{type === 'breakfast' ? '🥐 Snídaně' : type === 'lunch' ? '🍽️ Oběd' : type === 'dinner' ? '🍽️ Večeře' : '🍪 Svačina'}</div>
+            <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2 capitalize">{type === 'breakfast' ? '🥐 Snídaně' : type === 'lunch' ? '🍽️ Oběd' : type === 'dinner' ? '🍽️ Večeře' : '🍪 Svačina'}</div>
             {meals.filter(m => m.meal_type === type).map(m => (
               <div key={m.id} className="rounded-[10px] bg-[var(--bg)] p-2.5 mb-1.5 flex items-center justify-between">
-                <div className="text-[12px]">{m.description} {m.calories && <span className="text-gray-500">({m.calories} kcal)</span>}</div>
-                <button onClick={() => deleteHandler(m.id)} className="text-[11px] text-gray-400">✕</button>
+                <div className="text-[12px]">{m.description} {m.calories && <span className="text-[var(--text-secondary)]">({m.calories} kcal)</span>}</div>
+                <button onClick={() => deleteHandler(m.id)} className="text-[11px] text-[var(--text-tertiary)]">✕</button>
               </div>
             ))}
           </div>
@@ -182,7 +182,7 @@ function MealsTab({ userId }: { userId: string }) {
             <input type="text" placeholder="Co jsi jedl" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <input type="number" placeholder="Kalorií" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addMeal} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>
@@ -240,9 +240,9 @@ function SupplementsTab({ userId }: { userId: string }) {
           <div key={s.id} className="rounded-[12px] border border-[var(--border)] p-3 bg-[var(--surface)] flex items-start justify-between">
             <div>
               <div className="text-[13px] font-semibold">{s.name}</div>
-              <div className="text-[11px] text-gray-500">{s.dose} • {s.timing}</div>
+              <div className="text-[11px] text-[var(--text-secondary)]">{s.dose} • {s.timing}</div>
             </div>
-            <button onClick={() => deleteHandler(s.id)} className="text-[12px] text-gray-400">✕</button>
+            <button onClick={() => deleteHandler(s.id)} className="text-[12px] text-[var(--text-tertiary)]">✕</button>
           </div>
         ))}
       </div>
@@ -261,7 +261,7 @@ function SupplementsTab({ userId }: { userId: string }) {
               <option value="anytime">Kdykoliv</option>
             </select>
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addSupplement} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>

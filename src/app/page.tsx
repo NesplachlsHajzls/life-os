@@ -136,9 +136,11 @@ export default function DashboardPage() {
   return (
     <>
       {/* Hero header */}
-      <div className="bg-[var(--color-primary)] px-5 pt-4 pb-6 text-white">
-        <h2 className="text-[22px] font-bold">{greet()}, Martine 👋</h2>
-        <p className="text-[13px] text-white/70 mt-0.5">{capitalize(todayLabel())}</p>
+      <div className="px-5 pt-5 pb-5" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] mb-1" style={{ color: 'var(--text-tertiary)' }}>{capitalize(todayLabel())}</p>
+        <h2 className="text-[24px] font-bold leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--text-primary)' }}>
+          {greet()}, <span style={{ color: 'var(--color-primary)' }}>Martine</span>
+        </h2>
       </div>
 
       <div className="p-4 flex flex-col gap-3">

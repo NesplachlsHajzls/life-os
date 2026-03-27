@@ -19,8 +19,8 @@ function ToolBtn({
       onMouseDown={onMouseDown}
       className={`h-7 min-w-[28px] px-1.5 rounded-[6px] text-[13px] font-semibold transition-colors flex items-center justify-center select-none ${
         active
-          ? 'bg-gray-800 text-white'
-          : 'text-gray-600 hover:bg-[var(--surface-raised)]'
+          ? 'bg-[var(--surface-raised)] text-white'
+          : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
       }`}
     >
       {children}
@@ -255,7 +255,7 @@ export function RichTextEditor({
         onClick={handleEditorClick}
         data-placeholder={placeholder}
         style={{ minHeight }}
-        className="rich-editor flex-1 outline-none px-1 py-3 text-[15px] text-gray-700 leading-relaxed"
+        className="rich-editor flex-1 outline-none px-1 py-3 text-[15px] text-[var(--text-secondary)] leading-relaxed"
       />
     </div>
   )

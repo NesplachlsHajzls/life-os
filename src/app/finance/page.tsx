@@ -73,12 +73,12 @@ export default function FinancePage() {
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)]">
         <button
           onClick={() => { const i = allMonths.indexOf(curMonth); if (i > 0) setCurMonth(allMonths[i - 1]) }}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-lg"
         >‹</button>
-        <span className="text-[13px] font-bold text-gray-700">{mLabel(curMonth)}</span>
+        <span className="text-[13px] font-bold text-[var(--text-secondary)]">{mLabel(curMonth)}</span>
         <button
           onClick={() => { const i = allMonths.indexOf(curMonth); if (i < allMonths.length - 1) setCurMonth(allMonths[i + 1]) }}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:bg-[var(--surface-raised)] text-lg"
         >›</button>
       </div>
 
@@ -120,7 +120,7 @@ export default function FinancePage() {
                 placeholder="výplata 45000 / faktura 12000"
               />
               <button onClick={handleIncSubmit} disabled={!incInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-green-500 text-white text-[13px] font-bold disabled:opacity-40">+</button>
-              <button onClick={() => setShowAddInc(true)} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-gray-500 text-[13px]">✎</button>
+              <button onClick={() => setShowAddInc(true)} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-[var(--text-secondary)] text-[13px]">✎</button>
             </div>
             {incError && <p className="text-[11px] text-red-500 mt-1.5">⚠️ {incError}</p>}
           </div>
@@ -138,7 +138,7 @@ export default function FinancePage() {
                 placeholder="oběd 150 ucet / netflix 299 banka"
               />
               <button onClick={handleExpSubmit} disabled={!expInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-red-500 text-white text-[13px] font-bold disabled:opacity-40">−</button>
-              <button onClick={() => setShowAddExp(true)} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-gray-500 text-[13px]">✎</button>
+              <button onClick={() => setShowAddExp(true)} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-[var(--text-secondary)] text-[13px]">✎</button>
             </div>
             {expError && <p className="text-[11px] text-red-500 mt-1.5">⚠️ {expError}</p>}
           </div>
@@ -147,13 +147,13 @@ export default function FinancePage() {
         {/* Category bars — always shown when categories exist */}
         {!loading && catBarData.length > 0 && (
           <div className="bg-[var(--surface)] rounded-[16px] shadow-card p-4">
-            <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">Výdaje dle kategorie</div>
+            <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">Výdaje dle kategorie</div>
             <div className="flex flex-col gap-2.5">
               {catBarData.map(({ name, value, color }) => (
                 <div key={name}>
                   <div className="flex justify-between mb-1">
-                    <span className="text-[12px] font-semibold text-gray-700">{expCats[name]?.icon} {name}</span>
-                    <span className={`text-[12px] font-bold ${value > 0 ? 'text-gray-600' : 'text-gray-300'}`}>{value > 0 ? (hideAmounts ? '••••' : `${fmt(value)} Kč`) : '—'}</span>
+                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{expCats[name]?.icon} {name}</span>
+                    <span className={`text-[12px] font-bold ${value > 0 ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'}`}>{value > 0 ? (hideAmounts ? '••••' : `${fmt(value)} Kč`) : '—'}</span>
                   </div>
                   <div className="h-1.5 bg-[var(--surface-raised)] rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all" style={{ width: `${(value / maxCat) * 100}%`, background: color, opacity: value > 0 ? 1 : 0 }} />
@@ -168,7 +168,7 @@ export default function FinancePage() {
         {(filtExpenses.length > 0 || filtIncomes.length > 0) && (
           <div className="bg-[var(--surface)] rounded-[16px] shadow-card overflow-hidden">
             <div className="px-4 pt-3.5 pb-2 flex justify-between items-center">
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Poslední záznamy</div>
+              <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">Poslední záznamy</div>
               <a href="/finance/transakce" className="text-[11px] font-semibold" style={{ color: 'var(--color-primary)' }}>Vše ›</a>
             </div>
             {[
@@ -188,10 +188,10 @@ export default function FinancePage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-semibold truncate">{item.description}</div>
-                      <div className="text-[11px] text-gray-400">{item.category} · {item.date.slice(5).replace('-', '.')}</div>
+                      <div className="text-[11px] text-[var(--text-tertiary)]">{item.category} · {item.date.slice(5).replace('-', '.')}</div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className={`text-[14px] font-bold ${isExp ? 'text-gray-700' : 'text-green-600'}`}>
+                      <span className={`text-[14px] font-bold ${isExp ? 'text-[var(--text-secondary)]' : 'text-green-600'}`}>
                         {isExp ? '−' : '+'}{hideAmounts ? '••••' : `${fmt(item.amount)} Kč`}
                       </span>
                       <button
@@ -204,11 +204,11 @@ export default function FinancePage() {
                             if (inc) setEditingInc(inc)
                           }
                         }}
-                        className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[12px] transition-colors"
+                        className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[12px] transition-colors"
                       >✏️</button>
                       <button
                         onClick={() => isExp ? removeExpense(item.id) : removeIncome(item.id)}
-                        className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 text-[14px] transition-colors"
+                        className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 text-[14px] transition-colors"
                       >×</button>
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export default function FinancePage() {
         )}
 
         {!loading && filtExpenses.length === 0 && filtIncomes.length === 0 && (
-          <div className="text-center py-8 text-gray-400 text-[13px]">
+          <div className="text-center py-8 text-[var(--text-tertiary)] text-[13px]">
             Žádné záznamy pro {mLabel(curMonth)}.<br />
             <span className="text-[12px]">Přidej první výdaj nebo příjem ↑</span>
           </div>
@@ -229,7 +229,7 @@ export default function FinancePage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap animate-fade-in">
+        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap animate-fade-in">
           {toast}
         </div>
       )}

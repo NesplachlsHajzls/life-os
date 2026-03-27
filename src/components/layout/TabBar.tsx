@@ -13,7 +13,7 @@ export function TabBar() {
   return (
     <div
       className="flex items-center gap-1 px-3 py-2 overflow-x-auto flex-shrink-0"
-      style={{ background: 'var(--color-primary)', scrollbarWidth: 'none' }}
+      style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', scrollbarWidth: 'none' }}
     >
       {tabs.map(tab => {
         const isActive =
@@ -27,7 +27,7 @@ export function TabBar() {
             <Link
               href={tab.currentHref}
               className="flex items-center gap-1.5 pl-3 pr-2 py-1.5 text-[12px] font-semibold"
-              style={{ color: 'rgba(255,255,255,' + (isActive ? '1' : '0.7') + ')' }}
+              style={{ color: isActive ? 'var(--color-primary)' : 'var(--text-tertiary)', fontWeight: isActive ? 600 : 400 }}
             >
               <span className="text-[13px]">{tab.icon}</span>
               <span>{tab.label}</span>
@@ -35,7 +35,7 @@ export function TabBar() {
             <button
               onClick={() => closeTab(tab.id)}
               className="pl-1.5 pr-3 flex items-center justify-center text-[12px] leading-none hover:bg-[var(--surface)]/20 transition-colors"
-              style={{ color: 'rgba(255,255,255,0.55)' }}
+              style={{ color: 'var(--text-tertiary)' }}
               title="Zavřít záložku"
             >
               ×

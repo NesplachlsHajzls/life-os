@@ -24,8 +24,8 @@ function AddRecurringSheet({ onClose }: { onClose: () => void }) {
   // Simplified — just shows a placeholder for now
   return (
     <Sheet title="🔄 Nová opakovaná platba" onClose={onClose}>
-      <p className="text-[13px] text-gray-500">Správa opakovaných plateb bude brzy k dispozici.</p>
-      <button onClick={onClose} className="mt-4 w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zavřít</button>
+      <p className="text-[13px] text-[var(--text-secondary)]">Správa opakovaných plateb bude brzy k dispozici.</p>
+      <button onClick={onClose} className="mt-4 w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zavřít</button>
     </Sheet>
   )
 }
@@ -57,14 +57,14 @@ export default function OpakovAnePage() {
           </button>
         )}
 
-        <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">
+        <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
           Celkem měsíčně: {loading ? '…' : hideAmounts ? '••••' : `${fmt(totalMonthly)} Kč`}
         </div>
 
         {loading ? (
-          <div className="text-center py-6 text-gray-400 text-[13px]">Načítám…</div>
+          <div className="text-center py-6 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : recurring.length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-[13px]">
+          <div className="text-center py-8 text-[var(--text-tertiary)] text-[13px]">
             Žádné opakované platby.<br />
             <span className="text-[12px]">Přidej první kliknutím na +</span>
           </div>
@@ -83,7 +83,7 @@ export default function OpakovAnePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[14px] font-semibold">{r.description}</div>
-                    <div className="text-[11px] text-gray-400 mt-0.5">{FREQ_LABELS[r.category] ?? 'Každý měsíc'} · {r.category}</div>
+                    <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{FREQ_LABELS[r.category] ?? 'Každý měsíc'} · {r.category}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-[14px] font-bold text-red-500">−{hideAmounts ? '••••' : `${fmt(r.amount)} Kč`}</span>
@@ -103,7 +103,7 @@ export default function OpakovAnePage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
           {toast}
         </div>
       )}

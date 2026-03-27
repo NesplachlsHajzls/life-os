@@ -82,7 +82,7 @@ export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clients
 
         {/* Note */}
         {task.note && (
-          <div className="text-[12px] text-gray-400 mt-0.5 line-clamp-1">{task.note}</div>
+          <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 line-clamp-1">{task.note}</div>
         )}
 
         {/* URL */}
@@ -112,7 +112,7 @@ export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clients
         {onEdit && (
           <button
             onClick={() => onEdit(task)}
-            className="w-5 h-5 flex items-center justify-center rounded-full text-gray-300 hover:text-blue-400 hover:bg-blue-50 text-[11px] transition-colors"
+            className="w-5 h-5 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-blue-400 hover:bg-blue-50 text-[11px] transition-colors"
             title="Upravit úkol"
           >
             ✏️
@@ -120,7 +120,7 @@ export function TaskItem({ task, categories, onToggle, onDelete, onEdit, clients
         )}
         <button
           onClick={() => onDelete(task.id)}
-          className="w-5 h-5 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 text-[12px] transition-colors"
+          className="w-5 h-5 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 text-[12px] transition-colors"
         >
           ×
         </button>

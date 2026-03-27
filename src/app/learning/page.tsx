@@ -33,17 +33,17 @@ function AddAreaModal({ initial, onSave, onClose }: {
         <h2 className="text-[17px] font-bold mb-5">{initial ? '✏️ Upravit oblast' : '➕ Nová oblast učení'}</h2>
         <div className="flex flex-col gap-4">
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Název</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Název</label>
             <input className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
               value={name} onChange={e => setName(e.target.value)} placeholder="Digitalizace zdravotnictví..." autoFocus />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Popis (volitelný)</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Popis (volitelný)</label>
             <textarea className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)] resize-none"
               rows={2} value={desc} onChange={e => setDesc(e.target.value)} placeholder="Krátký popis oblasti..." />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Ikonka</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Ikonka</label>
             <div className="flex flex-wrap gap-2">
               {AREA_ICONS.map(ic => (
                 <button key={ic} onClick={() => setIcon(ic)}
@@ -54,7 +54,7 @@ function AddAreaModal({ initial, onSave, onClose }: {
             </div>
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Barva</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Barva</label>
             <div className="flex flex-wrap gap-2">
               {AREA_COLORS.map(c => (
                 <button key={c} onClick={() => setColor(c)}
@@ -64,7 +64,7 @@ function AddAreaModal({ initial, onSave, onClose }: {
             </div>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
             <button onClick={() => { if (valid) { onSave({ name: name.trim(), icon, color, description: desc || null }); onClose() } }}
               disabled={!valid} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
               style={{ background: 'var(--color-primary)' }}>{initial ? 'Uložit' : 'Vytvořit'}</button>
@@ -100,26 +100,26 @@ function AddBookModal({ userId, onSave, onClose }: { userId: string; onSave: (it
         <h2 className="text-[17px] font-bold mb-5">📚 Přidat knihu</h2>
         <div className="flex flex-col gap-4">
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Název</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Název</label>
             <input className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
               value={title} onChange={e => setTitle(e.target.value)} placeholder="Název knihy" autoFocus />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Autor</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Autor</label>
             <input className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
               value={author} onChange={e => setAuthor(e.target.value)} placeholder="Jméno autora" />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Počet stránek</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Počet stránek</label>
             <input type="number" className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
               value={pages} onChange={e => setPages(e.target.value)} placeholder="300" />
           </div>
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Stav</label>
+            <label className="block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5">Stav</label>
             <div className="flex gap-2">
               {(['wishlist', 'active', 'done'] as const).map(s => (
                 <button key={s} onClick={() => setStatus(s)}
-                  className={'flex-1 py-2 rounded-[12px] text-[12px] font-semibold transition-all ' + (status === s ? 'text-white' : 'bg-[var(--surface-raised)] text-gray-600')}
+                  className={'flex-1 py-2 rounded-[12px] text-[12px] font-semibold transition-all ' + (status === s ? 'text-white' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]')}
                   style={status === s ? { background: 'var(--color-primary)' } : {}}>
                   {s === 'wishlist' ? '📖 Chci' : s === 'active' ? '🔖 Čtu' : '✅ Přečteno'}
                 </button>
@@ -127,7 +127,7 @@ function AddBookModal({ userId, onSave, onClose }: { userId: string; onSave: (it
             </div>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
             <button onClick={handleSave} disabled={!valid} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
               style={{ background: 'var(--color-primary)' }}>Přidat</button>
           </div>
@@ -153,12 +153,12 @@ function AreaCard({ area, items, onEdit, onDelete, onClick }: {
             {area.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[15px] font-bold text-gray-900 leading-tight">{area.name}</div>
-            {area.description && <div className="text-[12px] text-gray-400 mt-0.5 truncate">{area.description}</div>}
+            <div className="text-[15px] font-bold text-[var(--text-primary)] leading-tight">{area.name}</div>
+            {area.description && <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 truncate">{area.description}</div>}
           </div>
           <div className="flex gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
-            <button onClick={onEdit} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-gray-600 text-[13px]">✏️</button>
-            <button onClick={onDelete} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-400 text-[15px]">×</button>
+            <button onClick={onEdit} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-[13px]">✏️</button>
+            <button onClick={onDelete} className="w-7 h-7 flex items-center justify-center rounded-lg text-[var(--text-tertiary)] hover:text-red-400 text-[15px]">×</button>
           </div>
         </div>
         {total > 0 ? (
@@ -176,7 +176,7 @@ function AreaCard({ area, items, onEdit, onDelete, onClick }: {
             </div>
           </>
         ) : (
-          <div className="text-[12px] text-gray-300 italic">Klikni pro přidání znalostí →</div>
+          <div className="text-[12px] text-[var(--text-tertiary)] italic">Klikni pro přidání znalostí →</div>
         )}
       </div>
     </div>
@@ -194,10 +194,10 @@ function BookRow({ item, onStatusChange, onDelete }: {
       <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[18px] flex-shrink-0 bg-[var(--bg)]">{item.cover_emoji ?? '📚'}</div>
       <div className="flex-1 min-w-0">
         <div className="text-[13px] font-semibold truncate">{item.title}</div>
-        {item.author && <div className="text-[11px] text-gray-400">{item.author}</div>}
+        {item.author && <div className="text-[11px] text-[var(--text-tertiary)]">{item.author}</div>}
         {item.status === 'active' && item.total_pages != null && item.current_page != null && (
           <div className="mt-1.5">
-            <div className="flex justify-between text-[10px] text-gray-400 mb-0.5">
+            <div className="flex justify-between text-[10px] text-[var(--text-tertiary)] mb-0.5">
               <span>{item.current_page}/{item.total_pages} str.</span>
               <span>{Math.round((item.current_page / item.total_pages) * 100)}%</span>
             </div>
@@ -311,14 +311,14 @@ export default function LearningPage() {
 
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
         {tab === 'areas' && (loading ? (
-          <div className="text-center py-12 text-gray-400 text-[13px]">Načítám…</div>
+          <div className="text-center py-12 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : (
           <div className="flex flex-col gap-3">
             {areas.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-[40px] mb-3">🎯</div>
-                <div className="text-[15px] font-semibold text-gray-600 mb-1">Žádné oblasti</div>
-                <div className="text-[13px] text-gray-400">Přidej první oblast — např. Digitalizace zdravotnictví</div>
+                <div className="text-[15px] font-semibold text-[var(--text-secondary)] mb-1">Žádné oblasti</div>
+                <div className="text-[13px] text-[var(--text-tertiary)]">Přidej první oblast — např. Digitalizace zdravotnictví</div>
               </div>
             )}
             {areas.map(area => (
@@ -334,14 +334,14 @@ export default function LearningPage() {
             <div className="flex gap-2 overflow-x-auto pb-1">
               {([{ id: 'all' as const, label: 'Vše' }, { id: 'active' as const, label: '🔖 Čtu' }, { id: 'done' as const, label: '✅ Přečteno' }, { id: 'wishlist' as const, label: '📖 Chci číst' }]).map(f => (
                 <button key={f.id} onClick={() => setBookFilter(f.id)}
-                  className={'px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all ' + (bookFilter === f.id ? 'text-white' : 'bg-[var(--surface-raised)] text-gray-600')}
+                  className={'px-3 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap transition-all ' + (bookFilter === f.id ? 'text-white' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]')}
                   style={bookFilter === f.id ? { background: 'var(--color-primary)' } : {}}>
                   {f.label}
                 </button>
               ))}
             </div>
             {filteredBooks.length === 0 ? (
-              <div className="text-center py-10 text-gray-400 text-[13px]">{books.length === 0 ? 'Žádné knihy — přidej první kliknutím na +' : 'Žádné knihy v tomto filtru'}</div>
+              <div className="text-center py-10 text-[var(--text-tertiary)] text-[13px]">{books.length === 0 ? 'Žádné knihy — přidej první kliknutím na +' : 'Žádné knihy v tomto filtru'}</div>
             ) : filteredBooks.map(b => (
               <BookRow key={b.id} item={b} onStatusChange={handleBookStatusChange} onDelete={handleDeleteBook} />
             ))}
@@ -354,7 +354,7 @@ export default function LearningPage() {
         style={{ background: 'var(--color-primary)' }}>+</button>
 
       {toast && (
-        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">{toast}</div>
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">{toast}</div>
       )}
 
       {showAddArea && <AddAreaModal onSave={handleAddArea} onClose={() => setShowAddArea(false)} />}

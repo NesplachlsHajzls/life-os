@@ -16,7 +16,7 @@ export function FinanceTabs({ active }: { active: string }) {
           className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold whitespace-nowrap transition-colors ${
             active === t.label
               ? 'bg-[var(--color-primary)] text-white'
-              : 'text-gray-500 hover:bg-[var(--surface-raised)]'
+              : 'text-[var(--text-secondary)] hover:bg-[var(--surface-raised)]'
           }`}
         >
           {t.label}

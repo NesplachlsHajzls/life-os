@@ -44,8 +44,8 @@ function AddDebtSheet({ prefillPerson, onSave, onClose }: { prefillPerson?: stri
   const [dateTo,   setDateTo]   = useState('')
 
   const valid = person.trim() && +amount > 0
-  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-green-400'
-  const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder-gray-400 outline-none focus:border-green-400'
+  const labelCls = 'block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5'
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
@@ -77,7 +77,7 @@ function AddDebtSheet({ prefillPerson, onSave, onClose }: { prefillPerson?: stri
             </div>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
             <button
               onClick={() => { if (valid) { onSave({ person: person.trim(), amount: +amount, note, date_from: dateFrom, date_to: dateTo || undefined, type: 'receivable' }); onClose() } }}
               disabled={!valid}
@@ -100,8 +100,8 @@ function EditDebtSheet({ debt, onSave, onClose }: { debt: Debt; onSave: (d: Debt
   const [dateTo,   setDateTo]   = useState(debt.date_to ?? '')
 
   const valid = person.trim() && +amount > 0
-  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
-  const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
+  const labelCls = 'block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5'
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
@@ -118,7 +118,7 @@ function EditDebtSheet({ debt, onSave, onClose }: { debt: Debt; onSave: (d: Debt
             <div><label className={labelCls}>Do kdy</label><input type="date" className={fieldCls} value={dateTo} onChange={e => setDateTo(e.target.value)} /></div>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
             <button
               onClick={() => { if (valid) { onSave({ ...debt, person: person.trim(), amount: +amount, note, date_from: dateFrom, date_to: dateTo || undefined }); onClose() } }}
               disabled={!valid}
@@ -212,16 +212,16 @@ export default function PohledavkyPage() {
               placeholder="Jirka 500 oběd / Martin 3000 záloha"
             />
             <button onClick={handleQuickAdd} disabled={!quickInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-green-500 text-white text-[13px] font-bold disabled:opacity-40">+</button>
-            <button onClick={() => { setAddPerson(''); setShowAdd(true) }} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-gray-500 text-[13px]">✎</button>
+            <button onClick={() => { setAddPerson(''); setShowAdd(true) }} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-[var(--text-secondary)] text-[13px]">✎</button>
           </div>
           {quickError && <p className="text-[11px] text-red-500 mt-1.5">⚠️ {quickError}</p>}
         </div>
 
         {/* Person groups */}
         {loading ? (
-          <div className="text-center py-8 text-gray-400 text-[13px]">Načítám…</div>
+          <div className="text-center py-8 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : Object.keys(grouped).length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-[13px]">
+          <div className="text-center py-8 text-[var(--text-tertiary)] text-[13px]">
             Nikdo ti nic nedluží 🎉<br /><span className="text-[12px]">Přidej pohledávku výše</span>
           </div>
         ) : (
@@ -248,13 +248,13 @@ export default function PohledavkyPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[14px] font-semibold">{personName}</div>
-                      {latestNote && <div className="text-[11px] text-gray-400 truncate">{latestNote}{entries.length > 1 ? ` +${entries.length - 1} další` : ''}</div>}
+                      {latestNote && <div className="text-[11px] text-[var(--text-tertiary)] truncate">{latestNote}{entries.length > 1 ? ` +${entries.length - 1} další` : ''}</div>}
                     </div>
                     <div className="text-right flex-shrink-0 mr-2">
                       <div className="text-[15px] font-bold text-green-600">+{h(total)}</div>
-                      {entries.length > 1 && <div className="text-[11px] text-gray-400">{entries.length} záznamy</div>}
+                      {entries.length > 1 && <div className="text-[11px] text-[var(--text-tertiary)]">{entries.length} záznamy</div>}
                     </div>
-                    <span className="text-gray-400 text-[12px]">{isOpen ? '▲' : '▼'}</span>
+                    <span className="text-[var(--text-tertiary)] text-[12px]">{isOpen ? '▲' : '▼'}</span>
                   </button>
 
                   {isOpen && (
@@ -267,8 +267,8 @@ export default function PohledavkyPage() {
                             className={`flex items-start gap-3 px-4 py-3 ${idx < entries.length - 1 ? 'border-b border-gray-50' : ''}`}
                           >
                             <div className="flex-1 min-w-0">
-                              <div className="text-[13px] font-semibold text-gray-800">{entry.note || '—'}</div>
-                              <div className="text-[11px] text-gray-400 mt-0.5">
+                              <div className="text-[13px] font-semibold text-[var(--text-primary)]">{entry.note || '—'}</div>
+                              <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">
                                 {formatDate(entry.date_from)}
                                 {entry.date_to ? ` → ${formatDate(entry.date_to)}` : ''}
                               </div>
@@ -277,11 +277,11 @@ export default function PohledavkyPage() {
                             <div className="flex gap-1 flex-shrink-0">
                               <button
                                 onClick={() => setEditingDebt(entry)}
-                                className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[12px]"
+                                className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[12px]"
                               >✏️</button>
                               <button
                                 onClick={() => removeDebt(entry.id)}
-                                className="w-6 h-6 flex items-center justify-center rounded-full text-gray-300 hover:text-red-400 hover:bg-red-50 text-[14px]"
+                                className="w-6 h-6 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-50 text-[14px]"
                               >×</button>
                             </div>
                           </div>
@@ -289,7 +289,7 @@ export default function PohledavkyPage() {
                       }
                       <button
                         onClick={() => { setAddPerson(personName); setShowAdd(true) }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-[12px] font-semibold text-gray-400 hover:text-green-600 hover:bg-[var(--bg)] transition-colors"
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-[12px] font-semibold text-[var(--text-tertiary)] hover:text-green-600 hover:bg-[var(--bg)] transition-colors"
                       >
                         <span className="text-[16px]">+</span> Přidat další záznam pro {personName}
                       </button>
@@ -303,7 +303,7 @@ export default function PohledavkyPage() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
+        <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-white text-[13px] font-medium px-4 py-2.5 rounded-[14px] shadow-lg z-50 whitespace-nowrap">
           {toast}
         </div>
       )}

@@ -75,12 +75,12 @@ function RoomModal({
       <div className="w-full bg-[var(--surface)] rounded-t-[24px] p-5 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between">
           <div className="text-[16px] font-bold">{initial ? 'Upravit místnost' : 'Nová místnost'}</div>
-          <button onClick={onClose} className="text-gray-400 text-[20px]">✕</button>
+          <button onClick={onClose} className="text-[var(--text-tertiary)] text-[20px]">✕</button>
         </div>
 
         {step === 'preset' && !initial && (
           <>
-            <div className="text-[13px] text-gray-500">Vyber typ místnosti nebo přidej vlastní</div>
+            <div className="text-[13px] text-[var(--text-secondary)]">Vyber typ místnosti nebo přidej vlastní</div>
             <div className="grid grid-cols-3 gap-2">
               {ROOM_PRESETS.map(p => (
                 <button
@@ -98,7 +98,7 @@ function RoomModal({
                 className="flex flex-col items-center gap-1 p-3 rounded-[12px] border border-dashed border-[var(--border-strong)]"
               >
                 <span className="text-[24px]">✏️</span>
-                <span className="text-[11px] font-semibold text-gray-500">Vlastní</span>
+                <span className="text-[11px] font-semibold text-[var(--text-secondary)]">Vlastní</span>
               </button>
             </div>
           </>
@@ -107,7 +107,7 @@ function RoomModal({
         {(step === 'custom' || initial) && (
           <>
             {!initial && (
-              <button onClick={() => setStep('preset')} className="text-[13px] text-gray-500">← Zpět na výběr</button>
+              <button onClick={() => setStep('preset')} className="text-[13px] text-[var(--text-secondary)]">← Zpět na výběr</button>
             )}
 
             {/* Preview */}
@@ -127,14 +127,14 @@ function RoomModal({
             />
 
             <div>
-              <div className="text-[12px] font-bold text-gray-500 mb-2">IKONA</div>
+              <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2">IKONA</div>
               <div className="flex gap-2 flex-wrap">
                 {ROOM_PRESETS.map(p => (
                   <button
                     key={p.icon}
                     onClick={() => setIcon(p.icon)}
                     className="text-[22px] p-2 rounded-[10px] transition-all"
-                    style={{ background: icon === p.icon ? color + '30' : '#f3f4f6', outline: icon === p.icon ? `2px solid ${color}` : 'none' }}
+                    style={{ background: icon === p.icon ? color + '30' : 'var(--surface-raised)', outline: icon === p.icon ? `2px solid ${color}` : 'none' }}
                   >
                     {p.icon}
                   </button>
@@ -143,7 +143,7 @@ function RoomModal({
             </div>
 
             <div>
-              <div className="text-[12px] font-bold text-gray-500 mb-2">BARVA</div>
+              <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2">BARVA</div>
               <div className="flex gap-2 flex-wrap">
                 {ROOM_COLORS.map(c => (
                   <button
@@ -161,7 +161,7 @@ function RoomModal({
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button
                 onClick={() => { if (name.trim()) onSave(name.trim(), icon, color) }}
                 className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white"
@@ -310,14 +310,14 @@ function RoomsTab({ userId }: { userId: string }) {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
-      <div className="text-[14px] text-gray-400">Načítám...</div>
+      <div className="text-[14px] text-[var(--text-tertiary)]">Načítám...</div>
     </div>
   )
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-3">
       {rooms.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-[var(--text-tertiary)]">
           <div className="text-[40px] mb-3">🏠</div>
           <div className="text-[15px] font-semibold">Zatím žádné místnosti</div>
           <div className="text-[13px] mt-1">Klepni na + a přidej první místnost</div>
@@ -344,14 +344,14 @@ function RoomsTab({ userId }: { userId: string }) {
                   {room.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[14px] font-semibold text-gray-800">{room.name}</div>
-                  <div className="text-[12px] text-gray-400 mt-0.5 flex gap-2">
+                  <div className="text-[14px] font-semibold text-[var(--text-primary)]">{room.name}</div>
+                  <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 flex gap-2">
                     {todoCount > 0 && <span>📋 {todoCount} úkolů</span>}
                     {buyCount > 0 && <span>🛒 {buyCount} k nákupu{totalCost > 0 ? ` • ${totalCost.toLocaleString('cs')} Kč` : ''}</span>}
-                    {todoCount === 0 && buyCount === 0 && <span className="text-gray-300">Vše hotovo</span>}
+                    {todoCount === 0 && buyCount === 0 && <span className="text-[var(--text-tertiary)]">Vše hotovo</span>}
                   </div>
                 </div>
-                <span className="text-gray-300 text-[12px]">{isExpanded ? '▼' : '▶'}</span>
+                <span className="text-[var(--text-tertiary)] text-[12px]">{isExpanded ? '▼' : '▶'}</span>
               </div>
             </button>
 
@@ -363,7 +363,7 @@ function RoomsTab({ userId }: { userId: string }) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setEditRoom(room)}
-                    className="flex-1 py-2 rounded-[10px] text-[12px] font-semibold border border-[var(--border)] bg-[var(--surface)] text-gray-600"
+                    className="flex-1 py-2 rounded-[10px] text-[12px] font-semibold border border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)]"
                   >
                     ✏️ Upravit místnost
                   </button>
@@ -377,7 +377,7 @@ function RoomsTab({ userId }: { userId: string }) {
 
                 {/* Todos */}
                 <div>
-                  <div className="text-[11px] font-bold text-gray-400 mb-2 tracking-wide">CO UDĚLAT</div>
+                  <div className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2 tracking-wide">CO UDĚLAT</div>
                   {roomTodos.filter(t => t.type === 'todo').map(todo => (
                     <div key={todo.id} className="flex items-center gap-2 py-1.5">
                       <input
@@ -393,7 +393,7 @@ function RoomsTab({ userId }: { userId: string }) {
                       >
                         {todo.title}
                       </span>
-                      <button onClick={() => removeTodo(room.id, todo.id)} className="text-gray-300 text-[14px] px-1">✕</button>
+                      <button onClick={() => removeTodo(room.id, todo.id)} className="text-[var(--text-tertiary)] text-[14px] px-1">✕</button>
                     </div>
                   ))}
                   <AddTodoForm color={room.color} onAdd={title => addTodo(room.id, title, 'todo', null)} />
@@ -401,7 +401,7 @@ function RoomsTab({ userId }: { userId: string }) {
 
                 {/* Buy */}
                 <div className="border-t border-[var(--border)] pt-4">
-                  <div className="text-[11px] font-bold text-gray-400 mb-2 tracking-wide">CO KOUPIT</div>
+                  <div className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2 tracking-wide">CO KOUPIT</div>
                   {roomTodos.filter(t => t.type === 'buy').map(todo => (
                     <div key={todo.id} className="flex items-center gap-2 py-1.5">
                       <input
@@ -417,8 +417,8 @@ function RoomsTab({ userId }: { userId: string }) {
                       >
                         {todo.title}
                       </span>
-                      {todo.price != null && <span className="text-[12px] text-gray-400">{todo.price.toLocaleString('cs')} Kč</span>}
-                      <button onClick={() => removeTodo(room.id, todo.id)} className="text-gray-300 text-[14px] px-1">✕</button>
+                      {todo.price != null && <span className="text-[12px] text-[var(--text-tertiary)]">{todo.price.toLocaleString('cs')} Kč</span>}
+                      <button onClick={() => removeTodo(room.id, todo.id)} className="text-[var(--text-tertiary)] text-[14px] px-1">✕</button>
                     </div>
                   ))}
                   <AddBuyForm color={room.color} onAdd={(title, price) => addTodo(room.id, title, 'buy', price)} />
@@ -512,7 +512,7 @@ function ContractsTab({ userId }: { userId: string }) {
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
-      <div className="text-[14px] text-gray-400">Načítám...</div>
+      <div className="text-[14px] text-[var(--text-tertiary)]">Načítám...</div>
     </div>
   )
 
@@ -531,7 +531,7 @@ function ContractsTab({ userId }: { userId: string }) {
       )}
 
       {contracts.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-[var(--text-tertiary)]">
           <div className="text-[40px] mb-3">📄</div>
           <div className="text-[15px] font-semibold">Zatím žádné smlouvy</div>
           <div className="text-[13px] mt-1">Klepni na + a přidej první smlouvu</div>
@@ -553,11 +553,11 @@ function ContractsTab({ userId }: { userId: string }) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[16px]">{typeInfo?.icon}</span>
-                    <span className="text-[14px] font-semibold text-gray-800">{contract.name}</span>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-500">{typeInfo?.label}</span>
+                    <span className="text-[14px] font-semibold text-[var(--text-primary)]">{contract.name}</span>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)]">{typeInfo?.label}</span>
                   </div>
-                  {contract.provider && <div className="text-[12px] text-gray-400 mb-1">{contract.provider}</div>}
-                  <div className="text-[15px] font-bold text-gray-800">{contract.amount_monthly.toLocaleString('cs')} Kč<span className="text-[12px] font-normal text-gray-400">/měs</span></div>
+                  {contract.provider && <div className="text-[12px] text-[var(--text-tertiary)] mb-1">{contract.provider}</div>}
+                  <div className="text-[15px] font-bold text-[var(--text-primary)]">{contract.amount_monthly.toLocaleString('cs')} Kč<span className="text-[12px] font-normal text-[var(--text-tertiary)]">/měs</span></div>
 
                   <div className="flex items-center gap-3 mt-2 flex-wrap">
                     {contract.renewal_date && (
@@ -580,7 +580,7 @@ function ContractsTab({ userId }: { userId: string }) {
                     )}
                   </div>
                 </div>
-                <button onClick={() => removeContract(contract.id)} className="text-gray-300 text-[18px] px-1 flex-shrink-0">✕</button>
+                <button onClick={() => removeContract(contract.id)} className="text-[var(--text-tertiary)] text-[18px] px-1 flex-shrink-0">✕</button>
               </div>
             </div>
           </div>
@@ -593,7 +593,7 @@ function ContractsTab({ userId }: { userId: string }) {
           <div className="w-full bg-[var(--surface)] rounded-t-[24px] p-5 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div className="text-[16px] font-bold">Nová smlouva</div>
-              <button onClick={() => setShowAdd(false)} className="text-gray-400 text-[20px]">✕</button>
+              <button onClick={() => setShowAdd(false)} className="text-[var(--text-tertiary)] text-[20px]">✕</button>
             </div>
 
             <input
@@ -613,7 +613,7 @@ function ContractsTab({ userId }: { userId: string }) {
                   style={{
                     background: form.type === t.id ? 'var(--color-primary)' : '#f9fafb',
                     color: form.type === t.id ? 'white' : '#374151',
-                    borderColor: form.type === t.id ? 'var(--color-primary)' : '#e5e7eb',
+                    borderColor: form.type === t.id ? 'var(--color-primary)' : 'var(--border)',
                   }}
                 >
                   <span>{t.icon}</span> {t.label}
@@ -631,7 +631,7 @@ function ContractsTab({ userId }: { userId: string }) {
 
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="text-[12px] text-gray-500 mb-1 block">Měsíční náklad (Kč)</label>
+                <label className="text-[12px] text-[var(--text-secondary)] mb-1 block">Měsíční náklad (Kč)</label>
                 <input
                   type="number"
                   placeholder="0"
@@ -641,7 +641,7 @@ function ContractsTab({ userId }: { userId: string }) {
                 />
               </div>
               <div className="flex-1">
-                <label className="text-[12px] text-gray-500 mb-1 block">Datum obnovení</label>
+                <label className="text-[12px] text-[var(--text-secondary)] mb-1 block">Datum obnovení</label>
                 <input
                   type="date"
                   value={form.renewal_date}
@@ -652,7 +652,7 @@ function ContractsTab({ userId }: { userId: string }) {
             </div>
 
             <div>
-              <label className="text-[12px] text-gray-500 mb-1 block">Odkaz na dokument (Google Drive, Disk...)</label>
+              <label className="text-[12px] text-[var(--text-secondary)] mb-1 block">Odkaz na dokument (Google Drive, Disk...)</label>
               <input
                 type="url"
                 placeholder="https://..."
@@ -670,11 +670,11 @@ function ContractsTab({ userId }: { userId: string }) {
               >
                 <div className="absolute top-0.5 w-4 h-4 bg-[var(--surface)] rounded-full shadow transition-all" style={{ left: form.auto_renew ? '22px' : '2px' }} />
               </div>
-              <span className="text-[13px] text-gray-700">Automatické obnovení</span>
+              <span className="text-[13px] text-[var(--text-secondary)]">Automatické obnovení</span>
             </label>
 
             <div className="flex gap-3 pt-2">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button
                 onClick={addContract}
                 className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white"

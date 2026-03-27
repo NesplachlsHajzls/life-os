@@ -108,16 +108,16 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
         <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
           {event.is_all_day ? '📌 Celý den' : `${fmtTime(event.start_datetime)} – ${fmtTime(event.end_datetime)}`}
         </div>
-        <div className="text-[13px] font-semibold text-gray-800 mt-0.5 truncate">
+        <div className="text-[13px] font-semibold text-[var(--text-primary)] mt-0.5 truncate">
           {event.emoji && <span className="mr-1">{event.emoji}</span>}
           {event.title}
-          {event.is_recurring && <span className="ml-1 text-[10px] text-gray-400">🔁</span>}
+          {event.is_recurring && <span className="ml-1 text-[10px] text-[var(--text-tertiary)]">🔁</span>}
         </div>
         {clientName && (
-          <div className="text-[10px] font-semibold text-gray-400 mt-0.5 truncate">💼 {clientName}</div>
+          <div className="text-[10px] font-semibold text-[var(--text-tertiary)] mt-0.5 truncate">💼 {clientName}</div>
         )}
         {event.description && (
-          <div className="text-[10px] text-gray-400 mt-0.5 truncate opacity-70">{event.description}</div>
+          <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5 truncate opacity-70">{event.description}</div>
         )}
       </div>
     </div>
@@ -159,11 +159,11 @@ function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFA
         <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color: style.color }}>
           ✅ {clientName ? clientName : 'Úkol'}
         </div>
-        <div className="text-[13px] font-semibold text-gray-700 mt-0.5 truncate">
+        <div className="text-[13px] font-semibold text-[var(--text-secondary)] mt-0.5 truncate">
           {task.title}
         </div>
         {task.note && (
-          <div className="text-[10px] text-gray-400 mt-0.5 truncate opacity-70">{task.note}</div>
+          <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5 truncate opacity-70">{task.note}</div>
         )}
       </div>
     </div>
@@ -191,14 +191,14 @@ function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate, appCa
           <span className="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full" style={{ background: style.background, color: style.color }}>
             {label}
           </span>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg">✕</button>
+          <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-lg">✕</button>
         </div>
-        <h2 className="text-[18px] font-bold text-gray-900 mb-1">
+        <h2 className="text-[18px] font-bold text-[var(--text-primary)] mb-1">
           {event.emoji && <span className="mr-2">{event.emoji}</span>}
           {event.title}
         </h2>
-        {event.description && <p className="text-[13px] text-gray-500 mb-3">{event.description}</p>}
-        <div className="text-[13px] text-gray-600 space-y-1 mb-4">
+        {event.description && <p className="text-[13px] text-[var(--text-secondary)] mb-3">{event.description}</p>}
+        <div className="text-[13px] text-[var(--text-secondary)] space-y-1 mb-4">
           {event.is_all_day
             ? <p>📅 Celý den</p>
             : <p>🕐 {fmtTime(event.start_datetime)} – {fmtTime(event.end_datetime)}</p>
@@ -212,7 +212,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate, appCa
         <div className="flex gap-2 mb-2">
           <button
             onClick={() => onEdit(event)}
-            className="flex-1 py-2.5 rounded-xl bg-[var(--bg)] text-gray-700 text-[13px] font-semibold hover:bg-[var(--surface-raised)] transition-colors flex items-center justify-center gap-1.5"
+            className="flex-1 py-2.5 rounded-xl bg-[var(--bg)] text-[var(--text-secondary)] text-[13px] font-semibold hover:bg-[var(--surface-raised)] transition-colors flex items-center justify-center gap-1.5"
           >
             ✏️ Upravit
           </button>
@@ -335,7 +335,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
   }
 
   const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-[14px] focus:outline-none focus:border-[var(--color-primary)]'
-  const labelCls = 'text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1 block'
+  const labelCls = 'text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1 block'
 
   const modalTitle = isEditMode ? 'Upravit událost' : isDuplicate ? 'Duplikovat událost' : 'Nová událost'
 
@@ -344,7 +344,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
       <div className="bg-[var(--surface)] rounded-2xl w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden" onClick={e => e.stopPropagation()}>
         <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
           <h2 className="text-[16px] font-bold">{modalTitle}</h2>
-          <button onClick={onClose} className="text-gray-400 text-lg">✕</button>
+          <button onClick={onClose} className="text-[var(--text-tertiary)] text-lg">✕</button>
         </div>
         <div className="p-5 space-y-4">
 
@@ -410,13 +410,13 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                   onClick={() => setShowClientPicker(v => !v)}
                   className={`w-full text-left ${fieldCls} flex items-center justify-between`}
                 >
-                  <span className={selectedClientName ? 'text-gray-900' : 'text-gray-400'}>
+                  <span className={selectedClientName ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}>
                     {selectedClientName ?? 'Vybrat klienta…'}
                   </span>
                   {clientId && (
                     <span
                       onClick={e => { e.stopPropagation(); setClientId(null); setClientSearch('') }}
-                      className="text-gray-400 hover:text-gray-600 ml-2"
+                      className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] ml-2"
                     >✕</span>
                   )}
                 </button>
@@ -432,13 +432,13 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                       />
                     </div>
                     {filteredClients.length === 0 ? (
-                      <div className="px-3 py-2 text-[13px] text-gray-400">Žádný klient nenalezen</div>
+                      <div className="px-3 py-2 text-[13px] text-[var(--text-tertiary)]">Žádný klient nenalezen</div>
                     ) : filteredClients.map(c => (
                       <button
                         key={c.id}
                         type="button"
                         onClick={() => { setClientId(c.id); setClientSearch(''); setShowClientPicker(false) }}
-                        className={`w-full text-left px-3 py-2 text-[13px] hover:bg-[var(--bg)] transition-colors ${clientId === c.id ? 'font-semibold text-[var(--color-primary)]' : 'text-gray-700'}`}
+                        className={`w-full text-left px-3 py-2 text-[13px] hover:bg-[var(--bg)] transition-colors ${clientId === c.id ? 'font-semibold text-[var(--color-primary)]' : 'text-[var(--text-secondary)]'}`}
                       >
                         {c.name}
                       </button>
@@ -457,7 +457,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
 
           {/* All day toggle */}
           <div className="flex items-center justify-between">
-            <label className="text-[13px] font-medium text-gray-700">Celý den</label>
+            <label className="text-[13px] font-medium text-[var(--text-secondary)]">Celý den</label>
             <button
               onClick={() => setIsAllDay(v => !v)}
               className={`relative w-11 h-6 rounded-full transition-colors ${isAllDay ? 'bg-[var(--color-primary)]' : 'bg-[var(--border)]'}`}
@@ -494,7 +494,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
 
           {/* Recurring toggle */}
           <div className="flex items-center justify-between">
-            <label className="text-[13px] font-medium text-gray-700">🔁 Opakující se</label>
+            <label className="text-[13px] font-medium text-[var(--text-secondary)]">🔁 Opakující se</label>
             <button
               onClick={() => setIsRecurring(v => !v)}
               className={`relative w-11 h-6 rounded-full transition-colors ${isRecurring ? 'bg-[var(--color-primary)]' : 'bg-[var(--border)]'}`}
@@ -515,7 +515,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                       className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-all ${
                         recType === rt
                           ? 'bg-[var(--color-primary-light)] border-[var(--color-primary)] text-[var(--color-primary)]'
-                          : 'bg-[var(--bg)] border-[var(--border)] text-gray-500'
+                          : 'bg-[var(--bg)] border-[var(--border)] text-[var(--text-secondary)]'
                       }`}
                     >
                       {RECURRENCE_LABELS[rt]}
@@ -576,10 +576,10 @@ function WeekStrip({ weekStart, events, onDayClick }: {
             onClick={() => onDayClick(day)}
             className={`flex flex-col items-center gap-1 py-1.5 rounded-xl cursor-pointer transition-colors ${isToday ? 'bg-[var(--color-primary)]' : 'hover:bg-[var(--bg)]'}`}
           >
-            <span className={`text-[10px] font-semibold uppercase ${isToday ? 'text-white/70' : 'text-gray-400'}`}>
+            <span className={`text-[10px] font-semibold uppercase ${isToday ? 'text-white/70' : 'text-[var(--text-tertiary)]'}`}>
               {dayLabels[i]}
             </span>
-            <span className={`text-[16px] font-bold ${isToday ? 'text-white' : 'text-gray-800'}`}>
+            <span className={`text-[16px] font-bold ${isToday ? 'text-white' : 'text-[var(--text-primary)]'}`}>
               {day.getDate()}
             </span>
             {hasDot && (
@@ -643,7 +643,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
     <div className="p-4 flex flex-col gap-0">
       <style>{`@keyframes calFlash{0%{background:transparent}20%{background:rgba(59,130,246,0.12)}60%{background:rgba(59,130,246,0.08)}100%{background:transparent}}`}</style>
       {visibleDays.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-[var(--text-tertiary)]">
           <div className="text-3xl mb-2">📭</div>
           <p className="text-[13px]">Tento týden nic naplánováno</p>
         </div>
@@ -672,12 +672,12 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
               onClick={() => onToggleDay?.(dayIso)}
             >
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'} text-gray-400`}>▶</span>
-                <div className={`text-[11px] font-bold uppercase tracking-wide ${isToday ? 'text-[var(--color-primary)]' : 'text-gray-400'}`}>
+                <span className={`text-[10px] transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'} text-[var(--text-tertiary)]`}>▶</span>
+                <div className={`text-[11px] font-bold uppercase tracking-wide ${isToday ? 'text-[var(--color-primary)]' : 'text-[var(--text-tertiary)]'}`}>
                   {label}
                 </div>
                 {isCollapsed && totalItems > 0 && (
-                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-500">
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)]">
                     {totalItems}
                   </span>
                 )}
@@ -691,12 +691,12 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
             </div>
             {!isCollapsed && (
               evs.length === 0 && tks.length === 0
-                ? <div className="text-[12px] text-gray-300 py-1.5 text-center">Žádné události ani úkoly</div>
+                ? <div className="text-[12px] text-[var(--text-tertiary)] py-1.5 text-center">Žádné události ani úkoly</div>
                 : (
                   <div className="grid grid-cols-2 gap-3">
                     {/* Levý sloupec — Události */}
                     <div className="flex flex-col gap-2">
-                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-300 mb-0.5">Události</div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-tertiary)] mb-0.5">Události</div>
                       {evs.length === 0
                         ? <div className="text-[11px] text-gray-200 italic">—</div>
                         : evs.map(ev => (
@@ -714,7 +714,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                     </div>
                     {/* Pravý sloupec — Úkoly */}
                     <div className="flex flex-col gap-2">
-                      <div className="text-[9px] font-bold uppercase tracking-widest text-gray-300 mb-0.5">Úkoly</div>
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-[var(--text-tertiary)] mb-0.5">Úkoly</div>
                       {tks.length === 0
                         ? <div className="text-[11px] text-gray-200 italic">—</div>
                         : tks.map(t => (
@@ -786,7 +786,7 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCat
     <div className="p-3">
       <div className="grid grid-cols-7 mb-1">
         {dayLabels.map(d => (
-          <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold text-[var(--text-tertiary)] uppercase py-1">{d}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-0.5">
@@ -812,7 +812,7 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCat
               }`}
             >
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold mb-1 mx-auto ${
-                isToday ? 'bg-[var(--color-primary)] text-white' : 'text-gray-700'
+                isToday ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--text-secondary)]'
               }`}>
                 {day.getDate()}
               </div>
@@ -1120,9 +1120,9 @@ export default function KalendarPage() {
 
       {/* Navigation */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)]">
-        <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-lg hover:bg-[var(--surface-raised)] flex items-center justify-center text-gray-600 text-lg font-bold">‹</button>
-        <span className="text-[14px] font-bold text-gray-800">{headerTitle}</span>
-        <button onClick={() => navigate(1)} className="w-8 h-8 rounded-lg hover:bg-[var(--surface-raised)] flex items-center justify-center text-gray-600 text-lg font-bold">›</button>
+        <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-lg hover:bg-[var(--surface-raised)] flex items-center justify-center text-[var(--text-secondary)] text-lg font-bold">‹</button>
+        <span className="text-[14px] font-bold text-[var(--text-primary)]">{headerTitle}</span>
+        <button onClick={() => navigate(1)} className="w-8 h-8 rounded-lg hover:bg-[var(--surface-raised)] flex items-center justify-center text-[var(--text-secondary)] text-lg font-bold">›</button>
       </div>
 
       {/* Week strip (only in week view) */}
@@ -1137,7 +1137,7 @@ export default function KalendarPage() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center py-16 text-gray-400 text-[13px]">Načítám…</div>
+          <div className="flex items-center justify-center py-16 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : view === 'week' ? (
           <WeekView
             weekStart={weekStart}
