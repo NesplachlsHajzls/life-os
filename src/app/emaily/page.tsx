@@ -54,7 +54,7 @@ function EmailCard({
   const filtered = clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className={`bg-white rounded-[14px] p-4 flex gap-3 transition-opacity ${isDone ? 'opacity-50' : ''}`}
+    <div className={`bg-[var(--surface)] rounded-[14px] p-4 flex gap-3 transition-opacity ${isDone ? 'opacity-50' : ''}`}
       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
 
       {/* Avatar */}
@@ -95,18 +95,18 @@ function EmailCard({
               className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${
                 clientName
                   ? 'text-white border-transparent'
-                  : 'text-gray-400 border-gray-200 hover:border-gray-300'
+                  : 'text-gray-400 border-[var(--border)] hover:border-[var(--border-strong)]'
               }`}
               style={clientName && clientColor ? { background: clientColor, borderColor: clientColor } : undefined}
             >
               {clientName ? `👤 ${clientName}` : '+ Klient'}
             </button>
             {showClientPicker && (
-              <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg w-56 max-h-56 overflow-y-auto">
-                <div className="p-2 border-b border-gray-100">
+              <div className="absolute z-50 top-full left-0 mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-lg w-56 max-h-56 overflow-y-auto">
+                <div className="p-2 border-b border-[var(--border)]">
                   <input
                     autoFocus
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[var(--color-primary)]"
+                    className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-[12px] outline-none focus:border-[var(--color-primary)]"
                     placeholder="Hledat klienta…"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
@@ -126,7 +126,7 @@ function EmailCard({
                   <button
                     key={c.id}
                     onClick={() => { onAssignClient(email.id, c.id); setShowClientPicker(false); setSearch('') }}
-                    className={`w-full text-left px-3 py-2 text-[12px] hover:bg-gray-50 flex items-center gap-2 ${email.client_id === c.id ? 'font-bold' : 'text-gray-700'}`}
+                    className={`w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--bg)] flex items-center gap-2 ${email.client_id === c.id ? 'font-bold' : 'text-gray-700'}`}
                   >
                     <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: c.color }} />
                     {c.name}
@@ -144,7 +144,7 @@ function EmailCard({
             className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${
               isDone
                 ? 'bg-green-50 border-green-200 text-green-600'
-                : 'border-gray-200 text-gray-400 hover:border-green-300 hover:text-green-600'
+                : 'border-[var(--border)] text-gray-400 hover:border-green-300 hover:text-green-600'
             }`}
           >
             {isDone ? '✓ Vyřízeno' : 'Vyřídit'}
@@ -228,10 +228,10 @@ function ImportModal({ userId, onImported, onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div className="bg-white rounded-[24px] p-6 w-full mx-4 shadow-2xl" style={{ maxWidth: 480 }}>
+      <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full mx-4 shadow-2xl" style={{ maxWidth: 480 }}>
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-[18px] font-extrabold text-gray-900">📥 Import emailů z Outlooku</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
         </div>
 
         {/* Instrukce */}
@@ -257,7 +257,7 @@ function ImportModal({ userId, onImported, onClose }: {
           onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
           onClick={() => fileRef.current?.click()}
           className={`border-2 border-dashed rounded-[14px] p-8 text-center cursor-pointer transition-all ${
-            dragging ? 'border-[var(--color-primary)] bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+            dragging ? 'border-[var(--color-primary)] bg-blue-50' : 'border-[var(--border)] hover:border-[var(--border-strong)]'
           }`}
         >
           <input
@@ -290,10 +290,10 @@ function ImportModal({ userId, onImported, onClose }: {
         )}
 
         {parsed.length > 0 && (
-          <div className="mt-4 bg-gray-50 rounded-[12px] p-3 text-[12px] text-gray-600 max-h-40 overflow-y-auto">
+          <div className="mt-4 bg-[var(--bg)] rounded-[12px] p-3 text-[12px] text-gray-600 max-h-40 overflow-y-auto">
             <div className="font-bold text-gray-700 mb-2">Náhled ({Math.min(3, parsed.length)} z {parsed.length}):</div>
             {parsed.slice(0, 3).map((e, i) => (
-              <div key={i} className="mb-2 pb-2 border-b border-gray-200 last:border-0">
+              <div key={i} className="mb-2 pb-2 border-b border-[var(--border)] last:border-0">
                 <div className="font-semibold text-gray-800 truncate">{e.subject || '(bez předmětu)'}</div>
                 <div className="text-gray-400">{e.from_name || e.from_address} · {e.received_at ? new Date(e.received_at).toLocaleDateString('cs-CZ') : '—'}</div>
               </div>
@@ -302,7 +302,7 @@ function ImportModal({ userId, onImported, onClose }: {
         )}
 
         <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
           <button
             onClick={handleImport}
             disabled={parsed.length === 0 || importing}
@@ -391,7 +391,7 @@ export default function EmalyPage() {
         action={
           <button
             onClick={() => setShowImport(true)}
-            className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-white/20 px-3 py-1.5 rounded-lg hover:bg-white/30 transition-colors"
+            className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-[var(--surface)]/20 px-3 py-1.5 rounded-lg hover:bg-[var(--surface)]/30 transition-colors"
           >
             📥 Import
           </button>
@@ -399,7 +399,7 @@ export default function EmalyPage() {
       />
 
       {/* Filter + search bar */}
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 flex-wrap">
+      <div className="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-3 flex items-center gap-3 flex-wrap">
         <div className="flex gap-1.5">
           {([
             { id: 'pending', label: `Nevyřízené${pendingCount > 0 ? ` (${pendingCount})` : ''}` },
@@ -420,7 +420,7 @@ export default function EmalyPage() {
           ))}
         </div>
         <input
-          className="flex-1 min-w-[140px] bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-[13px] outline-none focus:border-[var(--color-primary)]"
+          className="flex-1 min-w-[140px] bg-[var(--bg)] border border-[var(--border)] rounded-lg px-3 py-1.5 text-[13px] outline-none focus:border-[var(--color-primary)]"
           placeholder="Hledat…"
           value={search}
           onChange={e => setSearch(e.target.value)}

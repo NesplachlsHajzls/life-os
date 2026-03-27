@@ -52,26 +52,26 @@ export default function TransakcePage() {
 
   return (
     <>
-      <Header title="Finance 💰" />
+      <Header title="Finance" />
       <FinanceTabs active="Transakce" />
 
       {/* Month selector */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)]">
         <button onClick={() => { const i = allMonths.indexOf(curMonth); if (i > 0) setCurMonth(allMonths[i - 1]) }}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-lg">‹</button>
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-lg">‹</button>
         <span className="text-[13px] font-bold text-gray-700">{mLabel(curMonth)}</span>
         <button onClick={() => { const i = allMonths.indexOf(curMonth); if (i < allMonths.length - 1) setCurMonth(allMonths[i + 1]) }}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-lg">›</button>
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-lg">›</button>
       </div>
 
       {/* Filter chips */}
-      <div className="flex gap-2 px-4 py-2.5 bg-white border-b border-gray-100">
+      <div className="flex gap-2 px-4 py-2.5 bg-[var(--surface)] border-b border-[var(--border)]">
         {(['all', 'exp', 'inc'] as const).map(f => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-colors ${
-              filter === f ? 'bg-[var(--color-primary)] text-white' : 'bg-gray-100 text-gray-500'
+              filter === f ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--surface-raised)] text-gray-500'
             }`}
           >
             {f === 'all' ? 'Vše' : f === 'exp' ? '💸 Výdaje' : '💚 Příjmy'}
@@ -97,14 +97,14 @@ export default function TransakcePage() {
                 ? '📍 Dnes'
                 : date.slice(5).replace('-', '. ') + '. ' + date.slice(0, 4)}
             </div>
-            <div className="bg-white rounded-[16px] shadow-card overflow-hidden">
+            <div className="bg-[var(--surface)] rounded-[16px] shadow-card overflow-hidden">
               {items.map((item, idx) => {
                 const isExp = item.kind === 'exp'
                 const cat = isExp ? (expCats[item.category] ?? { icon: '📦', color: '#94a3b8' }) : null
                 return (
                   <div
                     key={item.id}
-                    className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? 'border-b border-gray-100' : ''}`}
+                    className={`flex items-center gap-3 px-4 py-3 ${idx < items.length - 1 ? 'border-b border-[var(--border)]' : ''}`}
                   >
                     <div
                       className="w-9 h-9 rounded-full flex items-center justify-center text-[16px] flex-shrink-0"

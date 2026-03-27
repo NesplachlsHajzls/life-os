@@ -20,7 +20,7 @@ function ToolBtn({
       className={`h-7 min-w-[28px] px-1.5 rounded-[6px] text-[13px] font-semibold transition-colors flex items-center justify-center select-none ${
         active
           ? 'bg-gray-800 text-white'
-          : 'text-gray-600 hover:bg-gray-100'
+          : 'text-gray-600 hover:bg-[var(--surface-raised)]'
       }`}
     >
       {children}
@@ -29,7 +29,7 @@ function ToolBtn({
 }
 
 function Sep() {
-  return <div className="w-px h-5 bg-gray-200 mx-0.5 flex-shrink-0" />
+  return <div className="w-px h-5 bg-[var(--border)] mx-0.5 flex-shrink-0" />
 }
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -164,7 +164,7 @@ export function RichTextEditor({
   return (
     <div className={`flex flex-col ${className}`}>
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-0.5 flex-wrap py-2 px-1 border-b border-gray-100 bg-white sticky top-0 z-10 rounded-t-[12px]">
+      <div className="flex items-center gap-0.5 flex-wrap py-2 px-1 border-b border-[var(--border)] bg-[var(--surface)] sticky top-0 z-10 rounded-t-[12px]">
 
         {/* Text style */}
         <ToolBtn onMouseDown={tb('bold')}          title="Tučné (Ctrl+B)"      active={queryState('bold')}         ><strong>B</strong></ToolBtn>

@@ -25,7 +25,7 @@ function AddRecurringSheet({ onClose }: { onClose: () => void }) {
   return (
     <Sheet title="🔄 Nová opakovaná platba" onClose={onClose}>
       <p className="text-[13px] text-gray-500">Správa opakovaných plateb bude brzy k dispozici.</p>
-      <button onClick={onClose} className="mt-4 w-full py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zavřít</button>
+      <button onClick={onClose} className="mt-4 w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zavřít</button>
     </Sheet>
   )
 }
@@ -44,7 +44,7 @@ export default function OpakovAnePage() {
 
   return (
     <>
-      <Header title="Finance 💰" />
+      <Header title="Finance" />
       <FinanceTabs active="Opakované" />
 
       <div className="p-4">
@@ -74,7 +74,7 @@ export default function OpakovAnePage() {
               const cat = expCats[r.category] ?? { icon: '📦', color: '#94a3b8' }
               const isDue = dueRecurring.some(d => d.id === r.id)
               return (
-                <div key={r.id} className="bg-white rounded-[16px] px-4 py-3.5 flex items-center gap-3 shadow-card">
+                <div key={r.id} className="bg-[var(--surface)] rounded-[16px] px-4 py-3.5 flex items-center gap-3 shadow-card">
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-[18px]"
                     style={{ background: cat.color + '22' }}

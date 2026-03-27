@@ -14,7 +14,7 @@ function TabNav({ tab, onTab }: { tab: string; onTab: (t: string) => void }) {
     { id: 'trips', label: 'Výlety' },
   ]
   return (
-    <div className="flex gap-3 px-5 pt-4 border-b border-gray-200">
+    <div className="flex gap-3 px-5 pt-4 border-b border-[var(--border)]">
       {tabs.map(t => (
         <button
           key={t.id}
@@ -113,7 +113,7 @@ function PlacesTab({ userId }: { userId: string }) {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-3 py-1.5 border border-gray-200 rounded-[8px] text-[12px]"
+          className="px-3 py-1.5 border border-[var(--border)] rounded-[8px] text-[12px]"
         >
           <option value="all">Všechna</option>
           <option value="want">Chci jít</option>
@@ -122,7 +122,7 @@ function PlacesTab({ userId }: { userId: string }) {
         <select
           value={filterType || ''}
           onChange={(e) => setFilterType(e.target.value || null)}
-          className="px-3 py-1.5 border border-gray-200 rounded-[8px] text-[12px]"
+          className="px-3 py-1.5 border border-[var(--border)] rounded-[8px] text-[12px]"
         >
           <option value="">Všechny typy</option>
           {PLACE_TYPES.map(t => (
@@ -133,7 +133,7 @@ function PlacesTab({ userId }: { userId: string }) {
 
       <div className="grid grid-cols-1 gap-3">
         {filtered.map(place => (
-          <div key={place.id} className="rounded-[14px] border border-gray-200 p-4 bg-white">
+          <div key={place.id} className="rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)]">
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <div className="text-[14px] font-semibold text-gray-800">{place.name}</div>
@@ -161,22 +161,22 @@ function PlacesTab({ userId }: { userId: string }) {
 
       {showAdd && (
         <div className="fixed inset-0 bg-black/30 flex items-end z-50">
-          <div className="w-full bg-white rounded-t-[20px] p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="w-full bg-[var(--surface)] rounded-t-[20px] p-5 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="text-[16px] font-bold">Nové místo</div>
-            <input type="text" placeholder="Název" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]">
+            <input type="text" placeholder="Název" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as any })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]">
               {PLACE_TYPES.map(t => (
                 <option key={t.id} value={t.id}>{t.label}</option>
               ))}
             </select>
-            <input type="text" placeholder="Město" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <input type="text" placeholder="Země" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as any })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]">
+            <input type="text" placeholder="Město" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <input type="text" placeholder="Země" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as any })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]">
               <option value="want">Chci jít</option>
               <option value="visited">Byl jsem</option>
             </select>
             {(form.status as PlaceStatus) === 'visited' && (
-              <select value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]">
+              <select value={form.rating} onChange={(e) => setForm({ ...form, rating: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]">
                 <option value="">Bez hodnocení</option>
                 <option value="1">1 hvězda</option>
                 <option value="2">2 hvězdy</option>
@@ -185,10 +185,10 @@ function PlacesTab({ userId }: { userId: string }) {
                 <option value="5">5 hvězd</option>
               </select>
             )}
-            <textarea placeholder="Poznámky" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <input type="url" placeholder="URL (web)" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
+            <textarea placeholder="Poznámky" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <input type="url" placeholder="URL (web)" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-gray-300">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addPlace} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>
@@ -260,7 +260,7 @@ function TripsTab({ userId }: { userId: string }) {
           <button
             key={trip.id}
             onClick={() => router.push(`/places/${trip.id}`)}
-            className="w-full text-left rounded-[14px] border border-gray-200 p-4 bg-white hover:bg-gray-50 transition-colors"
+            className="w-full text-left rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)] hover:bg-[var(--bg)] transition-colors"
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
@@ -295,13 +295,13 @@ function TripsTab({ userId }: { userId: string }) {
 
       {showAdd && (
         <div className="fixed inset-0 bg-black/30 flex items-end z-50">
-          <div className="w-full bg-white rounded-t-[20px] p-5 space-y-4">
+          <div className="w-full bg-[var(--surface)] rounded-t-[20px] p-5 space-y-4">
             <div className="text-[16px] font-bold">Nový výlet</div>
-            <input type="text" placeholder="Název výletu" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <input type="text" placeholder="Destinace" value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <input type="number" placeholder="Rozpočet (Kč)" value={form.budget_estimated} onChange={(e) => setForm({ ...form, budget_estimated: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
+            <input type="text" placeholder="Název výletu" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <input type="text" placeholder="Destinace" value={form.destination} onChange={(e) => setForm({ ...form, destination: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <input type="number" placeholder="Rozpočet (Kč)" value={form.budget_estimated} onChange={(e) => setForm({ ...form, budget_estimated: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-2 flex-wrap">
               {['✈️', '🚗', '🏖️', '⛷️', '🏕️', '🎒', '🗻', '🌍'].map(emoji => (
                 <button
@@ -315,7 +315,7 @@ function TripsTab({ userId }: { userId: string }) {
               ))}
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-gray-300">Zrušit</button>
+              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={addTrip} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>
@@ -337,7 +337,7 @@ export default function PlacesPage() {
 
   return (
     <>
-      <Header title="📍 Místa a výlety" />
+      <Header title="Místa a výlety" />
       <TabNav tab={tab} onTab={setTab} />
       {tab === 'places' && <PlacesTab userId={userId} />}
       {tab === 'trips' && <TripsTab userId={userId} />}

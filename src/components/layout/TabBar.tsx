@@ -34,7 +34,7 @@ export function TabBar() {
             </Link>
             <button
               onClick={() => closeTab(tab.id)}
-              className="pl-1.5 pr-3 flex items-center justify-center text-[12px] leading-none hover:bg-white/20 transition-colors"
+              className="pl-1.5 pr-3 flex items-center justify-center text-[12px] leading-none hover:bg-[var(--surface)]/20 transition-colors"
               style={{ color: 'rgba(255,255,255,0.55)' }}
               title="Zavřít záložku"
             >

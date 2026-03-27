@@ -8,7 +8,7 @@ export function FinanceTabs({ active }: { active: string }) {
     { label: 'Opakované', href: '/finance/opakovane' },
   ]
   return (
-    <div className="flex gap-1 px-4 py-2 bg-white border-b border-gray-100 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+    <div className="flex gap-1 px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
       {tabs.map(t => (
         <a
           key={t.href}
@@ -16,7 +16,7 @@ export function FinanceTabs({ active }: { active: string }) {
           className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold whitespace-nowrap transition-colors ${
             active === t.label
               ? 'bg-[var(--color-primary)] text-white'
-              : 'text-gray-500 hover:bg-gray-100'
+              : 'text-gray-500 hover:bg-[var(--surface-raised)]'
           }`}
         >
           {t.label}

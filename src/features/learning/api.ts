@@ -1,12 +1,13 @@
 import { supabase } from '@/lib/supabase'
 
-export type LearningItemType = 'book' | 'course' | 'topic' | 'podcast'
+// ── Learning Items (Books) ─────────────────────────────────────────
+
 export type LearningStatus = 'wishlist' | 'active' | 'done'
 
 export interface LearningItem {
   id: string
   user_id: string
-  type: LearningItemType
+  type: 'book'
   title: string
   author: string | null
   status: LearningStatus
@@ -16,44 +17,17 @@ export interface LearningItem {
   started_at: string | null
   finished_at: string | null
   url: string | null
-  category_id: string | null
   total_pages: number | null
   current_page: number | null
   cover_emoji: string
 }
-
-export interface LearningCategory {
-  id: string
-  user_id: string
-  name: string
-  icon: string
-  color: string
-}
-
-export interface LearningGoal {
-  id: string
-  user_id: string
-  title: string
-  type: 'books_per_year' | 'courses_per_year' | 'custom'
-  target: number
-  current: number
-  year: number
-}
-
-export const ITEM_TYPES: { id: LearningItemType; label: string; icon: string }[] = [
-  { id: 'book', label: 'Kniha', icon: '📚' },
-  { id: 'course', label: 'Kurz', icon: '🎓' },
-  { id: 'topic', label: 'Téma', icon: '🧠' },
-  { id: 'podcast', label: 'Podcast', icon: '🎙️' },
-]
-
-const XP_VALUES = { book: 100, course: 150, topic: 50, podcast: 75 }
 
 export async function fetchLearningItems(userId: string): Promise<LearningItem[]> {
   const { data, error } = await supabase
     .from('learning_items')
     .select('*')
     .eq('user_id', userId)
+    .eq('type', 'book')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data as LearningItem[]) ?? []
@@ -79,46 +53,118 @@ export async function deleteLearningItem(id: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
-export async function fetchLearningGoals(userId: string): Promise<LearningGoal[]> {
-  const { data, error } = await supabase
-    .from('learning_goals')
-    .select('*')
-    .eq('user_id', userId)
-    .order('year', { ascending: false })
-  if (error) throw new Error(error.message)
-  return (data as LearningGoal[]) ?? []
+// ── Learning Areas ────────────────────────────────────────────────
+
+export interface LearningArea {
+  id: string
+  user_id: string
+  name: string
+  icon: string
+  color: string
+  description: string | null
+  sort_order: number
+  created_at: string
 }
 
-export async function insertLearningGoal(payload: Omit<LearningGoal, 'id'>): Promise<LearningGoal> {
+export const AREA_ICONS = ['🏥', '🤝', '🚀', '💼', '🧠', '📊', '🔐', '⚙️', '📱', '🌐', '💡', '🎯', '📋', '🔬', '💊', '🏛️', '📡', '🤖', '📈', '🗣️']
+export const AREA_COLORS = ['#6366f1', '#8b5cf6', '#3b82f6', '#0ea5e9', '#14b8a6', '#22c55e', '#f59e0b', '#ef4444', '#ec4899', '#f97316']
+
+export async function fetchLearningAreas(userId: string): Promise<LearningArea[]> {
   const { data, error } = await supabase
-    .from('learning_goals')
+    .from('learning_areas')
+    .select('*')
+    .eq('user_id', userId)
+    .order('sort_order', { ascending: true })
+  if (error) throw new Error(error.message)
+  return (data as LearningArea[]) ?? []
+}
+
+export async function insertLearningArea(payload: Omit<LearningArea, 'id' | 'created_at'>): Promise<LearningArea> {
+  const { data, error } = await supabase
+    .from('learning_areas')
     .insert(payload)
     .select()
     .single()
   if (error) throw new Error(error.message)
-  return data as LearningGoal
+  return data as LearningArea
 }
 
-export async function updateLearningGoal(id: string, patch: Partial<LearningGoal>): Promise<void> {
-  const { error } = await supabase.from('learning_goals').update(patch).eq('id', id)
+export async function updateLearningArea(id: string, patch: Partial<LearningArea>): Promise<void> {
+  const { error } = await supabase.from('learning_areas').update(patch).eq('id', id)
   if (error) throw new Error(error.message)
 }
 
-export function calculateXP(items: LearningItem[]): number {
-  return items.filter(it => it.status === 'done').reduce((sum, it) => sum + (XP_VALUES[it.type] ?? 0), 0)
+export async function deleteLearningArea(id: string): Promise<void> {
+  const { error } = await supabase.from('learning_areas').delete().eq('id', id)
+  if (error) throw new Error(error.message)
 }
 
-export function getLevelFromXP(xp: number): { level: string; nextLevelXP: number; progress: number } {
-  const levels = [
-    { name: 'Začátečník', min: 0, max: 200 },
-    { name: 'Pokročilý', min: 200, max: 500 },
-    { name: 'Expert', min: 500, max: 1000 },
-    { name: 'Mistr', min: 1000, max: Infinity },
-  ]
-  const current = levels.find(l => xp >= l.min && xp < l.max) || levels[levels.length - 1]
-  return {
-    level: current.name,
-    nextLevelXP: current.max,
-    progress: Math.min((xp - current.min) / (current.max - current.min), 1),
-  }
+// ── Knowledge Items ───────────────────────────────────────────────
+
+export type KnowledgeStatus = 'to_learn' | 'learned' | 'uncertain'
+
+export interface KnowledgeItem {
+  id: string
+  user_id: string
+  area_id: string
+  title: string
+  notes: string | null
+  status: KnowledgeStatus
+  source_title: string | null
+  source_url: string | null
+  created_at: string
+  learned_at: string | null
+}
+
+export const KNOWLEDGE_STATUS_CONFIG: Record<KnowledgeStatus, { label: string; icon: string; color: string; bg: string }> = {
+  learned:   { label: 'Naučil jsem se', icon: '✅', color: '#16a34a', bg: '#f0fdf4' },
+  to_learn:  { label: 'Chci se naučit',  icon: '📋', color: '#2563eb', bg: '#eff6ff' },
+  uncertain: { label: 'Nejsem si jistý', icon: '❓', color: '#d97706', bg: '#fffbeb' },
+}
+
+export async function fetchKnowledgeItems(userId: string, areaId: string): Promise<KnowledgeItem[]> {
+  const { data, error } = await supabase
+    .from('knowledge_items')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('area_id', areaId)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as KnowledgeItem[]) ?? []
+}
+
+export async function fetchAllKnowledgeItems(userId: string): Promise<KnowledgeItem[]> {
+  const { data, error } = await supabase
+    .from('knowledge_items')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as KnowledgeItem[]) ?? []
+}
+
+export async function insertKnowledgeItem(payload: Omit<KnowledgeItem, 'id' | 'created_at'>): Promise<KnowledgeItem> {
+  const { data, error } = await supabase
+    .from('knowledge_items')
+    .insert(payload)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data as KnowledgeItem
+}
+
+export async function updateKnowledgeItem(id: string, patch: Partial<KnowledgeItem>): Promise<void> {
+  const { error } = await supabase.from('knowledge_items').update(patch).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteKnowledgeItem(id: string): Promise<void> {
+  const { error } = await supabase.from('knowledge_items').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export function getAreaProgress(items: KnowledgeItem[]): { learned: number; total: number; pct: number } {
+  const learned = items.filter(i => i.status === 'learned').length
+  const total = items.length
+  return { learned, total, pct: total === 0 ? 0 : Math.round((learned / total) * 100) }
 }

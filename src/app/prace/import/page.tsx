@@ -434,7 +434,7 @@ export default function ImportPage() {
     setStep('done')
   }
 
-  const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]'
 
   // Count groups for preview
   const previewGroups = step === 'preview' ? getPreviewGroups() : []
@@ -442,7 +442,7 @@ export default function ImportPage() {
 
   return (
     <>
-      <Header title="📥 Import klientů" />
+      <Header title="Import klientů" />
       <div className="p-4 max-w-2xl mx-auto">
 
         {/* ── Step indicator ── */}
@@ -457,14 +457,14 @@ export default function ImportPage() {
                 <div key={s} className="flex items-center gap-1.5">
                   <div className={`w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center transition-all ${
                     done ? 'bg-green-400 text-white' :
-                    active ? 'text-white' : 'bg-gray-200 text-gray-400'
+                    active ? 'text-white' : 'bg-[var(--border)] text-gray-400'
                   }`} style={active ? { background: 'var(--color-primary)' } : {}}>
                     {done ? '✓' : i + 1}
                   </div>
                   <span className={`text-[11px] font-semibold ${active ? 'text-gray-700' : 'text-gray-400'}`}>
                     {s === 'upload' ? 'Soubor' : s === 'map' ? 'Mapování' : 'Náhled'}
                   </span>
-                  {i < 2 && <div className="w-6 h-px bg-gray-200 mx-1" />}
+                  {i < 2 && <div className="w-6 h-px bg-[var(--border)] mx-1" />}
                 </div>
               )
             })}
@@ -474,7 +474,7 @@ export default function ImportPage() {
         {/* ── Step 1: Upload ── */}
         {step === 'upload' && (
           <div>
-            <div className="bg-white rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div className="bg-[var(--surface)] rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <h2 className="text-[16px] font-bold text-gray-900 mb-1">Nahraj svůj CRM soubor</h2>
               <p className="text-[13px] text-gray-500 mb-4">
                 Soubor se zpracuje <strong>přímo v prohlížeči</strong> — data nikdy neopustí tvůj počítač.
@@ -484,7 +484,7 @@ export default function ImportPage() {
                 onDrop={onDrop}
                 onDragOver={e => e.preventDefault()}
                 onClick={() => fileRef.current?.click()}
-                className="border-2 border-dashed border-gray-200 rounded-[14px] p-10 flex flex-col items-center gap-3 cursor-pointer hover:border-[var(--color-primary)] hover:bg-blue-50/30 transition-all"
+                className="border-2 border-dashed border-[var(--border)] rounded-[14px] p-10 flex flex-col items-center gap-3 cursor-pointer hover:border-[var(--color-primary)] hover:bg-blue-50/30 transition-all"
               >
                 <div className="text-[40px]">📄</div>
                 <div className="text-[14px] font-semibold text-gray-700">Přetáhni sem soubor, nebo klikni</div>
@@ -518,7 +518,7 @@ export default function ImportPage() {
         {/* ── Step 2: Column mapping ── */}
         {step === 'map' && (
           <div>
-            <div className="bg-white rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div className="bg-[var(--surface)] rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-[16px] font-bold text-gray-900">Namapuj sloupce</h2>
                 <span className="text-[12px] text-gray-400">{rows.length} řádků · {fileName}</span>
@@ -570,7 +570,7 @@ export default function ImportPage() {
             )}
 
             <div className="flex gap-3">
-              <button onClick={() => setStep('upload')} className="flex-1 py-3 rounded-[14px] bg-gray-100 text-gray-600 text-[13px] font-semibold">
+              <button onClick={() => setStep('upload')} className="flex-1 py-3 rounded-[14px] bg-[var(--surface-raised)] text-gray-600 text-[13px] font-semibold">
                 ← Zpět
               </button>
               <button
@@ -588,7 +588,7 @@ export default function ImportPage() {
         {/* ── Step 3: Preview ── */}
         {step === 'preview' && (
           <div>
-            <div className="bg-white rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div className="bg-[var(--surface)] rounded-[16px] p-5 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-[16px] font-bold text-gray-900">Náhled importu</h2>
                 <span className="text-[12px] text-gray-400">{allGroups.length} klientů</span>
@@ -604,7 +604,7 @@ export default function ImportPage() {
                   const raCountVal = data.ra_count?.trim()
                   const subjType = data.subject_type ? normalizeSubjectType(data.subject_type) : null
                   return (
-                    <div key={i} className="bg-gray-50 rounded-[12px] px-3 py-2.5">
+                    <div key={i} className="bg-[var(--bg)] rounded-[12px] px-3 py-2.5">
                       <div className="text-[13px] font-bold text-gray-900 mb-1">
                         💼 {data.name || <span className="text-red-400 font-normal">— chybí název, bude přeskočen —</span>}
                       </div>
@@ -642,7 +642,7 @@ export default function ImportPage() {
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setStep('map')} className="flex-1 py-3 rounded-[14px] bg-gray-100 text-gray-600 text-[13px] font-semibold">
+              <button onClick={() => setStep('map')} className="flex-1 py-3 rounded-[14px] bg-[var(--surface-raised)] text-gray-600 text-[13px] font-semibold">
                 ← Zpět
               </button>
               <button
@@ -658,11 +658,11 @@ export default function ImportPage() {
 
         {/* ── Step 4: Importing (progress) ── */}
         {step === 'importing' && (
-          <div className="bg-white rounded-[16px] p-8 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+          <div className="bg-[var(--surface)] rounded-[16px] p-8 text-center" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
             <div className="text-[40px] mb-3">⏳</div>
             <h2 className="text-[16px] font-bold text-gray-900 mb-1">Importuji klienty…</h2>
             <p className="text-[13px] text-gray-500 mb-5">{imported} / {rows.length}</p>
-            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-[var(--surface-raised)] rounded-full h-3 overflow-hidden">
               <div
                 className="h-3 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%`, background: 'var(--color-primary)' }}
@@ -675,7 +675,7 @@ export default function ImportPage() {
         {/* ── Step 5: Done ── */}
         {step === 'done' && (
           <div>
-            <div className="bg-white rounded-[16px] p-8 text-center mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div className="bg-[var(--surface)] rounded-[16px] p-8 text-center mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <div className="text-[48px] mb-3">🎉</div>
               <h2 className="text-[20px] font-extrabold text-gray-900 mb-2">Import dokončen</h2>
               <div className="flex justify-center gap-6 mt-4">

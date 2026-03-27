@@ -9,23 +9,9 @@ import { AppCategory } from '@/features/categories/api'
 import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const THEMES = [
-  { id: 'terracotta', name: 'Terracotta',   color: '#D44A1A' },
-  { id: 'dark',       name: 'Tmavá',        color: '#D44A1A' },
-  { id: 'ocean',     name: 'Oceán',       color: '#1E4B8E' },
-  { id: 'indigo',    name: 'Indigo',      color: '#4F46E5' },
-  { id: 'violet',    name: 'Fialová',     color: '#7C3AED' },
-  { id: 'fuchsia',   name: 'Fuchsia',     color: '#A21CAF' },
-  { id: 'rose',      name: 'Růžová',      color: '#E11D48' },
-  { id: 'coral',     name: 'Korál',       color: '#C2410C' },
-  { id: 'amber',     name: 'Zlatá',       color: '#B45309' },
-  { id: 'emerald',   name: 'Smaragd',     color: '#047857' },
-  { id: 'forest',    name: 'Les',         color: '#1A5C32' },
-  { id: 'cyan',      name: 'Azurová',     color: '#0E7490' },
-  { id: 'sky',       name: 'Obloha',      color: '#0369A1' },
-  { id: 'lavender',  name: 'Levandule',   color: '#5B3A8C' },
-  { id: 'sunset',    name: 'Západ',       color: '#B84800' },
-  { id: 'slate',     name: 'Břidlice',    color: '#334155' },
-  { id: 'charcoal',  name: 'Uhlí',        color: '#1A1F2E' },
+  { id: 'dark',        name: 'Tmavá',     color: '#D44A1A' },
+  { id: 'terracotta',  name: 'Světlá',    color: '#D44A1A' },
+  { id: 'ocean',       name: 'Modrá',     color: '#1E4B8E' },
 ]
 
 const FONTS = [
@@ -57,7 +43,7 @@ function SettingsSection({ label, children }: { label: string; children: React.R
   return (
     <div className="mb-5">
       <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide px-1 mb-2">{label}</div>
-      <div className="bg-white rounded-[14px] shadow-card overflow-hidden">{children}</div>
+      <div className="bg-[var(--surface)] rounded-[14px] shadow-card overflow-hidden">{children}</div>
     </div>
   )
 }
@@ -74,20 +60,20 @@ function CategoryForm({ initial, onSave, onCancel }: {
   const [color, setColor] = useState(initial?.color ?? '#3b82f6')
 
   return (
-    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+    <div className="px-4 py-3 bg-[var(--bg)] border-t border-[var(--border)]">
       {/* Icon picker */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         {CAT_ICONS.map(em => (
           <button key={em}
             onClick={() => setIcon(em)}
-            className={`w-8 h-8 rounded-lg text-[16px] flex items-center justify-center transition-all ${icon === em ? 'bg-white shadow-sm ring-2 ring-[var(--color-primary)]' : 'hover:bg-white'}`}
+            className={`w-8 h-8 rounded-lg text-[16px] flex items-center justify-center transition-all ${icon === em ? 'bg-[var(--surface)] shadow-sm ring-2 ring-[var(--color-primary)]' : 'hover:bg-[var(--surface)]'}`}
           >{em}</button>
         ))}
       </div>
 
       {/* Name */}
       <input
-        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)] mb-3"
+        className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)] mb-3"
         placeholder="Název kategorie…"
         value={name}
         onChange={e => setName(e.target.value)}
@@ -116,7 +102,7 @@ function CategoryForm({ initial, onSave, onCancel }: {
           style={{ background: color + '18', borderColor: color, color }}
         >{icon} {name || 'Náhled'}</span>
         <div className="flex-1" />
-        <button onClick={onCancel} className="px-3 py-1.5 text-[12px] text-gray-500 rounded-lg hover:bg-gray-200">Zrušit</button>
+        <button onClick={onCancel} className="px-3 py-1.5 text-[12px] text-gray-500 rounded-lg hover:bg-[var(--border)]">Zrušit</button>
         <button
           onClick={() => name.trim() && onSave({ name: name.trim(), icon, color })}
           disabled={!name.trim()}
@@ -154,7 +140,7 @@ function CategoryManager({ userId }: { userId: string }) {
               onCancel={() => setEditingId(null)}
             />
           ) : (
-            <div className={`flex items-center gap-3 px-4 py-3 ${idx > 0 ? 'border-t border-gray-100' : ''}`}>
+            <div className={`flex items-center gap-3 px-4 py-3 ${idx > 0 ? 'border-t border-[var(--border)]' : ''}`}>
               {/* Color dot + icon + name */}
               <span
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[16px] flex-shrink-0"
@@ -182,7 +168,7 @@ function CategoryManager({ userId }: { userId: string }) {
               {/* Edit */}
               <button
                 onClick={() => setEditingId(cat.id)}
-                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 text-[13px]"
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:bg-[var(--surface-raised)] text-[13px]"
               >✏️</button>
 
               {/* Delete */}
@@ -208,7 +194,7 @@ function CategoryManager({ userId }: { userId: string }) {
       ) : (
         <button
           onClick={() => setShowAdd(true)}
-          className="w-full flex items-center gap-2 px-4 py-3 border-t border-gray-100 text-[13px] font-semibold text-[var(--color-primary)] hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center gap-2 px-4 py-3 border-t border-[var(--border)] text-[13px] font-semibold text-[var(--color-primary)] hover:bg-[var(--bg)] transition-colors"
         >
           <span className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[14px]" style={{ background: 'var(--color-primary)' }}>+</span>
           Přidat kategorii
@@ -243,7 +229,7 @@ export default function NastaveniPage() {
 
   return (
     <>
-      <Header title="Nastavení ⚙️" />
+      <Header title="Nastavení" />
       <div className="p-4">
 
         {/* Kategorie */}
@@ -280,7 +266,7 @@ export default function NastaveniPage() {
           <div className="flex flex-col">
             {FONTS.map((f, i) => (
               <button key={f.id} onClick={() => handleFont(f.id)}
-                className={`flex items-center justify-between px-4 py-3.5 transition-colors ${i > 0 ? 'border-t border-gray-100' : ''} ${activeFont === f.id ? 'bg-[var(--color-primary-pale)]' : 'hover:bg-gray-50'}`}>
+                className={`flex items-center justify-between px-4 py-3.5 transition-colors ${i > 0 ? 'border-t border-[var(--border)]' : ''} ${activeFont === f.id ? 'bg-[var(--color-primary-pale)]' : 'hover:bg-[var(--bg)]'}`}>
                 <div className="text-left">
                   <div className="text-[14px] font-semibold text-gray-900" style={{ fontFamily: `'${f.name}', sans-serif` }}>{f.name}</div>
                   <div className="text-[11px] text-gray-400 mt-0.5" style={{ fontFamily: `'${f.name}', sans-serif` }}>{f.sample}</div>
@@ -298,7 +284,7 @@ export default function NastaveniPage() {
         <SettingsSection label="Soukromí">
           <button
             onClick={toggleHideAmounts}
-            className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
+            className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--bg)] active:bg-[var(--surface-raised)]"
           >
             <span className="text-[22px]">{hideAmounts ? '🙈' : '👁️'}</span>
             <div className="flex-1">
@@ -313,7 +299,7 @@ export default function NastaveniPage() {
               style={{ background: hideAmounts ? 'var(--color-primary)' : '#d1d5db' }}
             >
               <div
-                className="absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all"
+                className="absolute top-0.5 w-5 h-5 bg-[var(--surface)] rounded-full shadow transition-all"
                 style={{ left: hideAmounts ? '26px' : '2px' }}
               />
             </div>
@@ -322,7 +308,7 @@ export default function NastaveniPage() {
 
         {/* Finance */}
         <SettingsSection label="Finance">
-          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100">
+          <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border)]">
             <span className="text-[20px]">💱</span>
             <div className="flex-1">
               <div className="text-[14px] font-semibold">Měna</div>
@@ -334,7 +320,7 @@ export default function NastaveniPage() {
 
         {/* Data */}
         <SettingsSection label="Data">
-          <div className="flex items-center gap-3 px-4 py-3.5 cursor-pointer active:bg-gray-50">
+          <div className="flex items-center gap-3 px-4 py-3.5 cursor-pointer active:bg-[var(--bg)]">
             <span className="text-[20px]">🗑</span>
             <div className="flex-1">
               <div className="text-[14px] font-semibold text-red-500">Smazat účet</div>

@@ -33,7 +33,7 @@ export function Sheet({ title, onClose, children }: SheetProps) {
 
       {/* Sheet panel */}
       <div
-        className="relative w-full max-w-[390px] bg-white rounded-t-[24px] shadow-2xl animate-slide-up"
+        className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] shadow-2xl animate-slide-up"
         style={{ maxHeight: '90vh', overflowY: 'auto' }}
       >
         {/* Handle */}
@@ -42,11 +42,11 @@ export function Sheet({ title, onClose, children }: SheetProps) {
         </div>
 
         {/* Title */}
-        <div className="px-5 pt-2 pb-4 flex items-center justify-between border-b border-gray-100">
+        <div className="px-5 pt-2 pb-4 flex items-center justify-between border-b border-[var(--border)]">
           <h2 className="text-[16px] font-bold text-gray-800">{title}</h2>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 text-[18px] leading-none"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--surface-raised)] text-gray-500 text-[18px] leading-none"
           >
             ×
           </button>

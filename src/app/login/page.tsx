@@ -19,7 +19,7 @@ export default function LoginPage() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const inputCls = 'w-full bg-gray-50 border border-gray-200 rounded-[14px] px-4 py-3 text-[15px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] transition-colors'
+  const inputCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[14px] px-4 py-3 text-[15px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] transition-colors'
 
   // ── Google OAuth ─────────────────────────────────────────────────
   async function handleGoogle() {
@@ -84,7 +84,7 @@ export default function LoginPage() {
           <p className="text-[14px] text-gray-400 mt-1">Přihlaš se pro pokračování</p>
         </div>
 
-        <div className="bg-white rounded-[20px] shadow-lg p-6 flex flex-col gap-4">
+        <div className="bg-[var(--surface)] rounded-[20px] shadow-lg p-6 flex flex-col gap-4">
 
           {/* ── Google button (primary) ── */}
           {method === 'google' && (
@@ -92,7 +92,7 @@ export default function LoginPage() {
               <button
                 onClick={handleGoogle}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-[14px] border-2 border-gray-200 bg-white text-[15px] font-bold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-40"
+                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-[14px] border-2 border-[var(--border)] bg-[var(--surface)] text-[15px] font-bold text-gray-700 hover:bg-[var(--bg)] transition-colors disabled:opacity-40"
               >
                 {/* Google logo SVG */}
                 <svg width="20" height="20" viewBox="0 0 48 48">
@@ -105,14 +105,14 @@ export default function LoginPage() {
               </button>
 
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-px bg-gray-100" />
+                <div className="flex-1 h-px bg-[var(--surface-raised)]" />
                 <span className="text-[12px] text-gray-400">nebo</span>
-                <div className="flex-1 h-px bg-gray-100" />
+                <div className="flex-1 h-px bg-[var(--surface-raised)]" />
               </div>
 
               <button
                 onClick={() => setMethod('email')}
-                className="w-full py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+                className="w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500 hover:bg-[var(--bg)] transition-colors"
               >
                 ✉️ Přihlásit se emailem
               </button>
@@ -164,7 +164,7 @@ export default function LoginPage() {
                     type="text" inputMode="numeric" maxLength={1} value={digit}
                     onChange={e => handleDigit(i, e.target.value)}
                     onKeyDown={e => handleDigitKey(i, e)}
-                    className="w-11 h-14 text-center text-[22px] font-bold bg-gray-50 border-2 rounded-[12px] outline-none transition-colors"
+                    className="w-11 h-14 text-center text-[22px] font-bold bg-[var(--bg)] border-2 rounded-[12px] outline-none transition-colors"
                     style={{ borderColor: digit ? 'var(--color-primary)' : '#e5e7eb', color: 'var(--color-primary)' }}
                   />
                 ))}

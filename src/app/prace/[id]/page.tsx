@@ -41,7 +41,7 @@ const STATUS_COLORS: Record<string, string> = {
   'Potenciální': '#f59e0b', 'Aktivní': '#10b981', 'Pozastavený': '#94a3b8', 'Ukončený': '#ef4444',
 }
 
-const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]'
+const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]'
 const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
 // ── OrderRow ──────────────────────────────────────────────────────
@@ -54,14 +54,14 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
 }) {
   const dateStr = new Date(order.date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric', year: 'numeric' })
   return (
-    <div className={`bg-white rounded-[14px] p-4 flex items-start gap-3 transition-opacity ${order.invoiced ? 'opacity-60' : ''}`}
+    <div className={`bg-[var(--surface)] rounded-[14px] p-4 flex items-start gap-3 transition-opacity ${order.invoiced ? 'opacity-60' : ''}`}
       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
       {/* Invoiced toggle */}
       <button onClick={onToggle}
         className={`mt-0.5 w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-all ${
           order.invoiced
             ? 'bg-green-400 border-green-400'
-            : 'border-gray-300 hover:border-green-400'
+            : 'border-[var(--border-strong)] hover:border-green-400'
         }`}
         title={order.invoiced ? 'Označit jako nefakturované' : 'Označit jako fakturované'}>
         {order.invoiced && <span className="text-[10px] text-white font-bold">✓</span>}
@@ -540,9 +540,9 @@ export default function ClientPage() {
   return (
     <>
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-4 lg:px-6">
+      <div className="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-4 lg:px-6">
         <div className="flex items-center gap-3">
-          <Link href="/prace" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 text-[18px] transition-colors">←</Link>
+          <Link href="/prace" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[18px] transition-colors">←</Link>
           <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-[20px]" style={{ background: clientColor + '18' }}>{client?.icon ?? '💼'}</div>
           <div className="flex-1 min-w-0">
             <div className="text-[17px] font-extrabold text-gray-900 truncate">{client?.name ?? '…'}</div>
@@ -554,7 +554,7 @@ export default function ClientPage() {
           {/* První schůzka — klikatelný dot pro rychlou změnu */}
           {client && (
             <button onClick={cycleFirstMeeting} title={client.first_meeting_status ? FIRST_MEETING_LABELS[client.first_meeting_status] : 'Nastavit stav 1. schůzky'}
-              className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] hover:bg-gray-100 transition-colors">
+              className="flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-[10px] hover:bg-[var(--surface-raised)] transition-colors">
               <span className="w-3 h-3 rounded-full flex-shrink-0"
                 style={{ background: client.first_meeting_status ? FIRST_MEETING_COLORS[client.first_meeting_status] : '#d1d5db' }} />
               <span className="text-[10px] font-semibold text-gray-400 hidden lg:block">
@@ -563,13 +563,13 @@ export default function ClientPage() {
             </button>
           )}
           <button onClick={openEditClient}
-            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 text-[16px] transition-colors flex-shrink-0"
+            className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[16px] transition-colors flex-shrink-0"
             title="Upravit klienta">✏️</button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-white border-b border-gray-100 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+      <div className="flex bg-[var(--surface)] border-b border-[var(--border)] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => {
             setTab(t.id)
@@ -593,7 +593,7 @@ export default function ClientPage() {
                 {/* Levý sloupec: Info o společnosti + Kontaktní osoby */}
                 <div className="flex flex-col gap-4">
                   {/* Informace o společnosti */}
-                  <div className="bg-white rounded-[16px] p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                  <div className="bg-[var(--surface)] rounded-[16px] p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">Společnost</div>
                       <div className="flex items-center gap-1.5">
@@ -610,7 +610,7 @@ export default function ClientPage() {
                     </div>
                     <div className="flex flex-col gap-3">
                       {client?.partner_id && (
-                        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-gray-50 border border-gray-100">
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-[10px] bg-[var(--bg)] border border-[var(--border)]">
                           <span className="text-[11px] font-bold text-gray-400 uppercase">PP:</span>
                           <span className="text-[13px] font-bold text-gray-800 font-mono">{client.partner_id}</span>
                         </div>
@@ -633,16 +633,16 @@ export default function ClientPage() {
                       {client?.tags && client.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-1">
                           {client.tags.map(tag => (
-                            <span key={tag} className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{tag}</span>
+                            <span key={tag} className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-600">{tag}</span>
                           ))}
                         </div>
                       )}
-                      {client?.notes && <div className="text-[13px] text-gray-600 bg-gray-50 rounded-[10px] p-3 mt-1">{client.notes}</div>}
+                      {client?.notes && <div className="text-[13px] text-gray-600 bg-[var(--bg)] rounded-[10px] p-3 mt-1">{client.notes}</div>}
                     </div>
                   </div>
 
                   {/* Kontaktní osoby */}
-                  <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                  <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
                       <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">Kontaktní osoby</div>
                       <button onClick={() => openAddContact()}
@@ -654,7 +654,7 @@ export default function ClientPage() {
                     ) : (
                       <div className="flex flex-col">
                         {contacts.map((c, i) => (
-                          <div key={c.id} onClick={() => openEditContact(c)} className={`flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${i > 0 ? 'border-t border-gray-50' : ''}`}>
+                          <div key={c.id} onClick={() => openEditContact(c)} className={`flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-[var(--bg)] transition-colors ${i > 0 ? 'border-t border-gray-50' : ''}`}>
                             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-bold text-white flex-shrink-0"
                               style={{ background: clientColor }}>{c.name[0].toUpperCase()}</div>
                             <div className="flex-1 min-w-0">
@@ -677,12 +677,12 @@ export default function ClientPage() {
                 </div>
 
                 {/* Pravý sloupec: Interní data */}
-                <div className="bg-white rounded-[16px] p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[16px] p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   <div className="text-[12px] font-bold text-gray-400 uppercase tracking-wide mb-4">Interní data</div>
                   <div className="flex flex-col gap-0">
 
                     {/* Měsíční průměr — nahoře, velký */}
-                    <div className="pb-3 mb-3 border-b border-gray-100">
+                    <div className="pb-3 mb-3 border-b border-[var(--border)]">
                       <div className="text-[10px] font-bold text-gray-400 uppercase mb-1">Měsíční průměr fakturace</div>
                       <div className="text-[24px] font-extrabold leading-tight" style={{ color: clientColor }}>
                         {client?.monthly_avg_invoice != null ? fmtCZK(client.monthly_avg_invoice) : <span className="text-gray-300 text-[18px]">—</span>}
@@ -771,8 +771,8 @@ export default function ClientPage() {
               })()}
 
               {/* Klikací sekce — Úkoly */}
-              <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors" onClick={() => setTab('ukoly')}>
+              <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg)] transition-colors" onClick={() => setTab('ukoly')}>
                   <div className="flex items-center gap-2.5">
                     <span className="text-[18px]">✅</span>
                     <span className="text-[14px] font-extrabold text-gray-900">Úkoly</span>
@@ -792,14 +792,14 @@ export default function ClientPage() {
                         </div>
                       )
                     })}
-                    {openTasks.length > 3 && <button onClick={() => setTab('ukoly')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-gray-50 transition-colors" style={{ color: clientColor }}>+ {openTasks.length - 3} dalších úkolů</button>}
+                    {openTasks.length > 3 && <button onClick={() => setTab('ukoly')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-[var(--bg)] transition-colors" style={{ color: clientColor }}>+ {openTasks.length - 3} dalších úkolů</button>}
                   </div>
                 ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-gray-400">Žádné otevřené úkoly</div>}
               </div>
 
               {/* Klikací sekce — Aktivity */}
-              <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors" onClick={() => setTab('aktivity')}>
+              <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg)] transition-colors" onClick={() => setTab('aktivity')}>
                   <div className="flex items-center gap-2.5">
                     <span className="text-[18px]">📋</span>
                     <span className="text-[14px] font-extrabold text-gray-900">Aktivity</span>
@@ -816,7 +816,7 @@ export default function ClientPage() {
                         <span className="text-[11px] text-gray-400 flex-shrink-0">{fmtDate(a.activity_date)}</span>
                       </div>
                     ))}
-                    {activities.length > 3 && <button onClick={() => setTab('aktivity')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-gray-50 transition-colors" style={{ color: clientColor }}>+ {activities.length - 3} dalších aktivit</button>}
+                    {activities.length > 3 && <button onClick={() => setTab('aktivity')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-[var(--bg)] transition-colors" style={{ color: clientColor }}>+ {activities.length - 3} dalších aktivit</button>}
                   </div>
                 ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-gray-400">Žádné aktivity</div>}
               </div>
@@ -825,8 +825,8 @@ export default function ClientPage() {
               {(() => {
                 const activeDeals = deals.filter(d => d.stage !== 'Uzavřen' && d.stage !== 'Ztracen')
                 return (
-                  <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
-                    <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors" onClick={() => setTab('obchody')}>
+                  <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                    <button className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--bg)] transition-colors" onClick={() => setTab('obchody')}>
                       <div className="flex items-center gap-2.5">
                         <span className="text-[18px]">💰</span>
                         <span className="text-[14px] font-extrabold text-gray-900">Obchody</span>
@@ -843,7 +843,7 @@ export default function ClientPage() {
                             <span className="text-[12px] font-bold flex-shrink-0" style={{ color: DEAL_STAGE_COLORS[deal.stage] }}>{fmtCZK(deal.value)}</span>
                           </div>
                         ))}
-                        {activeDeals.length > 3 && <button onClick={() => setTab('obchody')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-gray-50 transition-colors" style={{ color: clientColor }}>+ {activeDeals.length - 3} dalších obchodů</button>}
+                        {activeDeals.length > 3 && <button onClick={() => setTab('obchody')} className="w-full text-center py-2.5 text-[12px] font-semibold border-t border-gray-50 hover:bg-[var(--bg)] transition-colors" style={{ color: clientColor }}>+ {activeDeals.length - 3} dalších obchodů</button>}
                       </div>
                     ) : <div className="border-t border-gray-50 px-5 py-3 text-[13px] text-gray-400">Žádné aktivní obchody</div>}
                   </div>
@@ -871,13 +871,13 @@ export default function ClientPage() {
                   style={{ background: clientColor }}>+ Přidat</button>
               </div>
               {showQuickAdd && (
-                <div className="bg-white rounded-[14px] p-3 mb-4" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[14px] p-3 mb-4" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                   <div className="flex gap-2">
-                    <input className="flex-1 bg-gray-50 border rounded-[10px] px-3 py-2 text-[13px] outline-none" style={{ borderColor: clientColor }}
+                    <input className="flex-1 bg-[var(--bg)] border rounded-[10px] px-3 py-2 text-[13px] outline-none" style={{ borderColor: clientColor }}
                       placeholder="Napiš úkol… (p2, zítra, …)" value={quickInput} onChange={e => setQuickInput(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') handleQuickAdd(); if (e.key === 'Escape') setShowQuickAdd(false) }}/>
                     <button onClick={handleQuickAdd} className="px-4 py-2 rounded-[10px] text-white text-[13px] font-bold" style={{ background: clientColor }}>+</button>
-                    <button onClick={() => setShowQuickAdd(false)} className="px-3 py-2 rounded-[10px] border border-gray-200 text-gray-400">✕</button>
+                    <button onClick={() => setShowQuickAdd(false)} className="px-3 py-2 rounded-[10px] border border-[var(--border)] text-gray-400">✕</button>
                   </div>
                 </div>
               )}
@@ -885,11 +885,11 @@ export default function ClientPage() {
                 <div className="text-center py-10"><div className="text-[36px] mb-2">{taskTab === 'done' ? '📭' : '✅'}</div>
                   <p className="text-[14px] font-semibold text-gray-500">{taskTab === 'done' ? 'Zatím nic hotového' : 'Žádné úkoly'}</p></div>
               ) : (
-                <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   {(taskTab === 'open' ? openTasks : doneTasks).map((task, i) => (
                     <div key={task.id}>
                       <TaskItem task={task} categories={DEFAULT_TODO_CATEGORIES} onToggle={toggleTask} onDelete={removeTask} onEdit={openEditTask} />
-                      {i < (taskTab === 'open' ? openTasks : doneTasks).length - 1 && <div className="h-px bg-gray-100 mx-4" />}
+                      {i < (taskTab === 'open' ? openTasks : doneTasks).length - 1 && <div className="h-px bg-[var(--surface-raised)] mx-4" />}
                     </div>
                   ))}
                 </div>
@@ -911,12 +911,12 @@ export default function ClientPage() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {activities.map(a => (
-                    <div key={a.id} className="bg-white rounded-[14px] p-4 flex items-start gap-3" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                    <div key={a.id} className="bg-[var(--surface)] rounded-[14px] p-4 flex items-start gap-3" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                       <span className="text-[22px] mt-0.5">{ACTIVITY_ICONS[a.type]}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <span className="text-[14px] font-bold text-gray-900">{a.title}</span>
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">{ACTIVITY_LABELS[a.type]}</span>
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-500">{ACTIVITY_LABELS[a.type]}</span>
                         </div>
                         {a.description && <div className="text-[13px] text-gray-600 mb-1">{a.description}</div>}
                         <div className="text-[11px] text-gray-400">{fmtDateTime(a.activity_date)}</div>
@@ -943,7 +943,7 @@ export default function ClientPage() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {deals.map(deal => (
-                    <div key={deal.id} className="bg-white rounded-[14px] p-4 cursor-pointer hover:shadow-md transition-shadow"
+                    <div key={deal.id} className="bg-[var(--surface)] rounded-[14px] p-4 cursor-pointer hover:shadow-md transition-shadow"
                       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)', borderLeft: `4px solid ${DEAL_STAGE_COLORS[deal.stage]}` }}
                       onClick={() => openEditDeal(deal)}>
                       <div className="flex items-center justify-between mb-1">
@@ -977,7 +977,7 @@ export default function ClientPage() {
               ) : (
                 <div className="flex flex-col gap-3">
                   {contacts.map(c => (
-                    <div key={c.id} onClick={() => openEditContact(c)} className="bg-white rounded-[14px] p-4 flex items-start gap-4 cursor-pointer hover:shadow-md transition-all" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+                    <div key={c.id} onClick={() => openEditContact(c)} className="bg-[var(--surface)] rounded-[14px] p-4 flex items-start gap-4 cursor-pointer hover:shadow-md transition-all" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center text-[18px] font-bold text-white flex-shrink-0"
                         style={{ background: clientColor }}>{c.name[0].toUpperCase()}</div>
                       <div className="flex-1 min-w-0">
@@ -1092,7 +1092,7 @@ export default function ClientPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {clientNotes.map(note => (
                     <Link key={note.id} href={`/poznamky/${note.id}`}
-                      className="group bg-white rounded-[16px] p-4 hover:shadow-md transition-all relative"
+                      className="group bg-[var(--surface)] rounded-[16px] p-4 hover:shadow-md transition-all relative"
                       style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                       <button onClick={e => handleDeleteClientNote(note.id, e)}
                         className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">
@@ -1152,7 +1152,7 @@ export default function ClientPage() {
             function EmailRow({ em }: { em: ImportedEmail }) {
               const isDone = em.status === 'done'
               return (
-                <div className={`bg-white rounded-[14px] p-4 flex gap-3 transition-opacity ${isDone ? 'opacity-50' : ''}`}
+                <div className={`bg-[var(--surface)] rounded-[14px] p-4 flex gap-3 transition-opacity ${isDone ? 'opacity-50' : ''}`}
                   style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
                   <div className="flex-1 min-w-0">
                     <div className={`text-[14px] font-bold truncate ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
@@ -1170,7 +1170,7 @@ export default function ClientPage() {
                   <button
                     onClick={() => toggleDone(em.id)}
                     className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${
-                      isDone ? 'bg-green-400 border-green-400' : 'border-gray-300 hover:border-green-400'
+                      isDone ? 'bg-green-400 border-green-400' : 'border-[var(--border-strong)] hover:border-green-400'
                     }`}
                     title={isDone ? 'Označit jako nevyřízené' : 'Označit jako vyřízené'}
                   >
@@ -1263,7 +1263,7 @@ export default function ClientPage() {
                       const isToday = evDate.toDateString() === now.toDateString()
                       const isFuture = evDate >= now
                       return (
-                        <div key={ev.id} className="bg-white rounded-[14px] p-4 flex items-center gap-4"
+                        <div key={ev.id} className="bg-[var(--surface)] rounded-[14px] p-4 flex items-center gap-4"
                           style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)', borderLeft: isFuture ? `3px solid ${clientColor}` : '3px solid #e5e7eb' }}>
                           <div className="flex-1 min-w-0">
                             <div className="text-[14px] font-bold text-gray-900 truncate">{ev.emoji ?? '🤝'} {ev.title}</div>
@@ -1296,10 +1296,10 @@ export default function ClientPage() {
       {showAddMeeting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAddMeeting(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ maxWidth: 420 }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 max-h-[90vh] overflow-y-auto" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">🤝 Nová schůzka</h2>
-              <button onClick={() => setShowAddMeeting(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowAddMeeting(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
@@ -1315,8 +1315,8 @@ export default function ClientPage() {
               <div className="flex items-center justify-between">
                 <label className="text-[13px] font-medium text-gray-700">Celý den</label>
                 <button onClick={() => setMAllDay(v => !v)}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${mAllDay ? 'bg-[var(--color-primary)]' : 'bg-gray-200'}`}>
-                  <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${mAllDay ? 'left-5.5' : 'left-0.5'}`} />
+                  className={`relative w-11 h-6 rounded-full transition-colors ${mAllDay ? 'bg-[var(--color-primary)]' : 'bg-[var(--border)]'}`}>
+                  <span className={`absolute top-0.5 w-5 h-5 bg-[var(--surface)] rounded-full shadow transition-all ${mAllDay ? 'left-5.5' : 'left-0.5'}`} />
                 </button>
               </div>
               {!mAllDay && (
@@ -1341,7 +1341,7 @@ export default function ClientPage() {
                 Schůzka se zobrazí i v kalendáři.
               </p>
               <div className="flex gap-3">
-                <button onClick={() => setShowAddMeeting(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddMeeting(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleAddMeeting} disabled={!mTitle.trim() || creatingMeeting}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: clientColor }}>
@@ -1357,12 +1357,12 @@ export default function ClientPage() {
       {showAddOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAddOrder(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">
                 📦 {editingOrder ? 'Upravit objednávku' : 'Nová objednávka'}
               </h2>
-              <button onClick={() => setShowAddOrder(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowAddOrder(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3">
@@ -1394,7 +1394,7 @@ export default function ClientPage() {
                     🗑️
                   </button>
                 )}
-                <button onClick={() => setShowAddOrder(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddOrder(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleSaveOrder} disabled={!oSubject.trim()}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: clientColor }}>
@@ -1410,10 +1410,10 @@ export default function ClientPage() {
       {showAddContact && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) { setShowAddContact(false); setEditingContact(null) } }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">{editingContact ? '✏️ Upravit kontakt' : '👤 Nová kontaktní osoba'}</h2>
-              <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Jméno *</label><input className={fieldCls} value={cName} onChange={e => setCName(e.target.value)} placeholder="Jméno a příjmení"/></div>
@@ -1433,7 +1433,7 @@ export default function ClientPage() {
                 </button>
               )}
               <div className="flex gap-3 pt-1">
-                <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => { setShowAddContact(false); setEditingContact(null) }} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleSaveContact} disabled={!cName.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>{editingContact ? 'Uložit' : 'Přidat'}</button>
               </div>
             </div>
@@ -1445,10 +1445,10 @@ export default function ClientPage() {
       {showAddActivity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAddActivity(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 420 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">📋 Nová aktivita</h2>
-              <button onClick={() => setShowAddActivity(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowAddActivity(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div>
@@ -1468,7 +1468,7 @@ export default function ClientPage() {
               <div><label className={labelCls}>Podrobnosti</label><textarea className={fieldCls + ' resize-none'} rows={2} value={aDesc} onChange={e => setADesc(e.target.value)} placeholder="Volitelné podrobnosti…" /></div>
               <div><label className={labelCls}>Datum a čas</label><input className={fieldCls} type="datetime-local" value={aDate} onChange={e => setADate(e.target.value)} /></div>
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setShowAddActivity(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddActivity(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleAddActivity} disabled={!aTitle.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>Přidat</button>
               </div>
             </div>
@@ -1480,10 +1480,10 @@ export default function ClientPage() {
       {showAddDeal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAddDeal(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 460, maxHeight: '90vh' }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 460, maxHeight: '90vh' }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">{editingDeal ? '✏️ Upravit obchod' : '💰 Nový obchod'}</h2>
-              <button onClick={() => setShowAddDeal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowAddDeal(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-3">
               <div><label className={labelCls}>Název *</label><input className={fieldCls} value={dTitle} onChange={e => setDTitle(e.target.value)} placeholder="Název zakázky nebo projektu"/></div>
@@ -1507,7 +1507,7 @@ export default function ClientPage() {
               <div><label className={labelCls}>Poznámky</label><textarea className={fieldCls + ' resize-none'} rows={2} value={dNotes} onChange={e => setDNotes(e.target.value)} placeholder="…" /></div>
               <div className="flex gap-3 pt-1">
                 {editingDeal && <button onClick={() => handleDeleteDeal(editingDeal.id)} className="px-4 py-3 rounded-[14px] border border-red-200 text-red-500 text-[13px] font-semibold hover:bg-red-50 transition-colors">Smazat</button>}
-                <button onClick={() => setShowAddDeal(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAddDeal(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleSaveDeal} disabled={!dTitle.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: DEAL_STAGE_COLORS[dStage] }}>
                   {editingDeal ? 'Uložit' : 'Přidat'}
                 </button>
@@ -1521,10 +1521,10 @@ export default function ClientPage() {
       {editingTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setEditingTask(null) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">✏️ Upravit úkol</h2>
-              <button onClick={() => setEditingTask(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setEditingTask(null)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
@@ -1560,7 +1560,7 @@ export default function ClientPage() {
                 <input className={fieldCls} value={tNote} onChange={e => setTNote(e.target.value)} placeholder="Volitelná poznámka…" />
               </div>
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setEditingTask(null)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setEditingTask(null)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleSaveTask} disabled={!tTitle.trim()} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40" style={{ background: clientColor }}>Uložit</button>
               </div>
             </div>
@@ -1572,10 +1572,10 @@ export default function ClientPage() {
       {showEditClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowEditClient(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 480, maxHeight: '90vh' }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 480, maxHeight: '90vh' }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">✏️ Upravit klienta</h2>
-              <button onClick={() => setShowEditClient(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowEditClient(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
 
@@ -1629,7 +1629,7 @@ export default function ClientPage() {
               </div>
 
               {/* Live preview */}
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-[12px]">
+              <div className="flex items-center gap-3 p-3 bg-[var(--bg)] rounded-[12px]">
                 <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-[20px]" style={{ background: eColor + '25' }}>{eIcon}</div>
                 <div>
                   <div className="text-[14px] font-bold text-gray-900">{eName || 'Název klienta'}</div>
@@ -1638,7 +1638,7 @@ export default function ClientPage() {
               </div>
 
               {/* Kategorizace */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide border-t border-gray-100 pt-1">Kategorizace</div>
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide border-t border-[var(--border)] pt-1">Kategorizace</div>
 
               {/* PP číslo */}
               <div>
@@ -1676,7 +1676,7 @@ export default function ClientPage() {
                     onClick={() => setEIsPrague(v => !v)}
                     className="w-10 h-6 rounded-full transition-all flex-shrink-0 relative"
                     style={{ background: eIsPrague ? '#0ea5e9' : '#d1d5db' }}>
-                    <div className="absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all"
+                    <div className="absolute top-1 w-4 h-4 rounded-full bg-[var(--surface)] shadow transition-all"
                       style={{ left: eIsPrague ? 'calc(100% - 20px)' : '4px' }} />
                   </div>
                   <span className="text-[13px] font-semibold text-gray-700">🏙️ Zákazník je z Prahy</span>
@@ -1684,7 +1684,7 @@ export default function ClientPage() {
               </div>
 
               {/* Kontaktní sekce */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide border-t border-gray-100 pt-1">Kontaktní údaje</div>
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide border-t border-[var(--border)] pt-1">Kontaktní údaje</div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className={labelCls}>Email</label><input className={fieldCls} value={eEmail} onChange={e => setEEmail(e.target.value)} placeholder="email@firma.cz" /></div>
                 <div><label className={labelCls}>Telefon</label><input className={fieldCls} value={ePhone} onChange={e => setEPhone(e.target.value)} placeholder="+420…" /></div>
@@ -1714,7 +1714,7 @@ export default function ClientPage() {
               </div>
 
               {/* Interní sekce */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1 border-t border-gray-100">Interní data</div>
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1 border-t border-[var(--border)]">Interní data</div>
 
               {/* Produkty */}
               <div>
@@ -1754,7 +1754,7 @@ export default function ClientPage() {
               </div>
 
               {/* Ceník */}
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1 border-t border-gray-100">Ceník služeb (CZK / ks)</div>
+              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide pt-1 border-t border-[var(--border)]">Ceník služeb (CZK / ks)</div>
 
               {/* HW položky — každá má název + cenu */}
               {([1, 2] as const).map(n => {
@@ -1793,7 +1793,7 @@ export default function ClientPage() {
               </div>
 
               {/* Smazat klienta */}
-              <div className="border-t border-gray-100 pt-3">
+              <div className="border-t border-[var(--border)] pt-3">
                 {!confirmDelete ? (
                   <button onClick={() => setConfirmDelete(true)}
                     className="w-full py-2.5 rounded-[12px] border border-red-200 text-red-500 text-[13px] font-semibold hover:bg-red-50 transition-colors">
@@ -1803,7 +1803,7 @@ export default function ClientPage() {
                   <div className="flex flex-col gap-2">
                     <div className="text-[13px] text-red-600 font-semibold text-center">Opravdu smazat? Tato akce je nevratná.</div>
                     <div className="flex gap-2">
-                      <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-[12px] border border-gray-200 text-[13px] font-semibold text-gray-500">Zrušit</button>
+                      <button onClick={() => setConfirmDelete(false)} className="flex-1 py-2.5 rounded-[12px] border border-[var(--border)] text-[13px] font-semibold text-gray-500">Zrušit</button>
                       <button onClick={handleDeleteClient} className="flex-1 py-2.5 rounded-[12px] bg-red-500 text-[13px] font-bold text-white">Smazat</button>
                     </div>
                   </div>
@@ -1811,7 +1811,7 @@ export default function ClientPage() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setShowEditClient(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowEditClient(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleSaveClient} className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white" style={{ background: clientColor }}>Uložit</button>
               </div>
             </div>

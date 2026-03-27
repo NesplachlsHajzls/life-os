@@ -104,7 +104,7 @@ export default function TripDetailPage() {
       <Header title={`${trip.cover_emoji} ${trip.name}`} />
       <div className="flex-1 overflow-y-auto px-5 py-4 pb-20">
         {/* Trip header */}
-        <div className="rounded-[14px] border border-gray-200 p-4 bg-white mb-4">
+        <div className="rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)] mb-4">
           <div className="text-[14px] font-semibold mb-2">{trip.destination}</div>
           <div className="text-[12px] text-gray-500 mb-3">
             📅 {new Date(trip.start_date).toLocaleDateString('cs-CZ')} - {new Date(trip.end_date).toLocaleDateString('cs-CZ')}
@@ -127,7 +127,7 @@ export default function TripDetailPage() {
 
         {/* Budget overview */}
         {(trip.budget_estimated || trip.status === 'done') && (
-          <div className="rounded-[14px] border border-gray-200 p-4 bg-white mb-4">
+          <div className="rounded-[14px] border border-[var(--border)] p-4 bg-[var(--surface)] mb-4">
             <div className="text-[12px] font-bold text-gray-500 mb-2">ROZPOČET</div>
             {trip.budget_estimated && (
               <div className="mb-2">
@@ -136,7 +136,7 @@ export default function TripDetailPage() {
                   {trip.status === 'done' && <span className="text-[12px]">Skutečný: {trip.budget_actual ?? 0} Kč</span>}
                 </div>
                 {trip.status === 'done' && (
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-[var(--border)] rounded-full h-2">
                     <div
                       className="h-2 rounded-full transition-all"
                       style={{ width: `${Math.min(((trip.budget_actual ?? 0) / trip.budget_estimated) * 100, 100)}%`, background: 'var(--color-primary)' }}
@@ -153,7 +153,7 @@ export default function TripDetailPage() {
           <div className="text-[13px] font-bold text-gray-600 mb-2">🎒 Co sbalit</div>
           <div className="space-y-2">
             {packItems.map(item => (
-              <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-[10px]">
+              <div key={item.id} className="flex items-center gap-2 p-2 bg-[var(--bg)] rounded-[10px]">
                 <input
                   type="checkbox"
                   checked={item.done}
@@ -174,7 +174,7 @@ export default function TripDetailPage() {
           <div className="text-[13px] font-bold text-gray-600 mb-2">🗺️ Aktivity</div>
           <div className="space-y-2">
             {activityItems.map(item => (
-              <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-[10px]">
+              <div key={item.id} className="flex items-center gap-2 p-2 bg-[var(--bg)] rounded-[10px]">
                 <input
                   type="checkbox"
                   checked={item.done}
@@ -195,7 +195,7 @@ export default function TripDetailPage() {
           <div className="text-[13px] font-bold text-gray-600 mb-2">💰 Výdaje ({expenseTotal} Kč)</div>
           <div className="space-y-2">
             {expenseItems.map(item => (
-              <div key={item.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-[10px]">
+              <div key={item.id} className="flex items-center gap-2 p-2 bg-[var(--bg)] rounded-[10px]">
                 <input
                   type="checkbox"
                   checked={item.done}
@@ -215,7 +215,7 @@ export default function TripDetailPage() {
         {/* Add item modal */}
         {showAddModal && (
           <div className="fixed inset-0 bg-black/30 flex items-end z-50">
-            <div className="w-full bg-white rounded-t-[20px] p-5 space-y-4">
+            <div className="w-full bg-[var(--surface)] rounded-t-[20px] p-5 space-y-4">
               <div className="text-[16px] font-bold">Přidat položku</div>
               <div className="flex gap-2">
                 {['pack', 'activity', 'expense'].map(type => (
@@ -237,7 +237,7 @@ export default function TripDetailPage() {
                 placeholder="Název"
                 value={itemInput}
                 onChange={(e) => setItemInput(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]"
+                className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
               />
               {itemType === 'expense' && (
                 <input
@@ -245,13 +245,13 @@ export default function TripDetailPage() {
                   placeholder="Cena"
                   value={itemPrice}
                   onChange={(e) => setItemPrice(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]"
+                  className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
                 />
               )}
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-gray-300"
+                  className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]"
                 >
                   Zrušit
                 </button>

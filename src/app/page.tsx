@@ -250,7 +250,7 @@ export default function DashboardPage() {
         {/* Nudle — Sport a Poznámky */}
         <div className="grid grid-cols-2 gap-3">
           <Link href="/sport"
-            className="bg-white rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
+            className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
       >
             <div className="flex items-center gap-2">
               <span className="text-[20px]">🏋️</span>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
           </Link>
 
           <Link href="/poznamky"
-            className="bg-white rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
+            className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
       >
             <div className="flex items-center gap-2">
               <span className="text-[20px]">💡</span>

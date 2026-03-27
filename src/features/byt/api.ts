@@ -7,10 +7,38 @@ export interface Room {
   user_id: string
   name: string
   icon: string
+  color: string
   order_index: number
 }
 
-export const ROOM_ICONS = ['🛋️', '🛏️', '🍳', '🚿', '🏠', '📦', '🚗', '🌿', '🏋️', '🖥️']
+export const ROOM_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
+  '#f59e0b', '#10b981', '#0ea5e9', '#06b6d4',
+  '#475569', '#92400e', '#16a34a', '#3b82f6',
+  '#ea580c', '#64748b', '#44403c',
+]
+
+export const ROOM_PRESETS: { name: string; icon: string; color: string }[] = [
+  { name: 'Obývací pokoj',      icon: '🛋️', color: '#6366f1' },
+  { name: 'Ložnice',            icon: '🛏️', color: '#8b5cf6' },
+  { name: 'Dětský pokoj',       icon: '🧸', color: '#ec4899' },
+  { name: 'Kuchyň',             icon: '🍳', color: '#f59e0b' },
+  { name: 'Koupelna',           icon: '🚿', color: '#0ea5e9' },
+  { name: 'WC',                 icon: '🚽', color: '#06b6d4' },
+  { name: 'Chodba',             icon: '🚪', color: '#6b7280' },
+  { name: 'Pracovna',           icon: '🖥️', color: '#3b82f6' },
+  { name: 'Balkón',             icon: '🌅', color: '#10b981' },
+  { name: 'Terasa',             icon: '☀️', color: '#22c55e' },
+  { name: 'Zahrada',            icon: '🌿', color: '#16a34a' },
+  { name: 'Garáž',              icon: '🚗', color: '#475569' },
+  { name: 'Kůlna',              icon: '🪚', color: '#92400e' },
+  { name: 'Sklep',              icon: '📦', color: '#44403c' },
+  { name: 'Technická místnost', icon: '⚙️', color: '#64748b' },
+  { name: 'Posilovna',          icon: '🏋️', color: '#ef4444' },
+  { name: 'Sauna',              icon: '🔥', color: '#ea580c' },
+]
+
+export const ROOM_ICONS = ROOM_PRESETS.map(p => p.icon)
 
 export async function fetchRooms(userId: string): Promise<Room[]> {
   const { data, error } = await supabase
@@ -102,13 +130,14 @@ export interface HomeContract {
   renewal_date: string | null
   notes: string | null
   auto_renew: boolean
+  file_url: string | null
 }
 
 export const CONTRACT_TYPES: { id: ContractType; label: string; icon: string }[] = [
-  { id: 'insurance', label: 'Pojištění', icon: '🛡️' },
-  { id: 'utility', label: 'Energie/voda', icon: '💧' },
-  { id: 'subscription', label: 'Předplatné', icon: '📱' },
-  { id: 'other', label: 'Ostatní', icon: '📄' },
+  { id: 'insurance',    label: 'Pojištění',      icon: '🛡️' },
+  { id: 'utility',      label: 'Energie / voda', icon: '💧' },
+  { id: 'subscription', label: 'Předplatné',     icon: '📱' },
+  { id: 'other',        label: 'Ostatní',        icon: '📄' },
 ]
 
 export async function fetchContracts(userId: string): Promise<HomeContract[]> {
@@ -138,48 +167,5 @@ export async function updateContract(id: string, patch: Partial<HomeContract>): 
 
 export async function deleteContract(id: string): Promise<void> {
   const { error } = await supabase.from('byt_contracts').delete().eq('id', id)
-  if (error) throw new Error(error.message)
-}
-
-// ── HomeAppliance ───────────────────────────────────────────────────
-
-export interface HomeAppliance {
-  id: string
-  user_id: string
-  room_id: string | null
-  name: string
-  brand: string | null
-  purchase_date: string | null
-  warranty_until: string | null
-  notes: string | null
-}
-
-export async function fetchAppliances(userId: string): Promise<HomeAppliance[]> {
-  const { data, error } = await supabase
-    .from('byt_appliances')
-    .select('*')
-    .eq('user_id', userId)
-    .order('purchase_date', { ascending: false, nullsFirst: true })
-  if (error) throw new Error(error.message)
-  return (data as HomeAppliance[]) ?? []
-}
-
-export async function insertAppliance(payload: Omit<HomeAppliance, 'id'>): Promise<HomeAppliance> {
-  const { data, error } = await supabase
-    .from('byt_appliances')
-    .insert(payload)
-    .select()
-    .single()
-  if (error) throw new Error(error.message)
-  return data as HomeAppliance
-}
-
-export async function updateAppliance(id: string, patch: Partial<HomeAppliance>): Promise<void> {
-  const { error } = await supabase.from('byt_appliances').update(patch).eq('id', id)
-  if (error) throw new Error(error.message)
-}
-
-export async function deleteAppliance(id: string): Promise<void> {
-  const { error } = await supabase.from('byt_appliances').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }

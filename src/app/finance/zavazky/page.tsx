@@ -61,14 +61,14 @@ function AddDebtSheet({ type, prefillPerson, onSave, onClose }: SheetProps) {
     onClose()
   }
 
-  const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
   const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
   const accentColor = type === 'liability' ? '#ef4444' : '#22c55e'
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[390px] bg-white rounded-t-[24px] p-5 pb-8 max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] p-5 pb-8 max-h-[92vh] overflow-y-auto">
         <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
         <h2 className="text-[16px] font-bold mb-4">{type === 'liability' ? '💳 Nový závazek' : '💚 Nová pohledávka'}</h2>
         <div className="flex flex-col gap-4">
@@ -100,7 +100,7 @@ function AddDebtSheet({ type, prefillPerson, onSave, onClose }: SheetProps) {
           </div>
 
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
             <button
               onClick={handleSave}
               disabled={!valid}
@@ -124,13 +124,13 @@ function EditDebtSheet({ debt, onSave, onClose }: { debt: Debt; onSave: (d: Debt
   const [dateTo,   setDateTo]   = useState(debt.date_to ?? '')
 
   const valid = person.trim() && +amount > 0
-  const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
   const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[390px] bg-white rounded-t-[24px] p-5 pb-8 max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] p-5 pb-8 max-h-[92vh] overflow-y-auto">
         <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
         <h2 className="text-[16px] font-bold mb-4">✏️ Upravit záznam</h2>
         <div className="flex flex-col gap-4">
@@ -157,7 +157,7 @@ function EditDebtSheet({ debt, onSave, onClose }: { debt: Debt; onSave: (d: Debt
             </div>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
             <button
               onClick={() => { if (valid) { onSave({ ...debt, person: person.trim(), amount: +amount, note, date_from: dateFrom, date_to: dateTo || undefined }); onClose() } }}
               disabled={!valid}
@@ -224,7 +224,7 @@ export default function ZavazkyPage() {
 
   return (
     <>
-      <Header title="Finance 💰" />
+      <Header title="Finance" />
       <FinanceTabs active="Peněženky" />
 
       <div className="p-4 flex flex-col gap-4">
@@ -242,18 +242,18 @@ export default function ZavazkyPage() {
         </div>
 
         {/* Quick text input */}
-        <div className="bg-white rounded-[16px] shadow-card px-4 py-3.5">
+        <div className="bg-[var(--surface)] rounded-[16px] shadow-card px-4 py-3.5">
           <div className="text-[10px] font-bold text-red-400 uppercase tracking-wide mb-2">➕ Přidat závazek</div>
           <div className="flex gap-2">
             <input
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[13px] outline-none focus:border-red-400"
+              className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] outline-none focus:border-red-400"
               value={quickInput}
               onChange={e => setQuickInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
               placeholder="Jirka 500 oběd / Banka 30000 půjčka"
             />
             <button onClick={handleQuickAdd} disabled={!quickInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-red-500 text-white text-[13px] font-bold disabled:opacity-40">+</button>
-            <button onClick={() => { setAddPerson(''); setShowAdd(true) }} className="px-3 py-2.5 rounded-[12px] border border-gray-200 text-gray-500 text-[13px]">✎</button>
+            <button onClick={() => { setAddPerson(''); setShowAdd(true) }} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-gray-500 text-[13px]">✎</button>
           </div>
           {quickError && <p className="text-[11px] text-red-500 mt-1.5">⚠️ {quickError}</p>}
         </div>
@@ -276,7 +276,7 @@ export default function ZavazkyPage() {
               const latestNote = [...entries].sort((a, b) => b.date_from.localeCompare(a.date_from))[0]?.note
 
               return (
-                <div key={personKey} className="bg-white rounded-[16px] shadow-card overflow-hidden">
+                <div key={personKey} className="bg-[var(--surface)] rounded-[16px] shadow-card overflow-hidden">
                   {/* Person header row */}
                   <button
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
@@ -301,7 +301,7 @@ export default function ZavazkyPage() {
 
                   {/* Expanded entries */}
                   {isOpen && (
-                    <div className="border-t border-gray-100">
+                    <div className="border-t border-[var(--border)]">
                       {entries
                         .sort((a, b) => b.date_from.localeCompare(a.date_from))
                         .map((entry, idx) => (
@@ -335,7 +335,7 @@ export default function ZavazkyPage() {
                       {/* Add another entry for same person */}
                       <button
                         onClick={() => { setAddPerson(personName); setShowAdd(true) }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-[12px] font-semibold text-gray-400 hover:text-[var(--color-primary)] hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-[12px] font-semibold text-gray-400 hover:text-[var(--color-primary)] hover:bg-[var(--bg)] transition-colors"
                       >
                         <span className="text-[16px]">+</span> Přidat další záznam pro {personName}
                       </button>

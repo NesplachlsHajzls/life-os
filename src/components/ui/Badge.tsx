@@ -1,5 +1,5 @@
 const variants = {
-  waiting: 'bg-gray-100 text-gray-500',
+  waiting: 'bg-[var(--surface-raised)] text-gray-500',
   active:  'bg-orange-100 text-orange-700',
   done:    'bg-green-100 text-green-700',
   today:   'bg-red-100 text-red-600',

@@ -15,7 +15,7 @@ const WALLET_ICONS = ['💵', '💳', '🏦', '💰', '🪙', '💸', '🏧', '�
 const WALLET_TYPES = ['běžná', 'spořicí', 'investiční', 'hotovost', 'kreditní', 'stravenky']
 const WALLET_COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#64748b']
 
-const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
+const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
 const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
 // ── EditWalletSheet ────────────────────────────────────────────────
@@ -37,7 +37,7 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[390px] bg-white rounded-t-[24px] p-5 pb-8 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] p-5 pb-8 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
         <h2 className="text-[16px] font-bold mb-4">✏️ Upravit peněženku</h2>
         <div className="flex flex-col gap-4">
@@ -54,7 +54,7 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
                 <button
                   key={ic}
                   onClick={() => setIcon(ic)}
-                  className={`w-9 h-9 rounded-xl text-[18px] flex items-center justify-center transition-all ${icon === ic ? 'ring-2 ring-[var(--color-primary)] bg-[var(--color-primary-light)]' : 'bg-gray-100'}`}
+                  className={`w-9 h-9 rounded-xl text-[18px] flex items-center justify-center transition-all ${icon === ic ? 'ring-2 ring-[var(--color-primary)] bg-[var(--color-primary-light)]' : 'bg-[var(--surface-raised)]'}`}
                 >
                   {ic}
                 </button>
@@ -92,7 +92,7 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${type === t ? 'bg-[var(--color-primary)] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${type === t ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--surface-raised)] text-gray-600'}`}
                 >
                   {t}
                 </button>
@@ -101,7 +101,7 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
           </div>
 
           <div className="flex gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
             <button
               onClick={handleSave}
               disabled={!valid}
@@ -121,11 +121,11 @@ function TransferSheet({ wallets, onTransfer, onClose }: { wallets: Wallet[]; on
   const [to,   setTo]   = useState(wallets[1]?.id ?? '')
   const [amt,  setAmt]  = useState('')
   const valid = from && to && from !== to && +amt > 0
-  const sel = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3 py-2.5 text-[13px] outline-none'
+  const sel = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3 py-2.5 text-[13px] outline-none'
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-[390px] bg-white rounded-t-[24px] p-5 pb-8">
+      <div className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] p-5 pb-8">
         <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
         <h2 className="text-[16px] font-bold mb-4">💸 Přesun peněz</h2>
         <div className="flex flex-col gap-3">
@@ -144,7 +144,7 @@ function TransferSheet({ wallets, onTransfer, onClose }: { wallets: Wallet[]; on
           </div>
         </div>
         <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
           <button
             onClick={() => { onTransfer(from, to, +amt); onClose() }}
             disabled={!valid}
@@ -177,7 +177,7 @@ export default function PenezenkyPage() {
 
   return (
     <>
-      <Header title="Finance 💰" />
+      <Header title="Finance" />
       <FinanceTabs active="Peněženky" />
 
       <div className="p-4">
@@ -191,10 +191,10 @@ export default function PenezenkyPage() {
           <div className="flex gap-3 mt-4">
             <button
               onClick={() => setShowTransfer(true)}
-              className="px-4 py-2 rounded-xl bg-white/20 text-white text-[12px] font-semibold"
+              className="px-4 py-2 rounded-xl bg-[var(--surface)]/20 text-white text-[12px] font-semibold"
             >💸 Přesunout</button>
-            <a href="/finance/pohledavky" className="px-4 py-2 rounded-xl bg-white/20 text-white text-[12px] font-semibold">🤝 Pohledávky</a>
-            <a href="/finance/zavazky" className="px-4 py-2 rounded-xl bg-white/20 text-white text-[12px] font-semibold">💳 Závazky</a>
+            <a href="/finance/pohledavky" className="px-4 py-2 rounded-xl bg-[var(--surface)]/20 text-white text-[12px] font-semibold">🤝 Pohledávky</a>
+            <a href="/finance/zavazky" className="px-4 py-2 rounded-xl bg-[var(--surface)]/20 text-white text-[12px] font-semibold">💳 Závazky</a>
           </div>
         </div>
 
@@ -206,7 +206,7 @@ export default function PenezenkyPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {wallets.map(w => (
-              <div key={w.id} className="bg-white rounded-[16px] px-4 py-3.5 flex items-center gap-3 shadow-card">
+              <div key={w.id} className="bg-[var(--surface)] rounded-[16px] px-4 py-3.5 flex items-center gap-3 shadow-card">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-[20px]"
                   style={{ background: (w.color ?? '#94a3b8') + '22' }}

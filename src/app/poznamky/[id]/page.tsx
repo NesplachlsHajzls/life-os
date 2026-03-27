@@ -185,9 +185,9 @@ export default function NoteDetailPage() {
     <div className="min-h-screen bg-[#F4F6FA] flex flex-col">
 
       {/* ── Top bar ── */}
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
+      <div className="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
         <Link href={backHref}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 text-[18px] transition-colors flex-shrink-0">
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[18px] transition-colors flex-shrink-0">
           ←
         </Link>
         <div className="flex items-center gap-1.5 flex-1 min-w-0 text-[12px] text-gray-400">
@@ -239,15 +239,15 @@ export default function NoteDetailPage() {
         <div className="flex items-start gap-3">
           <div className="relative flex-shrink-0">
             <button onClick={() => setShowIconPicker(v => !v)}
-              className="text-[40px] hover:bg-gray-100 rounded-[12px] p-1 transition-colors leading-none" title="Změnit ikonu">
+              className="text-[40px] hover:bg-[var(--surface-raised)] rounded-[12px] p-1 transition-colors leading-none" title="Změnit ikonu">
               {icon}
             </button>
             {showIconPicker && (
-              <div className="absolute top-full left-0 mt-1 bg-white rounded-[16px] shadow-2xl p-3 z-20 flex flex-wrap gap-1.5 w-[220px]"
+              <div className="absolute top-full left-0 mt-1 bg-[var(--surface)] rounded-[16px] shadow-2xl p-3 z-20 flex flex-wrap gap-1.5 w-[220px]"
                 style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.15)' }}>
                 {NOTE_ICONS.map(ic => (
                   <button key={ic} onClick={() => handleIconChange(ic)}
-                    className="text-[22px] w-9 h-9 rounded-[8px] hover:bg-gray-100 flex items-center justify-center transition-colors"
+                    className="text-[22px] w-9 h-9 rounded-[8px] hover:bg-[var(--surface-raised)] flex items-center justify-center transition-colors"
                     style={{ background: ic === icon ? 'var(--color-primary)' + '18' : undefined }}>
                     {ic}
                   </button>
@@ -271,7 +271,7 @@ export default function NoteDetailPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
                 style={activeCat
                   ? { background: activeCat.color + '18', borderColor: activeCat.color + '40', color: activeCat.color }
-                  : { background: '#f3f4f6', borderColor: '#e5e7eb', color: '#9ca3af' }
+                  : { background: '#f3f4f6', borderColor: 'var(--border)', color: '#9ca3af' }
                 }
               >
                 {activeCat ? <>{activeCat.icon} {activeCat.name}</> : '📦 Bez kategorie'}
@@ -279,10 +279,10 @@ export default function NoteDetailPage() {
               </button>
 
               {showCatPicker && (
-                <div className="absolute top-full left-0 mt-1 bg-white rounded-[14px] shadow-xl border border-gray-100 p-2 z-20 flex flex-col gap-0.5 min-w-[200px]"
+                <div className="absolute top-full left-0 mt-1 bg-[var(--surface)] rounded-[14px] shadow-xl border border-[var(--border)] p-2 z-20 flex flex-col gap-0.5 min-w-[200px]"
                   style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
                   <button onClick={() => handleCategoryChange(null)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all hover:bg-gray-50"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left transition-all hover:bg-[var(--bg)]"
                     style={{ color: !category ? 'var(--color-primary)' : '#6b7280', background: !category ? 'var(--color-primary-light, #eff6ff)' : 'transparent' }}>
                     📦 Bez kategorie
                   </button>
@@ -309,7 +309,7 @@ export default function NoteDetailPage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-[12px] font-semibold transition-all border"
                   style={clientId
                     ? { background: '#8b5cf618', borderColor: '#8b5cf640', color: '#8b5cf6' }
-                    : { background: '#f3f4f6', borderColor: '#e5e7eb', color: '#9ca3af' }
+                    : { background: '#f3f4f6', borderColor: 'var(--border)', color: '#9ca3af' }
                   }
                 >
                   👤 {clientName ?? 'Bez klienta'}
@@ -317,18 +317,18 @@ export default function NoteDetailPage() {
                 </button>
 
                 {showClientPicker && (
-                  <div className="absolute top-full left-0 mt-1 bg-white rounded-[14px] shadow-xl border border-gray-100 p-2 z-20 flex flex-col gap-0.5 min-w-[220px]"
+                  <div className="absolute top-full left-0 mt-1 bg-[var(--surface)] rounded-[14px] shadow-xl border border-[var(--border)] p-2 z-20 flex flex-col gap-0.5 min-w-[220px]"
                     style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.12)' }}>
                     <input
                       autoFocus
                       value={clientSearch}
                       onChange={e => setClientSearch(e.target.value)}
                       placeholder="Hledat klienta…"
-                      className="w-full px-3 py-1.5 text-[12px] border border-gray-200 rounded-[8px] outline-none mb-1"
+                      className="w-full px-3 py-1.5 text-[12px] border border-[var(--border)] rounded-[8px] outline-none mb-1"
                     />
                     {clientId && (
                       <button onClick={() => handleClientChange(null)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left hover:bg-gray-50 text-gray-500">
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[12px] font-semibold w-full text-left hover:bg-[var(--bg)] text-gray-500">
                         ✕ Odebrat klienta
                       </button>
                     )}
@@ -358,7 +358,7 @@ export default function NoteDetailPage() {
         )}
 
         {/* Rich text editor */}
-        <div className="bg-white rounded-[14px] overflow-hidden" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+        <div className="bg-[var(--surface)] rounded-[14px] overflow-hidden" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
           <RichTextEditor
             value={content}
             onChange={handleContentChange}
@@ -370,7 +370,7 @@ export default function NoteDetailPage() {
         </div>
 
         {/* Sub-notes */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-[var(--border)]">
           <div className="flex items-center justify-between mb-3">
             <span className="text-[12px] font-bold text-gray-400 uppercase tracking-wide">
               Podstránky {subNotes.length > 0 && `(${subNotes.length})`}
@@ -387,7 +387,7 @@ export default function NoteDetailPage() {
             <div className="flex flex-col gap-2">
               {subNotes.map(sub => (
                 <Link key={sub.id} href={`/poznamky/${sub.id}`}
-                  className="group flex items-center gap-3 bg-white rounded-[12px] px-4 py-3 hover:shadow-sm transition-all"
+                  className="group flex items-center gap-3 bg-[var(--surface)] rounded-[12px] px-4 py-3 hover:shadow-sm transition-all"
                   style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.04)' }}>
                   <span className="text-[18px] flex-shrink-0">{sub.icon}</span>
                   <div className="flex-1 min-w-0">
@@ -410,12 +410,12 @@ export default function NoteDetailPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
           onClick={() => setConfirmDelete(false)}>
-          <div className="bg-white rounded-[20px] p-6 mx-4 w-full max-w-[360px] shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-[var(--surface)] rounded-[20px] p-6 mx-4 w-full max-w-[360px] shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="text-[18px] font-extrabold text-gray-900 mb-2">Smazat poznámku?</div>
             <p className="text-[13px] text-gray-500 mb-5">Smaže se i všechny podstránky. Tuto akci nelze vrátit.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmDelete(false)}
-                className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
               <button onClick={handleDelete}
                 className="flex-1 py-3 rounded-[14px] bg-red-500 text-white text-[14px] font-bold">Smazat</button>
             </div>

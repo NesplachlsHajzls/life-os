@@ -103,7 +103,7 @@ export default function PoznamkyPage() {
 
   return (
     <>
-      <Header title="📝 Poznámky" />
+      <Header title="Poznámky" />
       <div className="p-4 lg:p-6">
 
         {/* Toolbar */}
@@ -111,7 +111,7 @@ export default function PoznamkyPage() {
           <div className="relative flex-1">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
             <input
-              className="w-full bg-white border border-gray-200 rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
               placeholder="Hledat v poznámkách…"
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -177,7 +177,7 @@ export default function PoznamkyPage() {
               const client = note.client_id ? clients.find(c => c.id === note.client_id)    : null
               return (
                 <Link key={note.id} href={`/poznamky/${note.id}`}
-                  className="group bg-white rounded-[16px] p-4 hover:shadow-md transition-all relative"
+                  className="group bg-[var(--surface)] rounded-[16px] p-4 hover:shadow-md transition-all relative"
                   style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
                   <button onClick={e => handleDelete(note.id, e)}
                     className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-gray-300 hover:text-red-400 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 text-[16px]">

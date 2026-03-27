@@ -130,7 +130,7 @@ export default function PracePage() {
 
   return (
     <>
-      <Header title="💼 Práce" />
+      <Header title="Práce" />
 
       <div className="p-4 lg:p-6">
 
@@ -142,7 +142,7 @@ export default function PracePage() {
             { label: 'Aktivní obchody',value: activeDeals.length, icon: '💰' },
             { label: 'Tento týden',   value: dueThisWeek.length,  icon: '📅' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div key={s.label} className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
               <span className="text-[22px]">{s.icon}</span>
               <div>
                 <div className="text-[20px] font-extrabold text-gray-900 leading-tight">{s.value}</div>
@@ -159,7 +159,7 @@ export default function PracePage() {
             <div className="relative flex-1">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[15px]">🔍</span>
               <input
-                className="w-full bg-white border border-gray-200 rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
+                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] pl-9 pr-4 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
                 placeholder="Hledat klienta…"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -167,12 +167,12 @@ export default function PracePage() {
               />
             </div>
             <Link href="/prace/pipeline"
-              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold border border-gray-200 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap flex-shrink-0"
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--bg)] transition-colors whitespace-nowrap flex-shrink-0"
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
               📊 Pipeline
             </Link>
             <Link href="/prace/import"
-              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold border border-gray-200 bg-white hover:bg-gray-50 transition-colors whitespace-nowrap flex-shrink-0"
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--bg)] transition-colors whitespace-nowrap flex-shrink-0"
               style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
               📥 Import
             </Link>
@@ -264,9 +264,9 @@ export default function PracePage() {
             <p className="text-[14px] font-semibold text-gray-500">{search ? 'Žádný klient nenalezen' : 'Zatím žádní klienti'}</p>
           </div>
         ) : (
-          <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
             {/* Table header */}
-            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-gray-100 text-[11px] font-bold text-gray-400 uppercase tracking-wide">
+            <div className="hidden lg:grid grid-cols-[2fr_160px_80px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-[var(--border)] text-[11px] font-bold text-gray-400 uppercase tracking-wide">
               <span>Klient</span>
               <span>Kontakt</span>
               <span className="text-center">Úkoly</span>
@@ -284,7 +284,7 @@ export default function PracePage() {
 
               return (
                 <Link key={client.id} href={`/prace/${client.id}`}
-                  className={`flex lg:grid lg:grid-cols-[2fr_160px_80px_80px_80px_80px_40px] items-center gap-3 lg:gap-4 px-5 py-3.5 hover:bg-gray-50 transition-colors ${i < filtered.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  className={`flex lg:grid lg:grid-cols-[2fr_160px_80px_80px_80px_80px_40px] items-center gap-3 lg:gap-4 px-5 py-3.5 hover:bg-[var(--bg)] transition-colors ${i < filtered.length - 1 ? 'border-b border-[var(--border)]' : ''}`}>
 
                   {/* Name + icon + badges */}
                   <div className="flex items-center gap-3 min-w-0">
@@ -384,15 +384,15 @@ export default function PracePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4" style={{ maxWidth: 440 }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">👥 Nový klient</h2>
-              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
                 <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Název *</label>
-                <input className="w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
+                <input className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]"
                   value={newName} onChange={e => setNewName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
                   placeholder="Název firmy nebo klienta" />
@@ -444,7 +444,7 @@ export default function PracePage() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleAdd} disabled={!newName.trim()}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: newColor }}>Přidat klienta</button>

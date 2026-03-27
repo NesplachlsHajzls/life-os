@@ -66,19 +66,19 @@ export default function FinancePage() {
 
   return (
     <>
-      <Header title="Finance 💰" />
+      <Header title="Finance" />
       <FinanceTabs active="Přehled" />
 
       {/* Month selector */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-100">
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)]">
         <button
           onClick={() => { const i = allMonths.indexOf(curMonth); if (i > 0) setCurMonth(allMonths[i - 1]) }}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-lg"
         >‹</button>
         <span className="text-[13px] font-bold text-gray-700">{mLabel(curMonth)}</span>
         <button
           onClick={() => { const i = allMonths.indexOf(curMonth); if (i < allMonths.length - 1) setCurMonth(allMonths[i + 1]) }}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-lg"
         >›</button>
       </div>
 
@@ -108,37 +108,37 @@ export default function FinancePage() {
         </div>
 
         {/* Quick add */}
-        <div className="bg-white rounded-[16px] shadow-card overflow-hidden">
+        <div className="bg-[var(--surface)] rounded-[16px] shadow-card overflow-hidden">
           <div className="px-4 pt-3.5 pb-2">
             <div className="text-[10px] font-bold text-green-500 uppercase tracking-wide mb-2">➕ Příjem</div>
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[13px] outline-none focus:border-green-400"
+                className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] outline-none focus:border-green-400"
                 value={incInput}
                 onChange={e => setIncInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleIncSubmit()}
                 placeholder="výplata 45000 / faktura 12000"
               />
               <button onClick={handleIncSubmit} disabled={!incInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-green-500 text-white text-[13px] font-bold disabled:opacity-40">+</button>
-              <button onClick={() => setShowAddInc(true)} className="px-3 py-2.5 rounded-[12px] border border-gray-200 text-gray-500 text-[13px]">✎</button>
+              <button onClick={() => setShowAddInc(true)} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-gray-500 text-[13px]">✎</button>
             </div>
             {incError && <p className="text-[11px] text-red-500 mt-1.5">⚠️ {incError}</p>}
           </div>
 
-          <div className="mx-4 h-px bg-gray-100" />
+          <div className="mx-4 h-px bg-[var(--surface-raised)]" />
 
           <div className="px-4 pt-2 pb-3.5">
             <div className="text-[10px] font-bold text-red-400 uppercase tracking-wide mb-2">➖ Výdaj</div>
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[13px] outline-none focus:border-red-400"
+                className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[13px] outline-none focus:border-red-400"
                 value={expInput}
                 onChange={e => setExpInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleExpSubmit()}
                 placeholder="oběd 150 ucet / netflix 299 banka"
               />
               <button onClick={handleExpSubmit} disabled={!expInput.trim()} className="px-4 py-2.5 rounded-[12px] bg-red-500 text-white text-[13px] font-bold disabled:opacity-40">−</button>
-              <button onClick={() => setShowAddExp(true)} className="px-3 py-2.5 rounded-[12px] border border-gray-200 text-gray-500 text-[13px]">✎</button>
+              <button onClick={() => setShowAddExp(true)} className="px-3 py-2.5 rounded-[12px] border border-[var(--border)] text-gray-500 text-[13px]">✎</button>
             </div>
             {expError && <p className="text-[11px] text-red-500 mt-1.5">⚠️ {expError}</p>}
           </div>
@@ -146,7 +146,7 @@ export default function FinancePage() {
 
         {/* Category bars — always shown when categories exist */}
         {!loading && catBarData.length > 0 && (
-          <div className="bg-white rounded-[16px] shadow-card p-4">
+          <div className="bg-[var(--surface)] rounded-[16px] shadow-card p-4">
             <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-3">Výdaje dle kategorie</div>
             <div className="flex flex-col gap-2.5">
               {catBarData.map(({ name, value, color }) => (
@@ -155,7 +155,7 @@ export default function FinancePage() {
                     <span className="text-[12px] font-semibold text-gray-700">{expCats[name]?.icon} {name}</span>
                     <span className={`text-[12px] font-bold ${value > 0 ? 'text-gray-600' : 'text-gray-300'}`}>{value > 0 ? (hideAmounts ? '••••' : `${fmt(value)} Kč`) : '—'}</span>
                   </div>
-                  <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-[var(--surface-raised)] rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all" style={{ width: `${(value / maxCat) * 100}%`, background: color, opacity: value > 0 ? 1 : 0 }} />
                   </div>
                 </div>
@@ -166,7 +166,7 @@ export default function FinancePage() {
 
         {/* Recent transactions */}
         {(filtExpenses.length > 0 || filtIncomes.length > 0) && (
-          <div className="bg-white rounded-[16px] shadow-card overflow-hidden">
+          <div className="bg-[var(--surface)] rounded-[16px] shadow-card overflow-hidden">
             <div className="px-4 pt-3.5 pb-2 flex justify-between items-center">
               <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">Poslední záznamy</div>
               <a href="/finance/transakce" className="text-[11px] font-semibold" style={{ color: 'var(--color-primary)' }}>Vše ›</a>
@@ -181,7 +181,7 @@ export default function FinancePage() {
                 const isExp = item.kind === 'exp'
                 const cat = isExp ? (expCats[item.category] ?? { icon: '📦', color: '#94a3b8' }) : null
                 return (
-                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < arr.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                  <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < arr.length - 1 ? 'border-b border-[var(--border)]' : ''}`}>
                     <div className="w-9 h-9 rounded-full flex items-center justify-center text-[16px] flex-shrink-0"
                       style={{ background: isExp ? (cat!.color + '22') : '#22c55e22' }}>
                       {isExp ? cat!.icon : '💚'}

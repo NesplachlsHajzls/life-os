@@ -53,14 +53,14 @@ function SectionDropdown({
 
       {open && (
         <div
-          className="absolute top-full left-0 mt-2 bg-white rounded-[16px] py-1.5 z-50 min-w-[180px]"
+          className="absolute top-full left-0 mt-2 bg-[var(--surface)] rounded-[16px] py-1.5 z-50 min-w-[180px]"
           style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.13)', border: '1px solid #f0f0f0' }}
         >
           {options.map(opt => (
             <button
               key={opt.value}
               onClick={() => { onChange(opt.value); setOpen(false) }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[14px] hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-[14px] hover:bg-[var(--bg)] transition-colors"
               style={{ fontWeight: opt.value === value ? 700 : 500, color: opt.value === value ? 'var(--color-primary)' : '#374151' }}
             >
               {opt.icon && <span className="text-[16px] w-5 text-center">{opt.icon}</span>}
@@ -170,7 +170,7 @@ export default function TodoPage() {
   // ── Task list ─────────────────────────────────────────────────
   function renderTaskRows(tasks: Task[]) {
     return (
-      <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+      <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
         {tasks.map((task, i) => (
           <div key={task.id}>
             <TaskItem
@@ -181,7 +181,7 @@ export default function TodoPage() {
               onEdit={setEditingTask}
               clientsMap={clientsMap}
             />
-            {i < tasks.length - 1 && <div className="h-px bg-gray-100 mx-4" />}
+            {i < tasks.length - 1 && <div className="h-px bg-[var(--surface-raised)] mx-4" />}
           </div>
         ))}
       </div>
@@ -219,7 +219,7 @@ export default function TodoPage() {
               <span className="text-red-400 text-[14px]">{overdueOpen ? '▲' : '▼'}</span>
             </button>
             {overdueOpen && (
-              <div className="bg-white">
+              <div className="bg-[var(--surface)]">
                 {overdue!.map((task, i) => (
                   <div key={task.id}>
                     <TaskItem
@@ -230,7 +230,7 @@ export default function TodoPage() {
                       onEdit={setEditingTask}
                       clientsMap={clientsMap}
                     />
-                    {i < overdue!.length - 1 && <div className="h-px bg-gray-100 mx-4" />}
+                    {i < overdue!.length - 1 && <div className="h-px bg-[var(--surface-raised)] mx-4" />}
                   </div>
                 ))}
               </div>
@@ -253,15 +253,15 @@ export default function TodoPage() {
             <div key={freq} className="mb-4">
               <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">{FREQ_LABELS[freq]}</div>
               {items.length === 0 ? (
-                <div className="bg-white rounded-[16px] px-4 py-3 text-[13px] text-gray-400" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[16px] px-4 py-3 text-[13px] text-gray-400" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   Žádné rutiny
                 </div>
               ) : (
-                <div className="bg-white rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[16px] overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   {items.map((r, i) => {
                     const cat = categories.find(c => c.name === r.category)
                     return (
-                      <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < items.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                      <div key={r.id} className={`flex items-center gap-3 px-4 py-3 ${i < items.length - 1 ? 'border-b border-[var(--border)]' : ''}`}>
                         <span className="text-[18px]">{cat?.icon ?? '🔄'}</span>
                         <div className="flex-1">
                           <div className="text-[14px] font-semibold text-gray-800">{r.title}</div>
@@ -281,11 +281,11 @@ export default function TodoPage() {
 
   return (
     <>
-      <Header title="✅ Todo" />
+      <Header title="Todo" />
 
       {/* ════════ MOBILE ════════ */}
       <div className="lg:hidden">
-        <div className="flex bg-white border-b border-gray-100">
+        <div className="flex bg-[var(--surface)] border-b border-[var(--border)]">
           {([
             ['ukoly',  `Úkoly (${openTasks.length})`],
             ['hotove', `Hotové (${doneTasks.length})`],
@@ -300,7 +300,7 @@ export default function TodoPage() {
         </div>
 
         {mobileTab !== 'rutiny' && (
-          <div className="flex gap-2 px-4 py-2.5 bg-white border-b border-gray-100 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div className="flex gap-2 px-4 py-2.5 bg-[var(--surface)] border-b border-[var(--border)] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
             {catChips.map(cat => (
               <button key={cat} onClick={() => setMobileCat(cat)}
                 className="px-3 py-1 rounded-full text-[12px] font-semibold whitespace-nowrap flex-shrink-0 transition-colors"
@@ -315,17 +315,17 @@ export default function TodoPage() {
           {mobileTab === 'rutiny' ? <RoutinesList /> : (
             <>
               {showQuickAdd && mobileTab === 'ukoly' && (
-                <div className="bg-white rounded-[16px] p-3 mb-3" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+                <div className="bg-[var(--surface)] rounded-[16px] p-3 mb-3" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
                     💡 koupit trička p2 · zavolat !3 zítra · logo https://...
                   </div>
                   <div className="flex gap-2">
-                    <input className="flex-1 bg-gray-50 border border-gray-200 rounded-[12px] px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]"
+                    <input className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]"
                       value={quickInput} onChange={e => setQuickInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
                       placeholder="Napiš úkol..." autoFocus />
                     <button onClick={handleQuickAdd} className="px-4 py-2 rounded-[12px] text-white text-[13px] font-bold" style={{ background: 'var(--color-primary)' }}>+</button>
-                    <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-gray-200 text-gray-400 text-[13px]">✕</button>
+                    <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-[var(--border)] text-gray-400 text-[13px]">✕</button>
                   </div>
                   {quickError && <p className="text-[11px] text-red-500 mt-1">⚠️ {quickError}</p>}
                 </div>
@@ -344,17 +344,17 @@ export default function TodoPage() {
       <div className="hidden lg:flex flex-col" style={{ height: 'calc(100vh - 64px)' }}>
 
         {showQuickAdd && (
-          <div className="mx-6 mt-5 bg-white rounded-[16px] p-3" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+          <div className="mx-6 mt-5 bg-[var(--surface)] rounded-[16px] p-3" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">
               💡 koupit trička p2 · zavolat !3 zítra · animinimal logo https://...
             </div>
             <div className="flex gap-2">
-              <input className="flex-1 bg-gray-50 border border-gray-200 rounded-[12px] px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]"
+              <input className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3 py-2 text-[13px] outline-none focus:border-[var(--color-primary)]"
                 value={quickInput} onChange={e => setQuickInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
                 placeholder="Napiš úkol..." autoFocus />
               <button onClick={handleQuickAdd} className="px-5 py-2 rounded-[12px] text-white text-[13px] font-bold" style={{ background: 'var(--color-primary)' }}>Přidat</button>
-              <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-gray-200 text-gray-400 text-[13px]">✕</button>
+              <button onClick={() => { setShowQuickAdd(false); setQuickInput('') }} className="px-3 py-2 rounded-[12px] border border-[var(--border)] text-gray-400 text-[13px]">✕</button>
             </div>
             {quickError && <p className="text-[11px] text-red-500 mt-1">⚠️ {quickError}</p>}
           </div>
@@ -377,7 +377,7 @@ export default function TodoPage() {
                     onChange={setSection}
                     options={pcOptions}
                   />
-                  <span className="text-[12px] font-semibold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full">
+                  <span className="text-[12px] font-semibold text-gray-400 bg-[var(--surface-raised)] px-2.5 py-0.5 rounded-full">
                     {count}
                   </span>
                 </div>
@@ -409,7 +409,7 @@ export default function TodoPage() {
       <div className="fixed z-40 flex flex-col items-end gap-2 bottom-24 lg:bottom-6 right-5">
         <button
           onClick={() => setShowQuickAdd(v => !v)}
-          className="w-10 h-10 rounded-[12px] bg-white border border-gray-200 shadow-md flex items-center justify-center text-[18px] transition-all active:scale-95"
+          className="w-10 h-10 rounded-[12px] bg-[var(--surface)] border border-[var(--border)] shadow-md flex items-center justify-center text-[18px] transition-all active:scale-95"
           title="Rychlé přidání textem"
         >⚡</button>
         <button

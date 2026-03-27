@@ -97,7 +97,7 @@ function EventChip({ event, onClick, onComplete, isCompleted, appCategories = DE
           className={`w-[20px] h-[20px] rounded-[5px] border-2 flex-shrink-0 transition-all flex items-center justify-center ${
             isCompleted
               ? 'bg-green-400 border-green-400'
-              : 'border-gray-300 hover:border-green-400 hover:bg-green-50'
+              : 'border-[var(--border-strong)] hover:border-green-400 hover:bg-green-50'
           }`}
           aria-label="Dokončit"
         >
@@ -148,7 +148,7 @@ function TaskChip({ task, onClick, onComplete, isCompleted, appCategories = DEFA
           className={`w-[20px] h-[20px] rounded-[5px] border-2 flex-shrink-0 transition-all flex items-center justify-center ${
             isCompleted
               ? 'bg-green-400 border-green-400'
-              : 'border-gray-300 hover:border-green-400 hover:bg-green-50'
+              : 'border-[var(--border-strong)] hover:border-green-400 hover:bg-green-50'
           }`}
           aria-label="Dokončit úkol"
         >
@@ -186,7 +186,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate, appCa
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-sm p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-[var(--surface)] rounded-2xl w-full max-w-sm p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-3">
           <span className="text-[11px] font-bold uppercase px-2 py-0.5 rounded-full" style={{ background: style.background, color: style.color }}>
             {label}
@@ -212,7 +212,7 @@ function EventDetailModal({ event, onClose, onDelete, onEdit, onDuplicate, appCa
         <div className="flex gap-2 mb-2">
           <button
             onClick={() => onEdit(event)}
-            className="flex-1 py-2.5 rounded-xl bg-gray-50 text-gray-700 text-[13px] font-semibold hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5"
+            className="flex-1 py-2.5 rounded-xl bg-[var(--bg)] text-gray-700 text-[13px] font-semibold hover:bg-[var(--surface-raised)] transition-colors flex items-center justify-center gap-1.5"
           >
             ✏️ Upravit
           </button>
@@ -334,15 +334,15 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
     }
   }
 
-  const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[14px] focus:outline-none focus:border-[var(--color-primary)]'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-[14px] focus:outline-none focus:border-[var(--color-primary)]'
   const labelCls = 'text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1 block'
 
   const modalTitle = isEditMode ? 'Upravit událost' : isDuplicate ? 'Duplikovat událost' : 'Nová událost'
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden" onClick={e => e.stopPropagation()}>
-        <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+      <div className="bg-[var(--surface)] rounded-2xl w-full max-w-sm shadow-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden" onClick={e => e.stopPropagation()}>
+        <div className="p-5 border-b border-[var(--border)] flex items-center justify-between">
           <h2 className="text-[16px] font-bold">{modalTitle}</h2>
           <button onClick={onClose} className="text-gray-400 text-lg">✕</button>
         </div>
@@ -354,7 +354,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
             <div className="flex gap-2">
               <button
                 onClick={() => setShowEmojis(v => !v)}
-                className="w-11 h-11 rounded-xl bg-gray-50 border border-gray-200 text-[20px] flex items-center justify-center shrink-0"
+                className="w-11 h-11 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[20px] flex items-center justify-center shrink-0"
               >
                 {emoji}
               </button>
@@ -366,10 +366,10 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
               />
             </div>
             {showEmojis && (
-              <div className="flex flex-wrap gap-2 mt-2 p-2 bg-gray-50 rounded-xl">
+              <div className="flex flex-wrap gap-2 mt-2 p-2 bg-[var(--bg)] rounded-xl">
                 {EVENT_EMOJIS.map(em => (
                   <button key={em} onClick={() => { setEmoji(em); setShowEmojis(false) }}
-                    className={`text-[20px] w-8 h-8 rounded-lg hover:bg-white ${emoji === em ? 'bg-white shadow' : ''}`}
+                    className={`text-[20px] w-8 h-8 rounded-lg hover:bg-[var(--surface)] ${emoji === em ? 'bg-[var(--surface)] shadow' : ''}`}
                   >{em}</button>
                 ))}
               </div>
@@ -390,7 +390,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                     className="text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-all"
                     style={isSelected
                       ? { background: catStyle.background, borderColor: catStyle.borderColor, color: catStyle.color }
-                      : { background: '#f9fafb', borderColor: '#e5e7eb', color: '#6b7280' }
+                      : { background: '#f9fafb', borderColor: 'var(--border)', color: '#6b7280' }
                     }
                   >
                     {cat.icon} {cat.name}
@@ -421,11 +421,11 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                   )}
                 </button>
                 {showClientPicker && (
-                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                    <div className="p-2 border-b border-gray-100">
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                    <div className="p-2 border-b border-[var(--border)]">
                       <input
                         autoFocus
-                        className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-[13px] outline-none focus:border-[var(--color-primary)]"
+                        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-2 py-1.5 text-[13px] outline-none focus:border-[var(--color-primary)]"
                         placeholder="Hledat klienta…"
                         value={clientSearch}
                         onChange={e => setClientSearch(e.target.value)}
@@ -438,7 +438,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                         key={c.id}
                         type="button"
                         onClick={() => { setClientId(c.id); setClientSearch(''); setShowClientPicker(false) }}
-                        className={`w-full text-left px-3 py-2 text-[13px] hover:bg-gray-50 transition-colors ${clientId === c.id ? 'font-semibold text-[var(--color-primary)]' : 'text-gray-700'}`}
+                        className={`w-full text-left px-3 py-2 text-[13px] hover:bg-[var(--bg)] transition-colors ${clientId === c.id ? 'font-semibold text-[var(--color-primary)]' : 'text-gray-700'}`}
                       >
                         {c.name}
                       </button>
@@ -460,9 +460,9 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
             <label className="text-[13px] font-medium text-gray-700">Celý den</label>
             <button
               onClick={() => setIsAllDay(v => !v)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${isAllDay ? 'bg-[var(--color-primary)]' : 'bg-gray-200'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${isAllDay ? 'bg-[var(--color-primary)]' : 'bg-[var(--border)]'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${isAllDay ? 'left-5.5' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 w-5 h-5 bg-[var(--surface)] rounded-full shadow transition-all ${isAllDay ? 'left-5.5' : 'left-0.5'}`} />
             </button>
           </div>
 
@@ -497,14 +497,14 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
             <label className="text-[13px] font-medium text-gray-700">🔁 Opakující se</label>
             <button
               onClick={() => setIsRecurring(v => !v)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${isRecurring ? 'bg-[var(--color-primary)]' : 'bg-gray-200'}`}
+              className={`relative w-11 h-6 rounded-full transition-colors ${isRecurring ? 'bg-[var(--color-primary)]' : 'bg-[var(--border)]'}`}
             >
-              <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all ${isRecurring ? 'left-5.5' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 w-5 h-5 bg-[var(--surface)] rounded-full shadow transition-all ${isRecurring ? 'left-5.5' : 'left-0.5'}`} />
             </button>
           </div>
 
           {isRecurring && (
-            <div className="space-y-3 pl-2 border-l-2 border-gray-100">
+            <div className="space-y-3 pl-2 border-l-2 border-[var(--border)]">
               <div>
                 <label className={labelCls}>Frekvence</label>
                 <div className="flex flex-wrap gap-2">
@@ -515,7 +515,7 @@ function AddEventModal({ defaultDate, isWork, userId, existingEvent, isDuplicate
                       className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg border transition-all ${
                         recType === rt
                           ? 'bg-[var(--color-primary-light)] border-[var(--color-primary)] text-[var(--color-primary)]'
-                          : 'bg-gray-50 border-gray-200 text-gray-500'
+                          : 'bg-[var(--bg)] border-[var(--border)] text-gray-500'
                       }`}
                     >
                       {RECURRENCE_LABELS[rt]}
@@ -566,7 +566,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
   const dayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']
 
   return (
-    <div className="grid grid-cols-7 gap-1 px-4 py-3 bg-white border-b border-gray-100">
+    <div className="grid grid-cols-7 gap-1 px-4 py-3 bg-[var(--surface)] border-b border-[var(--border)]">
       {days.map((day, i) => {
         const isToday = isSameDay(day, today)
         const hasDot = daysWithEvents.has(day.toDateString())
@@ -574,7 +574,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
           <div
             key={day.toDateString()}
             onClick={() => onDayClick(day)}
-            className={`flex flex-col items-center gap-1 py-1.5 rounded-xl cursor-pointer transition-colors ${isToday ? 'bg-[var(--color-primary)]' : 'hover:bg-gray-50'}`}
+            className={`flex flex-col items-center gap-1 py-1.5 rounded-xl cursor-pointer transition-colors ${isToday ? 'bg-[var(--color-primary)]' : 'hover:bg-[var(--bg)]'}`}
           >
             <span className={`text-[10px] font-semibold uppercase ${isToday ? 'text-white/70' : 'text-gray-400'}`}>
               {dayLabels[i]}
@@ -583,7 +583,7 @@ function WeekStrip({ weekStart, events, onDayClick }: {
               {day.getDate()}
             </span>
             {hasDot && (
-              <span className={`w-1.5 h-1.5 rounded-full ${isToday ? 'bg-white/70' : 'bg-[var(--color-primary)]'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${isToday ? 'bg-[var(--surface)]/70' : 'bg-[var(--color-primary)]'}`} />
             )}
           </div>
         )
@@ -665,7 +665,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
             key={day.toDateString()}
             style={isHighlight ? { animation: 'calFlash 1.4s ease-out', borderRadius: 12 } : undefined}
           >
-            {di > 0 && <div className="h-px bg-gray-100 my-4" />}
+            {di > 0 && <div className="h-px bg-[var(--surface-raised)] my-4" />}
             {/* Day header — kliknutím kolaps/rozbalení */}
             <div
               className="flex items-center justify-between mb-2 cursor-pointer select-none group"
@@ -677,7 +677,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                   {label}
                 </div>
                 {isCollapsed && totalItems > 0 && (
-                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[var(--surface-raised)] text-gray-500">
                     {totalItems}
                   </span>
                 )}
@@ -808,7 +808,7 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCat
               key={day.toDateString()}
               onClick={() => isCurrentMonth && onNavigateToDay(day)}
               className={`min-h-[64px] rounded-xl p-1.5 transition-colors ${
-                isCurrentMonth ? 'cursor-pointer hover:bg-gray-50' : 'opacity-25 pointer-events-none'
+                isCurrentMonth ? 'cursor-pointer hover:bg-[var(--bg)]' : 'opacity-25 pointer-events-none'
               }`}
             >
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold mb-1 mx-auto ${
@@ -1102,13 +1102,13 @@ export default function KalendarPage() {
       <Header
         title="Kalendář"
         action={
-          <div className="flex bg-white/15 rounded-lg p-0.5">
+          <div className="flex bg-[var(--surface)]/15 rounded-lg p-0.5">
             {(['week', 'month'] as CalView[]).map(v => (
               <button
                 key={v}
                 onClick={() => setView(v)}
                 className={`text-[11px] font-semibold px-2.5 py-1 rounded-md transition-colors ${
-                  view === v ? 'bg-white/25 text-white' : 'text-white/60'
+                  view === v ? 'bg-[var(--surface)]/25 text-white' : 'text-white/60'
                 }`}
               >
                 {v === 'week' ? 'Týden' : 'Měsíc'}
@@ -1119,10 +1119,10 @@ export default function KalendarPage() {
       />
 
       {/* Navigation */}
-      <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-100">
-        <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold">‹</button>
+      <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)]">
+        <button onClick={() => navigate(-1)} className="w-8 h-8 rounded-lg hover:bg-[var(--surface-raised)] flex items-center justify-center text-gray-600 text-lg font-bold">‹</button>
         <span className="text-[14px] font-bold text-gray-800">{headerTitle}</span>
-        <button onClick={() => navigate(1)} className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-600 text-lg font-bold">›</button>
+        <button onClick={() => navigate(1)} className="w-8 h-8 rounded-lg hover:bg-[var(--surface-raised)] flex items-center justify-center text-gray-600 text-lg font-bold">›</button>
       </div>
 
       {/* Week strip (only in week view) */}

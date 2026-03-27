@@ -7,7 +7,7 @@ import { Wallet, Expense, Income } from '../api'
 
 // ── Field styles ──────────────────────────────────────────────────
 
-const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] transition-colors'
+const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] transition-colors'
 const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
 // ── AddExpenseSheet ───────────────────────────────────────────────
@@ -83,7 +83,7 @@ export function AddExpenseSheet({ expCats, wallets, onSave, onClose }: AddExpens
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
                   category === name
                     ? 'text-white border-transparent'
-                    : 'bg-gray-100 text-gray-600 border-transparent'
+                    : 'bg-[var(--surface-raised)] text-gray-600 border-transparent'
                 }`}
                 style={category === name ? { background: cat.color } : {}}
               >
@@ -113,7 +113,7 @@ export function AddExpenseSheet({ expCats, wallets, onSave, onClose }: AddExpens
         <div className="flex gap-3 pt-1">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500"
+            className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500"
           >
             Zrušit
           </button>
@@ -196,7 +196,7 @@ export function EditExpenseSheet({ expense, expCats, wallets, onSave, onClose }:
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
                   category === name
                     ? 'text-white border-transparent'
-                    : 'bg-gray-100 text-gray-600 border-transparent'
+                    : 'bg-[var(--surface-raised)] text-gray-600 border-transparent'
                 }`}
                 style={category === name ? { background: cat.color } : {}}
               >
@@ -226,7 +226,7 @@ export function EditExpenseSheet({ expense, expCats, wallets, onSave, onClose }:
         <div className="flex gap-3 pt-1">
           <button
             onClick={onClose}
-            className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500"
+            className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500"
           >
             Zrušit
           </button>
@@ -296,7 +296,7 @@ export function EditIncomeSheet({ income, incCats, onSave, onClose }: EditIncome
                 key={name}
                 onClick={() => setCategory(name)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
-                  category === name ? 'text-white border-transparent' : 'bg-gray-100 text-gray-600 border-transparent'
+                  category === name ? 'text-white border-transparent' : 'bg-[var(--surface-raised)] text-gray-600 border-transparent'
                 }`}
                 style={category === name ? { background: cat.color } : {}}
               >
@@ -312,7 +312,7 @@ export function EditIncomeSheet({ income, incCats, onSave, onClose }: EditIncome
         </div>
 
         <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
           <button
             onClick={handleSave}
             disabled={!valid}
@@ -384,7 +384,7 @@ export function AddIncomeSheet({ incCats, onSave, onClose }: AddIncomeSheetProps
                 key={name}
                 onClick={() => setCategory(name)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${
-                  category === name ? 'text-white border-transparent' : 'bg-gray-100 text-gray-600 border-transparent'
+                  category === name ? 'text-white border-transparent' : 'bg-[var(--surface-raised)] text-gray-600 border-transparent'
                 }`}
                 style={category === name ? { background: cat.color } : {}}
               >
@@ -400,7 +400,7 @@ export function AddIncomeSheet({ incCats, onSave, onClose }: AddIncomeSheetProps
         </div>
 
         <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
           <button
             onClick={handleSave}
             disabled={!valid}

@@ -82,12 +82,12 @@ export default function BucketListPage() {
 
   return (
     <>
-      <Header title="🎯 Bucket List" />
+      <Header title="Bucket List" />
       <div className="flex-1 overflow-y-auto px-5 py-4 pb-20">
         {/* Progress */}
-        <div className="rounded-[14px] bg-white p-4 mb-4 border border-gray-200">
+        <div className="rounded-[14px] bg-[var(--surface)] p-4 mb-4 border border-[var(--border)]">
           <div className="text-[12px] font-bold text-gray-500 mb-2">{progress}% splněno</div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5"><div className="h-2.5 rounded-full transition-all" style={{ width: `${progress}%`, background: 'var(--color-primary)' }} /></div>
+          <div className="w-full bg-[var(--border)] rounded-full h-2.5"><div className="h-2.5 rounded-full transition-all" style={{ width: `${progress}%`, background: 'var(--color-primary)' }} /></div>
           <div className="text-[11px] text-gray-600 mt-2">{done} z {total} cílů</div>
         </div>
 
@@ -131,7 +131,7 @@ export default function BucketListPage() {
               {big.map(item => {
                 const cat = BUCKET_CATEGORIES.find(c => c.id === item.category)
                 return (
-                  <div key={item.id} className="rounded-[12px] border border-gray-200 p-3 bg-white flex items-start gap-2">
+                  <div key={item.id} className="rounded-[12px] border border-[var(--border)] p-3 bg-[var(--surface)] flex items-start gap-2">
                     <button
                       onClick={() => toggleDone(item.id, item.status)}
                       className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center mt-0.5 transition-all"
@@ -169,7 +169,7 @@ export default function BucketListPage() {
               {small.map(item => {
                 const cat = BUCKET_CATEGORIES.find(c => c.id === item.category)
                 return (
-                  <div key={item.id} className="rounded-[12px] border border-gray-200 p-3 bg-white flex items-start gap-2">
+                  <div key={item.id} className="rounded-[12px] border border-[var(--border)] p-3 bg-[var(--surface)] flex items-start gap-2">
                     <button
                       onClick={() => toggleDone(item.id, item.status)}
                       className="w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center mt-0.5"
@@ -202,7 +202,7 @@ export default function BucketListPage() {
       {/* Inspiration modal */}
       {showInspiration && (
         <div className="fixed inset-0 bg-black/30 flex items-end z-50">
-          <div className="w-full bg-white rounded-t-[20px] p-5 max-h-[80vh] overflow-y-auto">
+          <div className="w-full bg-[var(--surface)] rounded-t-[20px] p-5 max-h-[80vh] overflow-y-auto">
             <div className="text-[16px] font-bold mb-4">💡 Inspirace</div>
             <div className="grid grid-cols-1 gap-2">
               {unusedSuggestions.map((s, i) => (
@@ -212,7 +212,7 @@ export default function BucketListPage() {
                     addItem(s.title, s.category, s.size)
                     setShowInspiration(false)
                   }}
-                  className="text-left p-3 rounded-[10px] border border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="text-left p-3 rounded-[10px] border border-[var(--border)] hover:bg-[var(--bg)] transition-colors"
                 >
                   <div className="text-[13px] font-semibold text-gray-800">{s.title}</div>
                   <div className="text-[11px] text-gray-500">{BUCKET_CATEGORIES.find(c => c.id === s.category)?.label} • {s.size === 'big' ? '🏔️ Velký' : '✨ Malý'}</div>
@@ -226,19 +226,19 @@ export default function BucketListPage() {
       {/* Add modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/30 flex items-end z-50">
-          <div className="w-full bg-white rounded-t-[20px] p-5 space-y-4">
+          <div className="w-full bg-[var(--surface)] rounded-t-[20px] p-5 space-y-4">
             <div className="text-[16px] font-bold">Nový cíl</div>
-            <input type="text" placeholder="Co chceš zažít?" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
-            <select value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value as any })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]">
+            <input type="text" placeholder="Co chceš zažít?" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
+            <select value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value as any })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]">
               <option value="big">🏔️ Velký cíl</option>
               <option value="small">✨ Malý cíl</option>
             </select>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as any })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]">
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value as any })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]">
               {BUCKET_CATEGORIES.map(cat => (<option key={cat.id} value={cat.id}>{cat.icon} {cat.label}</option>))}
             </select>
-            <textarea placeholder="Poznámky" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-4 py-2.5 border border-gray-300 rounded-[10px] text-[14px]" />
+            <textarea placeholder="Poznámky" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]" />
             <div className="flex gap-3">
-              <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-gray-300">Zrušit</button>
+              <button onClick={() => setShowAddModal(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-gray-700 border border-[var(--border-strong)]">Zrušit</button>
               <button onClick={() => { addItem(form.title, form.category, form.size); setShowAddModal(false); setForm({ title: '', size: 'big', category: 'travel', notes: '' }) }} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white" style={{ background: 'var(--color-primary)' }}>Přidat</button>
             </div>
           </div>

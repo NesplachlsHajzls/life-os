@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Sheet } from '@/features/finance/components/Sheet'
 import { TodoCategory, Task } from '../api'
 
-const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] transition-colors'
+const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-gray-800 placeholder-gray-400 outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-light)] transition-colors'
 const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
 const PRIORITY_OPTIONS: Array<{ value: 1 | 2 | 3; label: string; color: string }> = [
@@ -198,12 +198,12 @@ export function AddTaskSheet({
                 onFocus={() => setShowDropdown(true)}
               />
               {showDropdown && filteredClients.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-[12px] shadow-lg z-20 max-h-48 overflow-y-auto">
+                <div className="absolute left-0 right-0 top-full mt-1 bg-[var(--surface)] border border-[var(--border)] rounded-[12px] shadow-lg z-20 max-h-48 overflow-y-auto">
                   {filteredClients.map(c => (
                     <button
                       key={c.id}
                       onClick={() => handleSelectClient(c)}
-                      className="w-full text-left px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-gray-50 first:rounded-t-[12px] last:rounded-b-[12px]"
+                      className="w-full text-left px-3.5 py-2.5 text-[13px] text-gray-800 hover:bg-[var(--bg)] first:rounded-t-[12px] last:rounded-b-[12px]"
                     >
                       💼 {c.name}
                     </button>
@@ -233,7 +233,7 @@ export function AddTaskSheet({
       <div className="flex gap-3 pt-1">
         <button
           onClick={onClose}
-          className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+          className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500 hover:bg-[var(--bg)] transition-colors"
         >
           Zrušit
         </button>
@@ -259,12 +259,12 @@ export function AddTaskSheet({
         style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
         onClick={e => { if (e.target === e.currentTarget) onClose() }}
       >
-        <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl" style={{ maxWidth: 480 }}>
+        <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl" style={{ maxWidth: 480 }}>
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-[18px] font-extrabold text-gray-900">{sheetTitle}</h2>
             <button
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[18px] transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[18px] transition-colors"
             >×</button>
           </div>
           {formJsx}

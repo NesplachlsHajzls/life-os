@@ -95,14 +95,14 @@ export default function PipelinePage() {
     .reduce((s, d) => s + (d.value ?? 0), 0)
   const wonValue = deals.filter(d => d.stage === 'Uzavřen').reduce((s, d) => s + (d.value ?? 0), 0)
 
-  const fieldCls = 'w-full bg-gray-50 border border-gray-200 rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]'
+  const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--color-primary)]'
   const labelCls = 'block text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-1.5'
 
   return (
     <>
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 py-4 lg:px-6 flex items-center gap-3">
-        <Link href="/prace" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 text-[18px]">←</Link>
+      <div className="bg-[var(--surface)] border-b border-[var(--border)] px-4 py-4 lg:px-6 flex items-center gap-3">
+        <Link href="/prace" className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--surface-raised)] text-gray-400 text-[18px]">←</Link>
         <div className="flex-1">
           <div className="text-[17px] font-extrabold text-gray-900">📊 Pipeline</div>
           <div className="text-[12px] text-gray-400">{deals.length} obchodů · {fmtCZK(activeDealValue)} aktivně · {fmtCZK(wonValue)} uzavřeno</div>
@@ -131,7 +131,7 @@ export default function PipelinePage() {
                     <div className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
                       <span className="text-[13px] font-bold text-gray-700">{stage}</span>
-                      <span className="text-[11px] font-semibold text-gray-400 bg-gray-100 px-1.5 rounded-full">{stageDeals.length}</span>
+                      <span className="text-[11px] font-semibold text-gray-400 bg-[var(--surface-raised)] px-1.5 rounded-full">{stageDeals.length}</span>
                     </div>
                     {stageValue > 0 && <span className="text-[11px] font-semibold text-gray-500">{fmtCZK(stageValue)}</span>}
                   </div>
@@ -142,7 +142,7 @@ export default function PipelinePage() {
                       const client = clients.find(c => c.id === deal.client_id)
                       return (
                         <div key={deal.id}
-                          className="bg-white rounded-[14px] p-4 cursor-pointer hover:shadow-md transition-shadow"
+                          className="bg-[var(--surface)] rounded-[14px] p-4 cursor-pointer hover:shadow-md transition-shadow"
                           style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.07)', borderTop: `3px solid ${color}` }}
                           onClick={() => openEdit(deal)}>
                           <div className="text-[13px] font-bold text-gray-900 mb-1">{deal.title}</div>
@@ -169,7 +169,7 @@ export default function PipelinePage() {
 
                     {/* Add button per column */}
                     <button onClick={() => { openAdd(); setFStage(stage) }}
-                      className="w-full py-2.5 rounded-[12px] border-2 border-dashed border-gray-200 text-[12px] font-semibold text-gray-400 hover:border-gray-300 hover:text-gray-500 transition-colors">
+                      className="w-full py-2.5 rounded-[12px] border-2 border-dashed border-[var(--border)] text-[12px] font-semibold text-gray-400 hover:border-[var(--border-strong)] hover:text-gray-500 transition-colors">
                       + Přidat
                     </button>
                   </div>
@@ -185,10 +185,10 @@ export default function PipelinePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center"
           style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
           onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
-          <div className="bg-white rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 480, maxHeight: '90vh' }}>
+          <div className="bg-[var(--surface)] rounded-[24px] p-6 w-full shadow-2xl mx-4 overflow-y-auto" style={{ maxWidth: 480, maxHeight: '90vh' }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-[18px] font-extrabold text-gray-900">{editDeal ? '✏️ Upravit obchod' : '💰 Nový obchod'}</h2>
-              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 text-[20px]">×</button>
+              <button onClick={() => setShowAdd(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:bg-[var(--surface-raised)] text-[20px]">×</button>
             </div>
             <div className="flex flex-col gap-4">
               <div>
@@ -211,10 +211,10 @@ export default function PipelinePage() {
                     className="absolute right-3 top-[34px] text-gray-400 hover:text-gray-600 text-[16px]">×</button>
                 )}
                 {fClientOpen && clientResults.length > 0 && !fClient && (
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-[12px] shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
+                  <div className="absolute z-50 mt-1 w-full bg-[var(--surface)] border border-[var(--border)] rounded-[12px] shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
                     {clientResults.slice(0, 8).map(c => (
                       <button key={c.id} type="button"
-                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left hover:bg-[var(--bg)] transition-colors"
                         onMouseDown={e => { e.preventDefault(); setFClient(c.id); setFClientSearch(`${c.icon} ${c.name}`); setFClientOpen(false) }}>
                         <span className="text-[16px]">{c.icon}</span>
                         <span className="text-[13px] font-semibold text-gray-800">{c.name}</span>
@@ -260,7 +260,7 @@ export default function PipelinePage() {
                     Smazat
                   </button>
                 )}
-                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-gray-200 text-[14px] font-semibold text-gray-500">Zrušit</button>
+                <button onClick={() => setShowAdd(false)} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-gray-500">Zrušit</button>
                 <button onClick={handleSave} disabled={!fTitle.trim() || !fClient}
                   className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
                   style={{ background: DEAL_STAGE_COLORS[fStage] }}>

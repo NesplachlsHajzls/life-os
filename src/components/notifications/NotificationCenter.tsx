@@ -99,7 +99,7 @@ export function NotificationCenter() {
       {/* Bell button */}
       <button
         onClick={() => { setOpen(v => !v); setShowSettings(false); if (!open) load() }}
-        className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-white/15 hover:bg-white/25 transition-colors"
+        className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-[var(--surface)]/15 hover:bg-[var(--surface)]/25 transition-colors"
         aria-label="Notifikace"
       >
         <span className="text-[18px]">🔔</span>
@@ -112,9 +112,9 @@ export function NotificationCenter() {
 
       {/* Panel */}
       {open && (
-        <div className="absolute right-0 top-12 w-[320px] max-h-[520px] bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col z-50 overflow-hidden">
+        <div className="absolute right-0 top-12 w-[320px] max-h-[520px] bg-[var(--surface)] rounded-2xl shadow-2xl border border-[var(--border)] flex flex-col z-50 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
             <span className="text-[14px] font-bold text-gray-800">
               Notifikace {unread > 0 && <span className="ml-1 text-[11px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">{unread} nových</span>}
             </span>
@@ -126,7 +126,7 @@ export function NotificationCenter() {
               )}
               <button
                 onClick={() => setShowSettings(v => !v)}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center text-[14px] transition-colors ${showSettings ? 'bg-gray-100 text-gray-700' : 'text-gray-400 hover:bg-gray-100 hover:text-gray-600'}`}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-[14px] transition-colors ${showSettings ? 'bg-[var(--surface-raised)] text-gray-700' : 'text-gray-400 hover:bg-[var(--surface-raised)] hover:text-gray-600'}`}
                 title="Nastavení upozornění"
               >
                 ⚙️
@@ -136,7 +136,7 @@ export function NotificationCenter() {
 
           {/* Settings panel */}
           {showSettings && (
-            <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+            <div className="px-4 py-3 border-b border-[var(--border)] bg-[var(--bg)]">
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wide mb-2">Upozornit mě</p>
               <div className="flex flex-wrap gap-1.5">
                 {NOTIF_LEAD_OPTIONS.map(opt => (
@@ -169,7 +169,7 @@ export function NotificationCenter() {
                 <div
                   key={n.id}
                   onClick={() => handleMarkRead(n.id)}
-                  className={`flex gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors ${!n.read ? 'bg-blue-50/60' : ''}`}
+                  className={`flex gap-3 px-4 py-3 border-b border-gray-50 cursor-pointer hover:bg-[var(--bg)] transition-colors ${!n.read ? 'bg-blue-50/60' : ''}`}
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
