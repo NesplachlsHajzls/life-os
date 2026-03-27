@@ -40,8 +40,8 @@ export function BottomNav() {
     <>
       {/* Nav bar — overflow visible so center button can poke above */}
       <nav
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white border-t border-gray-200 z-40 overflow-visible"
-        style={{ height: 64 }}
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-40 overflow-visible"
+        style={{ height: 64, background: 'var(--surface)', borderTop: '1px solid var(--border)' }}
       >
         <div className="flex items-center h-full overflow-visible">
 
@@ -49,7 +49,7 @@ export function BottomNav() {
           {LEFT_ITEMS.map(item => (
             <Link key={item.href} href={item.href}
               className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-                isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-gray-400'
+                isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-[var(--text-tertiary)]'
               }`}
             >
               <span className="text-[22px] leading-none">{item.icon}</span>
@@ -97,7 +97,7 @@ export function BottomNav() {
           {RIGHT_ITEMS.map(item => (
             <Link key={item.href} href={item.href}
               className={`flex-1 flex flex-col items-center gap-0.5 py-2 transition-colors ${
-                isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-gray-400'
+                isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-[var(--text-tertiary)]'
               }`}
             >
               <span className="text-[22px] leading-none">{item.icon}</span>

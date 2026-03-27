@@ -19,12 +19,12 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#1E4B8E',
+  themeColor: '#D44A1A',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="cs" className="theme-ocean font-inter">
+    <html lang="cs" className="theme-terracotta font-dm-sans">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
@@ -35,19 +35,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             })
           }
         `}} />
-        {/* Only Inter is preloaded — other fonts are injected lazily by ThemeProvider when selected */}
+        {/* DM Sans jako primární font — ostatní se lazy-injectují přes ThemeProvider */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400;1,9..40,500&display=swap"
           rel="stylesheet"
         />
       </head>
       <body>
         <ThemeProvider />
-        {/* Mobile: centered phone shell. PC (lg+): full-width sidebar layout */}
-        <div className="min-h-screen flex justify-center bg-gray-100 lg:bg-[#F4F6FA]">
-          <div className="relative w-full max-w-[390px] lg:max-w-none min-h-screen bg-[#F4F6FA] flex flex-col lg:flex-row shadow-2xl lg:shadow-none">
+        {/* Mobile: centrovaný shell. PC (lg+): full-width sidebar layout */}
+        <div className="min-h-screen flex justify-center" style={{ background: 'var(--bg)' }}>
+          <div
+            className="relative w-full max-w-[390px] lg:max-w-none min-h-screen flex flex-col lg:flex-row shadow-2xl lg:shadow-none"
+            style={{ background: 'var(--bg)' }}
+          >
             <PrivacyProvider>
               <AuthWrapper>
                 {children}

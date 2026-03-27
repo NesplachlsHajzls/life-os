@@ -47,10 +47,10 @@ function Tile({ href, title, icon, children }: {
   href: string; title: string; icon: string; children: React.ReactNode
 }) {
   return (
-    <Link href={href} className="bg-white rounded-[14px] p-4 flex flex-col gap-2.5 active:scale-[0.97] transition-transform"
-      style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+    <Link href={href} className="rounded-[14px] p-4 flex flex-col gap-2.5 active:scale-[0.97] transition-transform" style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-md)' }}
+>
       <div className="flex justify-between items-center">
-        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wide">{title}</span>
+        <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{title}</span>
         <span className="text-[18px]">{icon}</span>
       </div>
       {children}
@@ -59,7 +59,7 @@ function Tile({ href, title, icon, children }: {
 }
 
 function Empty({ label }: { label: string }) {
-  return <div className="text-[12px] text-gray-300 italic">{label}</div>
+  return <div className="text-[12px] italic" style={{ color: 'var(--text-tertiary)' }}>{label}</div>
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────
@@ -155,16 +155,16 @@ export default function DashboardPage() {
                   <div key={t.id} className="flex items-center gap-2 text-[13px]">
                     <span className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ background: PRIORITY_COLORS[t.priority] ?? '#94a3b8' }} />
-                    <span className="flex-1 truncate text-gray-800">{t.title}</span>
+                    <span className="flex-1 truncate text-[var(--text-primary)]">{t.title}</span>
                     {t.due_date && (
-                      <span className="text-[11px] text-gray-400 flex-shrink-0">
+                      <span className="text-[11px] text-[var(--text-tertiary)] flex-shrink-0">
                         {new Date(t.due_date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}
                       </span>
                     )}
                   </div>
                 ))}
                 {tasks.filter(t => t.status === 'open' && !t.client_id).length > 3 && (
-                  <div className="text-[11px] text-gray-400">
+                  <div className="text-[11px] text-[var(--text-tertiary)]">
                     +{tasks.filter(t => t.status === 'open' && !t.client_id).length - 3} dalších
                   </div>
                 )}
@@ -183,11 +183,11 @@ export default function DashboardPage() {
                     <span className="text-[11px] font-bold text-[var(--color-primary)] flex-shrink-0 w-10">
                       {ev.is_all_day ? 'celý' : fmtTime(ev.start_datetime)}
                     </span>
-                    <span className="truncate text-gray-800">{ev.emoji ? `${ev.emoji} ` : ''}{ev.title}</span>
+                    <span className="truncate text-[var(--text-primary)]">{ev.emoji ? `${ev.emoji} ` : ''}{ev.title}</span>
                   </div>
                 ))}
                 {events.length > 3 && (
-                  <div className="text-[11px] text-gray-400">+{events.length - 3} dalších</div>
+                  <div className="text-[11px] text-[var(--text-tertiary)]">+{events.length - 3} dalších</div>
                 )}
               </div>
             )}
@@ -199,18 +199,18 @@ export default function DashboardPage() {
               <Empty label="Načítám…" />
             ) : (
               <>
-                <div className="text-[22px] font-extrabold text-gray-900 leading-none">
+                <div className="text-[22px] font-extrabold text-[var(--text-primary)] leading-none">
                   {amt(finance.balance)}
                 </div>
-                <div className="text-[11px] text-gray-400">celkový zůstatek</div>
+                <div className="text-[11px] text-[var(--text-tertiary)]">celkový zůstatek</div>
                 <div className="flex gap-3 mt-1">
                   <div className="flex items-center gap-1">
                     <span className="text-[10px] font-bold text-green-500">↑</span>
-                    <span className="text-[12px] font-semibold text-gray-600">{amt(finance.monthIncome)}</span>
+                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{amt(finance.monthIncome)}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="text-[10px] font-bold text-red-400">↓</span>
-                    <span className="text-[12px] font-semibold text-gray-600">{amt(finance.monthExpenses)}</span>
+                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{amt(finance.monthExpenses)}</span>
                   </div>
                 </div>
               </>
@@ -227,10 +227,10 @@ export default function DashboardPage() {
                   <div key={c.id} className="flex justify-between items-center text-[13px]">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className="text-[13px] flex-shrink-0">{c.icon}</span>
-                      <span className="truncate text-gray-800">{c.name}</span>
+                      <span className="truncate text-[var(--text-primary)]">{c.name}</span>
                     </div>
                     {count > 0 && (
-                      <span className="text-[11px] font-semibold text-gray-400 flex-shrink-0 ml-1">
+                      <span className="text-[11px] font-semibold text-[var(--text-tertiary)] flex-shrink-0 ml-1">
                         {count} úkol{count === 1 ? '' : count < 5 ? 'y' : 'ů'}
                       </span>
                     )}
@@ -251,30 +251,30 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 gap-3">
           <Link href="/sport"
             className="bg-white rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
-            style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+      >
             <div className="flex items-center gap-2">
               <span className="text-[20px]">🏋️</span>
               <div>
-                <div className="text-[13px] font-bold text-gray-900">Sport</div>
-                <div className="text-[11px] text-gray-400">Přejít na deník</div>
+                <div className="text-[13px] font-bold text-[var(--text-primary)]">Sport</div>
+                <div className="text-[11px] text-[var(--text-tertiary)]">Přejít na deník</div>
               </div>
             </div>
-            <span className="text-gray-300 text-lg">›</span>
+            <span className="text-[var(--text-tertiary)] text-lg">›</span>
           </Link>
 
           <Link href="/poznamky"
             className="bg-white rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
-            style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
+      >
             <div className="flex items-center gap-2">
               <span className="text-[20px]">💡</span>
               <div>
-                <div className="text-[13px] font-bold text-gray-900">Poznámky</div>
-                <div className="text-[11px] text-gray-400">
+                <div className="text-[13px] font-bold text-[var(--text-primary)]">Poznámky</div>
+                <div className="text-[11px] text-[var(--text-tertiary)]">
                   {noteCount === null ? '…' : `${noteCount} ${noteCount === 1 ? 'poznámka' : noteCount < 5 ? 'poznámky' : 'poznámek'}`}
                 </div>
               </div>
             </div>
-            <span className="text-gray-300 text-lg">›</span>
+            <span className="text-[var(--text-tertiary)] text-lg">›</span>
           </Link>
         </div>
 

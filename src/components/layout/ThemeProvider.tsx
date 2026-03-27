@@ -5,8 +5,8 @@ import { useEffect } from 'react'
 const THEME_KEY = 'life-os-theme'
 const FONT_KEY  = 'life-os-font'
 
-export const DEFAULT_THEME = 'ocean'
-export const DEFAULT_FONT  = 'inter'
+export const DEFAULT_THEME = 'terracotta'
+export const DEFAULT_FONT  = 'dm-sans'
 
 // Google Fonts query strings — only loaded on demand when the user selects that font.
 // Inter is preloaded in layout.tsx; all others are lazy-injected here.
@@ -23,7 +23,7 @@ const FONT_URLS: Record<string, string> = {
 }
 
 function ensureFontLoaded(id: string) {
-  if (id === 'inter') return  // already in layout.tsx
+  if (id === 'inter' || id === 'dm-sans') return  // preloaded in layout.tsx
   const linkId = `gfont-${id}`
   if (document.getElementById(linkId)) return  // already injected
   const family = FONT_URLS[id]

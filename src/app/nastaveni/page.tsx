@@ -9,6 +9,8 @@ import { AppCategory } from '@/features/categories/api'
 import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const THEMES = [
+  { id: 'terracotta', name: 'Terracotta',   color: '#D44A1A' },
+  { id: 'dark',       name: 'Tmavá',        color: '#D44A1A' },
   { id: 'ocean',     name: 'Oceán',       color: '#1E4B8E' },
   { id: 'indigo',    name: 'Indigo',      color: '#4F46E5' },
   { id: 'violet',    name: 'Fialová',     color: '#7C3AED' },
@@ -219,7 +221,7 @@ function CategoryManager({ userId }: { userId: string }) {
 // ── Main page ─────────────────────────────────────────────────────
 
 export default function NastaveniPage() {
-  const [activeTheme, setActiveTheme] = useState('ocean')
+  const [activeTheme, setActiveTheme] = useState('terracotta')
   const [activeFont,  setActiveFont]  = useState('inter')
   const { user } = useUser()
   const { hideAmounts, toggleHideAmounts } = usePrivacy()
