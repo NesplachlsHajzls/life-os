@@ -60,25 +60,39 @@ export function Sidebar() {
   return (
     <aside
       className="hidden lg:flex flex-col w-[220px] min-h-screen flex-shrink-0"
-      style={{ background: 'var(--color-primary)' }}
+      style={{
+        background: 'var(--surface)',
+        borderRight: '1px solid var(--border)',
+      }}
     >
       {/* Logo */}
-      <div className="px-5 pt-6 pb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-[12px] flex items-center justify-center text-[18px]"
-            style={{ background: 'rgba(255,255,255,0.15)' }}>
-            🌀
+      <div className="px-5 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-[12px] flex items-center justify-center text-[16px] font-black"
+            style={{
+              background: 'var(--color-primary)',
+              color: '#fff',
+              boxShadow: '0 0 20px rgba(212,74,26,0.4)',
+            }}
+          >
+            ⚡
           </div>
-          <span className="text-[17px] font-extrabold text-white">Life OS</span>
+          <div>
+            <div className="text-[15px] font-extrabold" style={{ color: 'var(--text-primary)' }}>Life OS</div>
+            <div className="text-[10px] tracking-widest uppercase" style={{ color: 'var(--text-tertiary)' }}>Personal OS</div>
+          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 pb-4">
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
         {SIDEBAR_SECTIONS.map(section => (
           <div key={section.label} className="mb-5">
-            <div className="text-[10px] font-bold uppercase tracking-wider px-2 mb-1"
-              style={{ color: 'rgba(255,255,255,0.45)' }}>
+            <div
+              className="text-[10px] font-bold uppercase tracking-wider px-2 mb-1.5"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               {section.label}
             </div>
             {section.items.map(item => {
@@ -89,33 +103,37 @@ export function Sidebar() {
                     href={item.href}
                     className="flex items-center gap-3 px-3 py-2 rounded-[10px] transition-all w-full"
                     style={{
-                      background: active ? 'rgba(255,255,255,0.18)' : 'transparent',
+                      background: active ? 'var(--color-primary-light)' : 'transparent',
+                      borderLeft: active ? '2px solid var(--color-primary)' : '2px solid transparent',
                     }}
                   >
-                    <span className="text-[18px] leading-none flex-shrink-0">{item.icon}</span>
+                    <span className="text-[17px] leading-none flex-shrink-0">{item.icon}</span>
                     <span
                       className="text-[13px] font-semibold"
-                      style={{ color: active ? '#fff' : 'rgba(255,255,255,0.72)' }}
+                      style={{ color: active ? 'var(--color-primary-mid)' : 'var(--text-secondary)' }}
                     >
                       {item.label}
                     </span>
                     <div className="ml-auto flex items-center gap-1.5">
                       {item.href === '/todo' && todoCount > 0 && (
-                        <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-white/20 text-white text-[10px] font-bold flex items-center justify-center">
+                        <span
+                          className="min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center"
+                          style={{ background: 'var(--color-primary)', color: '#fff' }}
+                        >
                           {todoCount > 99 ? '99+' : todoCount}
                         </span>
                       )}
-                      {active && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-white opacity-80" />
-                      )}
                     </div>
                   </Link>
-                  {/* Otevřít jako interní záložku — viditelné při hoveru */}
+                  {/* Otevřít jako záložku — viditelné při hoveru */}
                   <button
                     onClick={e => { e.preventDefault(); openTab(item.href, item.label, item.icon) }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-[6px] flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity hover:bg-white/20"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-[6px] flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
                     title="Otevřít jako záložku"
-                    style={{ color: 'rgba(255,255,255,0.7)' }}
+                    style={{
+                      color: 'var(--text-tertiary)',
+                      background: 'var(--surface-raised)',
+                    }}
                   >
                     <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M4.5 1.5H1.5v8h8V6.5" />
@@ -131,13 +149,15 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom — user */}
-      <div className="px-4 py-3" style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+      <div className="px-4 py-3" style={{ borderTop: '1px solid var(--border)' }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold"
-            style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold"
+            style={{ background: 'var(--color-primary)', color: '#fff' }}
+          >
             M
           </div>
-          <span className="text-[12px] font-semibold" style={{ color: 'rgba(255,255,255,0.8)' }}>Martin</span>
+          <span className="text-[12px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Martin</span>
         </div>
       </div>
     </aside>

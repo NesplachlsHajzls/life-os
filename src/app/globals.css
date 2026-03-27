@@ -4,35 +4,34 @@
 
 /* ═══════════════════════════════════════════════════════════════════
    DESIGN SYSTEM — Life OS
-   ═══════════════════════════════════════════════════════════════════
-   Tři skiny: terracotta (výchozí), ocean blue, dark (tmavá s oranžovou)
-   Ostatní theme-* třídy přepisují pouze akcentní barvu.
+   Výchozí skin: DARK (černá + oranžová)
+   Přepínání: theme-terracotta | theme-ocean | theme-dark
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── BASE / TERRACOTTA (výchozí) ───────────────────────────────── */
+/* ── BASE / DARK (výchozí) ─────────────────────────────────────── */
 :root {
-  /* Akcent */
+  /* Akcent — oranžová */
   --color-primary:       #D44A1A;
   --color-primary-mid:   #E86B3A;
-  --color-primary-light: #FDEADF;
-  --color-primary-pale:  #FEF5F0;
+  --color-primary-light: #3A2010;
+  --color-primary-pale:  #2A1A0A;
 
   /* Plochy */
-  --bg:              #FAFAF8;
-  --surface:         #FFFFFF;
-  --surface-raised:  #FFFFFF;
-  --border:          #E8E6E1;
-  --border-strong:   #D0CEC8;
+  --bg:              #0D0C0B;
+  --surface:         #161513;
+  --surface-raised:  #1E1C1A;
+  --border:          #2A2825;
+  --border-strong:   #3A3835;
 
   /* Text */
-  --text-primary:    #1A1917;
-  --text-secondary:  #5C5955;
-  --text-tertiary:   #9C9890;
+  --text-primary:    #F5F3EF;
+  --text-secondary:  #B0ADA8;
+  --text-tertiary:   #706D68;
 
-  /* Stíny */
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
+  /* Stíny (v tmavém módu výraznější) */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.20);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.40), 0 2px 4px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.50), 0 4px 8px rgba(0,0,0,0.35);
 
   /* Rádiusy */
   --radius-sm: 8px;
@@ -44,39 +43,7 @@
   --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* ── SKIN: Terracotta (identická s :root, pro explicitní přepnutí) ── */
-.theme-terracotta {
-  --color-primary:       #D44A1A;
-  --color-primary-mid:   #E86B3A;
-  --color-primary-light: #FDEADF;
-  --color-primary-pale:  #FEF5F0;
-  --bg:              #FAFAF8;
-  --surface:         #FFFFFF;
-  --surface-raised:  #FFFFFF;
-  --border:          #E8E6E1;
-  --border-strong:   #D0CEC8;
-  --text-primary:    #1A1917;
-  --text-secondary:  #5C5955;
-  --text-tertiary:   #9C9890;
-}
-
-/* ── SKIN: Ocean Blue (modro-bílá) ─────────────────────────────── */
-.theme-ocean {
-  --color-primary:       #1E4B8E;
-  --color-primary-mid:   #4A7FC1;
-  --color-primary-light: #D6E4F7;
-  --color-primary-pale:  #EEF4FC;
-  --bg:              #F7F6F3;
-  --surface:         #FFFFFF;
-  --surface-raised:  #FFFFFF;
-  --border:          #E4E2DC;
-  --border-strong:   #CCC9C2;
-  --text-primary:    #1A1917;
-  --text-secondary:  #5C5955;
-  --text-tertiary:   #9C9890;
-}
-
-/* ── SKIN: Dark (tmavá s oranžovou) ────────────────────────────── */
+/* ── SKIN: Dark (identická s :root, pro explicitní přepnutí) ───── */
 .theme-dark {
   --color-primary:       #D44A1A;
   --color-primary-mid:   #E86B3A;
@@ -90,25 +57,72 @@
   --text-primary:    #F5F3EF;
   --text-secondary:  #B0ADA8;
   --text-tertiary:   #706D68;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.20);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.40), 0 2px 4px rgba(0,0,0,0.25);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.50), 0 4px 8px rgba(0,0,0,0.35);
+}
+
+/* ── SKIN: Terracotta (světlá, oranžová) ───────────────────────── */
+.theme-terracotta {
+  --color-primary:       #D44A1A;
+  --color-primary-mid:   #E86B3A;
+  --color-primary-light: #FDEADF;
+  --color-primary-pale:  #FEF5F0;
+  --bg:              #FAFAF8;
+  --surface:         #FFFFFF;
+  --surface-raised:  #FFFFFF;
+  --border:          #E8E6E1;
+  --border-strong:   #D0CEC8;
+  --text-primary:    #1A1917;
+  --text-secondary:  #5C5955;
+  --text-tertiary:   #9C9890;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
+}
+
+/* ── SKIN: Ocean Blue (světlá, modrá) ──────────────────────────── */
+.theme-ocean {
+  --color-primary:       #1E4B8E;
+  --color-primary-mid:   #4A7FC1;
+  --color-primary-light: #D6E4F7;
+  --color-primary-pale:  #EEF4FC;
+  --bg:              #F7F6F3;
+  --surface:         #FFFFFF;
+  --surface-raised:  #FFFFFF;
+  --border:          #E4E2DC;
+  --border-strong:   #CCC9C2;
+  --text-primary:    #1A1917;
+  --text-secondary:  #5C5955;
+  --text-tertiary:   #9C9890;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
    OSTATNÍ BAREVNÁ TÉMATA — přepisují jen akcent
    ═══════════════════════════════════════════════════════════════════ */
-.theme-indigo   { --color-primary: #4F46E5; --color-primary-mid: #6366F1; --color-primary-light: #C7D2FE; --color-primary-pale: #EEF2FF; }
-.theme-violet   { --color-primary: #7C3AED; --color-primary-mid: #8B5CF6; --color-primary-light: #DDD6FE; --color-primary-pale: #F5F3FF; }
-.theme-fuchsia  { --color-primary: #A21CAF; --color-primary-mid: #C026D3; --color-primary-light: #F0ABFC; --color-primary-pale: #FDF4FF; }
-.theme-rose     { --color-primary: #E11D48; --color-primary-mid: #F43F5E; --color-primary-light: #FECDD3; --color-primary-pale: #FFF1F2; }
-.theme-coral    { --color-primary: #C2410C; --color-primary-mid: #EA580C; --color-primary-light: #FED7AA; --color-primary-pale: #FFF7ED; }
-.theme-amber    { --color-primary: #B45309; --color-primary-mid: #D97706; --color-primary-light: #FDE68A; --color-primary-pale: #FFFBEB; }
-.theme-emerald  { --color-primary: #047857; --color-primary-mid: #059669; --color-primary-light: #A7F3D0; --color-primary-pale: #ECFDF5; }
-.theme-forest   { --color-primary: #1A5C32; --color-primary-mid: #2E8B57; --color-primary-light: #C8EDD8; --color-primary-pale: #EDFAF3; }
-.theme-cyan     { --color-primary: #0E7490; --color-primary-mid: #0891B2; --color-primary-light: #A5F3FC; --color-primary-pale: #ECFEFF; }
-.theme-sky      { --color-primary: #0369A1; --color-primary-mid: #0284C7; --color-primary-light: #BAE6FD; --color-primary-pale: #F0F9FF; }
-.theme-slate    { --color-primary: #334155; --color-primary-mid: #475569; --color-primary-light: #CBD5E1; --color-primary-pale: #F1F5F9; }
-.theme-charcoal { --color-primary: #1A1F2E; --color-primary-mid: #3A4055; --color-primary-light: #C8CCDC; --color-primary-pale: #ECEEF5; }
-.theme-sunset   { --color-primary: #B84800; --color-primary-mid: #E06020; --color-primary-light: #FDDDC8; --color-primary-pale: #FEF5EE; }
-.theme-lavender { --color-primary: #5B3A8C; --color-primary-mid: #8660C0; --color-primary-light: #DDD0F5; --color-primary-pale: #F3EFFE; }
+.theme-indigo   { --color-primary: #4F46E5; --color-primary-mid: #6366F1; --color-primary-light: #1e1b4b; --color-primary-pale: #16153a; }
+.theme-violet   { --color-primary: #7C3AED; --color-primary-mid: #8B5CF6; --color-primary-light: #2e1065; --color-primary-pale: #1e0a4a; }
+.theme-fuchsia  { --color-primary: #C026D3; --color-primary-mid: #d946ef; --color-primary-light: #4a1040; --color-primary-pale: #350a2e; }
+.theme-rose     { --color-primary: #F43F5E; --color-primary-mid: #fb7185; --color-primary-light: #4c0519; --color-primary-pale: #350311; }
+.theme-coral    { --color-primary: #EA580C; --color-primary-mid: #f97316; --color-primary-light: #431407; --color-primary-pale: #2c0d04; }
+.theme-amber    { --color-primary: #D97706; --color-primary-mid: #f59e0b; --color-primary-light: #451a03; --color-primary-pale: #2c1002; }
+.theme-emerald  { --color-primary: #059669; --color-primary-mid: #34d399; --color-primary-light: #022c22; --color-primary-pale: #011c17; }
+.theme-forest   { --color-primary: #2E8B57; --color-primary-mid: #3cb371; --color-primary-light: #052e16; --color-primary-pale: #031d0d; }
+.theme-cyan     { --color-primary: #0891B2; --color-primary-mid: #22d3ee; --color-primary-light: #0c2c3a; --color-primary-pale: #071d27; }
+.theme-sky      { --color-primary: #0284C7; --color-primary-mid: #38bdf8; --color-primary-light: #0c1a2e; --color-primary-pale: #07101d; }
+.theme-slate    { --color-primary: #64748b; --color-primary-mid: #94a3b8; --color-primary-light: #1e293b; --color-primary-pale: #0f172a; }
+.theme-charcoal { --color-primary: #9ca3af; --color-primary-mid: #d1d5db; --color-primary-light: #1f2937; --color-primary-pale: #111827; }
+.theme-sunset   { --color-primary: #E06020; --color-primary-mid: #f97316; --color-primary-light: #431407; --color-primary-pale: #2c0d04; }
+.theme-lavender { --color-primary: #8660C0; --color-primary-mid: #a78bfa; --color-primary-light: #2e1065; --color-primary-pale: #1e0a4a; }
+
+/* Světlé varianty (terracotta/ocean) mají jiné --light/--pale, přepíšeme je */
+.theme-terracotta.theme-indigo,
+.theme-ocean.theme-indigo   { --color-primary-light: #C7D2FE; --color-primary-pale: #EEF2FF; }
+.theme-terracotta.theme-violet,
+.theme-ocean.theme-violet   { --color-primary-light: #DDD6FE; --color-primary-pale: #F5F3FF; }
 
 /* ═══════════════════════════════════════════════════════════════════
    FONTY — přepíná se třídou na <html>
@@ -192,11 +206,12 @@ body {
 }
 
 .rich-editor code {
-  background: var(--color-primary-pale);
+  background: var(--surface-raised);
   border-radius: 4px;
   padding: 0.1em 0.35em;
   font-size: 0.88em;
   font-family: ui-monospace, monospace;
+  color: var(--color-primary-mid);
 }
 
 .rich-editor:focus { outline: none; }

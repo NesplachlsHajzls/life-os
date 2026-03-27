@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 const THEME_KEY = 'life-os-theme'
 const FONT_KEY  = 'life-os-font'
 
-export const DEFAULT_THEME = 'terracotta'
+export const DEFAULT_THEME = 'dark'
 export const DEFAULT_FONT  = 'dm-sans'
 
 // Google Fonts query strings — only loaded on demand when the user selects that font.

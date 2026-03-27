@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="cs" className="theme-terracotta font-dm-sans">
+    <html lang="cs" className="theme-dark font-dm-sans">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
