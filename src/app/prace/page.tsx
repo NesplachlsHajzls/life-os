@@ -243,9 +243,9 @@ export default function PracePage() {
                   onClick={() => toggleKraj(k)}
                   className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold whitespace-nowrap transition-all flex-shrink-0"
                   style={{
-                    background: krajFilter.has(k) ? '#0ea5e9' : '#e0f2fe',
-                    color: krajFilter.has(k) ? '#fff' : '#0369a1',
-                    outline: krajFilter.has(k) ? '2px solid #0ea5e9' : 'none',
+                    background: krajFilter.has(k) ? 'var(--color-primary)' : 'var(--color-primary-light)',
+                    color: krajFilter.has(k) ? '#fff' : 'var(--color-primary-mid)',
+                    outline: krajFilter.has(k) ? '2px solid var(--color-primary)' : 'none',
                     outlineOffset: '1px',
                   }}>
                   📍 {k}
@@ -304,11 +304,11 @@ export default function PracePage() {
                         {(() => {
                           const k = getKraj(client.tags ?? [])
                           return k ? (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px] bg-sky-50 text-sky-600">
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary-mid)' }}>
                               📍 {k}
                             </span>
                           ) : client.is_prague ? (
-                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px] bg-sky-50 text-sky-600">
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-[6px]" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary-mid)' }}>
                               🏙️ Praha
                             </span>
                           ) : null
@@ -330,7 +330,7 @@ export default function PracePage() {
                   {/* Open tasks */}
                   <div className="hidden lg:flex justify-center">
                     {openCount > 0
-                      ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600">{openCount}</span>
+                      ? <span className="text-[12px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--color-primary-light)', color: 'var(--color-primary-mid)' }}>{openCount}</span>
                       : <span className="text-[12px] text-[var(--text-tertiary)]">—</span>}
                   </div>
 

@@ -484,7 +484,7 @@ export default function ImportPage() {
                 onDrop={onDrop}
                 onDragOver={e => e.preventDefault()}
                 onClick={() => fileRef.current?.click()}
-                className="border-2 border-dashed border-[var(--border)] rounded-[14px] p-10 flex flex-col items-center gap-3 cursor-pointer hover:border-[var(--color-primary)] hover:bg-blue-50/30 transition-all"
+                className="border-2 border-dashed border-[var(--border)] rounded-[14px] p-10 flex flex-col items-center gap-3 cursor-pointer hover:border-[var(--color-primary)] hover:bg-[var(--color-primary-light)]/30 transition-all"
               >
                 <div className="text-[40px]">📄</div>
                 <div className="text-[14px] font-semibold text-[var(--text-secondary)]">Přetáhni sem soubor, nebo klikni</div>
@@ -502,9 +502,9 @@ export default function ImportPage() {
               />
             </div>
 
-            <div className="bg-blue-50 rounded-[14px] p-4 text-[12px] text-blue-700">
+            <div className="bg-[var(--color-primary-light)] rounded-[14px] p-4 text-[12px] text-[var(--color-primary)]">
               <div className="font-bold mb-1.5">💡 Tipy pro přehledný import</div>
-              <div className="space-y-1 text-blue-600">
+              <div className="space-y-1 text-[var(--color-primary-mid)]">
                 <div>• <strong>První řádek</strong> musí být záhlaví sloupců (názvy polí)</div>
                 <div>• Importér automaticky rozpozná sloupce PP, Kraj, RA, Kategorie, Jméno, Telefon, Email aj.</div>
                 <div>• <strong>Více kontaktů u jednoho klienta</strong>: řádky s prázdným názvem firmy se automaticky přiřadí k předchozímu klientovi</div>
@@ -612,7 +612,7 @@ export default function ImportPage() {
                         {data.contact_name && <span className="text-[11px] text-[var(--text-secondary)]">👤 {data.contact_name}</span>}
                         {data.email        && <span className="text-[11px] text-[var(--text-secondary)]">✉️ {data.email}</span>}
                         {data.phone        && <span className="text-[11px] text-[var(--text-secondary)]">📞 {data.phone}</span>}
-                        {subjType          && <span className="text-[11px] text-blue-600">🏷 {subjType}</span>}
+                        {subjType          && <span className="text-[11px] text-[var(--color-primary-mid)]">🏷 {subjType}</span>}
                         {krajNorm          && <span className="text-[11px] text-teal-600">📍 {krajNorm}</span>}
                         {ppVal             && <span className="text-[11px] text-purple-600">PP: {ppVal}</span>}
                         {hasRa             && <span className="text-[11px] text-green-600">RA{raCountVal ? ` ×${raCountVal}` : ''}</span>}
