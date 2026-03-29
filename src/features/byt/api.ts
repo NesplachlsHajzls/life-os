@@ -169,3 +169,93 @@ export async function deleteContract(id: string): Promise<void> {
   const { error } = await supabase.from('byt_contracts').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+
+// ── ShoppingItem ────────────────────────────────────────────────────
+
+export interface ShoppingItem {
+  id: string
+  user_id: string
+  title: string
+  done: boolean
+  created_at: string
+}
+
+export async function fetchShoppingItems(userId: string): Promise<ShoppingItem[]> {
+  const { data, error } = await supabase
+    .from('home_shopping')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as ShoppingItem[]) ?? []
+}
+
+export async function insertShoppingItem(payload: Omit<ShoppingItem, 'id' | 'created_at'>): Promise<ShoppingItem> {
+  const { data, error } = await supabase
+    .from('home_shopping')
+    .insert(payload)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data as ShoppingItem
+}
+
+export async function updateShoppingItem(id: string, patch: Partial<ShoppingItem>): Promise<void> {
+  const { error } = await supabase.from('home_shopping').update(patch).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteShoppingItem(id: string): Promise<void> {
+  const { error } = await supabase.from('home_shopping').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function clearDoneShoppingItems(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('home_shopping')
+    .delete()
+    .eq('user_id', userId)
+    .eq('done', true)
+  if (error) throw new Error(error.message)
+}
+
+// ── HomeTask ────────────────────────────────────────────────────────
+
+export interface HomeTask {
+  id: string
+  user_id: string
+  title: string
+  done: boolean
+  created_at: string
+}
+
+export async function fetchHomeTasks(userId: string): Promise<HomeTask[]> {
+  const { data, error } = await supabase
+    .from('home_tasks')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as HomeTask[]) ?? []
+}
+
+export async function insertHomeTask(payload: Omit<HomeTask, 'id' | 'created_at'>): Promise<HomeTask> {
+  const { data, error } = await supabase
+    .from('home_tasks')
+    .insert(payload)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data as HomeTask
+}
+
+export async function updateHomeTask(id: string, patch: Partial<HomeTask>): Promise<void> {
+  const { error } = await supabase.from('home_tasks').update(patch).eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteHomeTask(id: string): Promise<void> {
+  const { error } = await supabase.from('home_tasks').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}

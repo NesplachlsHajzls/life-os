@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
 import {
-  Room, RoomTodo, HomeContract,
+  Room, RoomTodo,
   fetchRooms, insertRoom, updateRoom, deleteRoom,
   fetchRoomTodos, insertRoomTodo, updateRoomTodo, deleteRoomTodo,
-  fetchContracts, insertContract, deleteContract,
-  ROOM_PRESETS, ROOM_COLORS, CONTRACT_TYPES,
+  ROOM_PRESETS, ROOM_COLORS,
+  ShoppingItem, fetchShoppingItems, insertShoppingItem, updateShoppingItem, deleteShoppingItem, clearDoneShoppingItems,
+  HomeTask, fetchHomeTasks, insertHomeTask, updateHomeTask, deleteHomeTask,
 } from '@/features/byt/api'
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -27,8 +28,9 @@ function Toast({ msg, show }: { msg: string; show: boolean }) {
 
 function TabNav({ tab, onTab }: { tab: string; onTab: (t: string) => void }) {
   const tabs = [
-    { id: 'rooms',     label: '🏠 Místnosti' },
-    { id: 'contracts', label: '📄 Smlouvy' },
+    { id: 'rooms',    label: 'Místnosti' },
+    { id: 'shopping', label: 'Nákupy' },
+    { id: 'tasks',    label: 'Úkoly domu' },
   ]
   return (
     <div className="flex gap-3 px-5 pt-4 border-b border-[var(--border)] bg-[var(--surface)]">
@@ -109,15 +111,12 @@ function RoomModal({
             {!initial && (
               <button onClick={() => setStep('preset')} className="text-[13px] text-[var(--text-secondary)]">← Zpět na výběr</button>
             )}
-
-            {/* Preview */}
             <div className="flex items-center gap-3 p-3 rounded-[12px]" style={{ background: color + '18' }}>
               <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-[22px]" style={{ background: color }}>
                 {icon}
               </div>
               <span className="font-semibold" style={{ color }}>{name || 'Název místnosti'}</span>
             </div>
-
             <input
               type="text"
               placeholder="Název místnosti"
@@ -125,7 +124,6 @@ function RoomModal({
               onChange={e => setName(e.target.value)}
               className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
             />
-
             <div>
               <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2">IKONA</div>
               <div className="flex gap-2 flex-wrap">
@@ -141,7 +139,6 @@ function RoomModal({
                 ))}
               </div>
             </div>
-
             <div>
               <div className="text-[12px] font-bold text-[var(--text-secondary)] mb-2">BARVA</div>
               <div className="flex gap-2 flex-wrap">
@@ -150,16 +147,11 @@ function RoomModal({
                     key={c}
                     onClick={() => setColor(c)}
                     className="w-8 h-8 rounded-full transition-transform active:scale-90"
-                    style={{
-                      background: c,
-                      outline: color === c ? `3px solid ${c}` : 'none',
-                      outlineOffset: '2px',
-                    }}
+                    style={{ background: c, outline: color === c ? `3px solid ${c}` : 'none', outlineOffset: '2px' }}
                   />
                 ))}
               </div>
             </div>
-
             <div className="flex gap-3 pt-2">
               <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
               <button
@@ -190,7 +182,7 @@ function AddTodoForm({ color, onAdd }: { color: string; onAdd: (title: string) =
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && submit()}
-        className="flex-1 px-3 py-1.5 border border-[var(--border)] rounded-[8px] text-[13px]"
+        className="flex-1 px-3 py-1.5 border border-[var(--border)] rounded-[8px] text-[13px] bg-[var(--bg)]"
       />
       <button onClick={submit} className="px-3 py-1.5 rounded-[8px] text-[12px] font-bold text-white" style={{ background: color }}>+</button>
     </div>
@@ -213,14 +205,14 @@ function AddBuyForm({ color, onAdd }: { color: string; onAdd: (title: string, pr
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && submit()}
-        className="flex-1 px-3 py-1.5 border border-[var(--border)] rounded-[8px] text-[13px]"
+        className="flex-1 px-3 py-1.5 border border-[var(--border)] rounded-[8px] text-[13px] bg-[var(--bg)]"
       />
       <input
         type="number"
         placeholder="Kč"
         value={price}
         onChange={e => setPrice(e.target.value)}
-        className="w-16 px-2 py-1.5 border border-[var(--border)] rounded-[8px] text-[13px]"
+        className="w-16 px-2 py-1.5 border border-[var(--border)] rounded-[8px] text-[13px] bg-[var(--bg)]"
       />
       <button onClick={submit} className="px-3 py-1.5 rounded-[8px] text-[12px] font-bold text-white" style={{ background: color }}>+</button>
     </div>
@@ -333,7 +325,6 @@ function RoomsTab({ userId }: { userId: string }) {
 
         return (
           <div key={room.id} className="rounded-[16px] overflow-hidden shadow-sm border border-[var(--border)]">
-            {/* Room header */}
             <button
               onClick={() => setExpandedRoom(isExpanded ? null : room.id)}
               className="w-full text-left flex items-center bg-[var(--surface)]"
@@ -348,18 +339,15 @@ function RoomsTab({ userId }: { userId: string }) {
                   <div className="text-[12px] text-[var(--text-tertiary)] mt-0.5 flex gap-2">
                     {todoCount > 0 && <span>📋 {todoCount} úkolů</span>}
                     {buyCount > 0 && <span>🛒 {buyCount} k nákupu{totalCost > 0 ? ` • ${totalCost.toLocaleString('cs')} Kč` : ''}</span>}
-                    {todoCount === 0 && buyCount === 0 && <span className="text-[var(--text-tertiary)]">Vše hotovo</span>}
+                    {todoCount === 0 && buyCount === 0 && <span>Vše hotovo ✓</span>}
                   </div>
                 </div>
                 <span className="text-[var(--text-tertiary)] text-[12px]">{isExpanded ? '▼' : '▶'}</span>
               </div>
             </button>
 
-            {/* Room body */}
             {isExpanded && (
               <div className="border-t border-[var(--border)] bg-[var(--bg)] px-4 py-4 space-y-4">
-
-                {/* Edit / Delete */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => setEditRoom(room)}
@@ -369,15 +357,14 @@ function RoomsTab({ userId }: { userId: string }) {
                   </button>
                   <button
                     onClick={() => removeRoom(room.id)}
-                    className="px-3 py-2 rounded-[10px] text-[12px] font-semibold border border-red-100 bg-red-50 text-red-500"
+                    className="px-3 py-2 rounded-[10px] text-[12px] font-semibold text-red-400 border border-[var(--border)]"
                   >
-                    🗑️ Smazat
+                    🗑️
                   </button>
                 </div>
 
-                {/* Todos */}
                 <div>
-                  <div className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2 tracking-wide">CO UDĚLAT</div>
+                  <div className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2 tracking-wide uppercase">Co udělat</div>
                   {roomTodos.filter(t => t.type === 'todo').map(todo => (
                     <div key={todo.id} className="flex items-center gap-2 py-1.5">
                       <input
@@ -399,9 +386,8 @@ function RoomsTab({ userId }: { userId: string }) {
                   <AddTodoForm color={room.color} onAdd={title => addTodo(room.id, title, 'todo', null)} />
                 </div>
 
-                {/* Buy */}
                 <div className="border-t border-[var(--border)] pt-4">
-                  <div className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2 tracking-wide">CO KOUPIT</div>
+                  <div className="text-[11px] font-bold text-[var(--text-tertiary)] mb-2 tracking-wide uppercase">Co koupit</div>
                   {roomTodos.filter(t => t.type === 'buy').map(todo => (
                     <div key={todo.id} className="flex items-center gap-2 py-1.5">
                       <input
@@ -429,7 +415,6 @@ function RoomsTab({ userId }: { userId: string }) {
         )
       })}
 
-      {/* FAB */}
       <button
         onClick={() => setShowAdd(true)}
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full text-[28px] flex items-center justify-center text-white shadow-lg"
@@ -446,69 +431,64 @@ function RoomsTab({ userId }: { userId: string }) {
           onClose={() => setEditRoom(null)}
         />
       )}
-
       <Toast show={!!toast} msg={toast} />
     </div>
   )
 }
 
-// ── Contracts Tab ─────────────────────────────────────────────────────
+// ── Shopping Tab ──────────────────────────────────────────────────────
 
-function ContractsTab({ userId }: { userId: string }) {
-  const [contracts, setContracts] = useState<HomeContract[]>([])
-  const [showAdd, setShowAdd] = useState(false)
+function ShoppingTab({ userId }: { userId: string }) {
+  const [items, setItems] = useState<ShoppingItem[]>([])
+  const [input, setInput] = useState('')
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState('')
-  const [form, setForm] = useState({
-    name: '', type: 'utility' as const, provider: '',
-    amount_monthly: '', renewal_date: '', auto_renew: true, file_url: '',
-  })
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500) }
 
   useEffect(() => {
-    fetchContracts(userId)
-      .then(setContracts)
+    fetchShoppingItems(userId)
+      .then(setItems)
       .catch(() => showToast('Chyba při načítání'))
       .finally(() => setLoading(false))
   }, [userId])
 
-  const addContract = async () => {
-    if (!form.name.trim()) return
+  const addItem = async () => {
+    if (!input.trim()) return
     try {
-      const contract = await insertContract({
-        user_id: userId,
-        name: form.name,
-        type: form.type,
-        provider: form.provider || null,
-        amount_monthly: parseFloat(form.amount_monthly) || 0,
-        renewal_date: form.renewal_date || null,
-        auto_renew: form.auto_renew,
-        notes: null,
-        file_url: form.file_url || null,
-      })
-      setContracts(c => [...c, contract].sort((a, b) => {
-        if (!a.renewal_date) return 1
-        if (!b.renewal_date) return -1
-        return a.renewal_date.localeCompare(b.renewal_date)
-      }))
-      setShowAdd(false)
-      setForm({ name: '', type: 'utility', provider: '', amount_monthly: '', renewal_date: '', auto_renew: true, file_url: '' })
-      showToast('Smlouva přidána')
+      const item = await insertShoppingItem({ user_id: userId, title: input.trim(), done: false })
+      setItems(prev => [item, ...prev])
+      setInput('')
+      inputRef.current?.focus()
     } catch { showToast('Chyba') }
   }
 
-  const removeContract = async (id: string) => {
+  const toggle = async (id: string, done: boolean) => {
     try {
-      await deleteContract(id)
-      setContracts(c => c.filter(ct => ct.id !== id))
+      await updateShoppingItem(id, { done: !done })
+      setItems(prev => prev.map(i => i.id === id ? { ...i, done: !done } : i))
     } catch { showToast('Chyba') }
   }
 
-  const daysUntil = (date: string | null) => {
-    if (!date) return null
-    return Math.ceil((new Date(date).getTime() - Date.now()) / 86_400_000)
+  const removeItem = async (id: string) => {
+    try {
+      await deleteShoppingItem(id)
+      setItems(prev => prev.filter(i => i.id !== id))
+    } catch { showToast('Chyba') }
   }
+
+  const clearDone = async () => {
+    try {
+      await clearDoneShoppingItems(userId)
+      setItems(prev => prev.filter(i => !i.done))
+      showToast('Hotové položky smazány')
+    } catch { showToast('Chyba') }
+  }
+
+  const doneCount = items.filter(i => i.done).length
+  const pending = items.filter(i => !i.done)
+  const done = items.filter(i => i.done)
 
   if (loading) return (
     <div className="flex-1 flex items-center justify-center">
@@ -516,184 +496,220 @@ function ContractsTab({ userId }: { userId: string }) {
     </div>
   )
 
-  const totalMonthly = contracts.reduce((s, c) => s + c.amount_monthly, 0)
-
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-3">
+    <div className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-4">
+      {/* Quick add */}
+      <div className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Přidat položku..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addItem()}
+          className="flex-1 px-4 py-3 border border-[var(--border)] rounded-[12px] text-[14px] bg-[var(--surface)]"
+          style={{ color: 'var(--text-primary)' }}
+        />
+        <button
+          onClick={addItem}
+          className="w-12 h-12 rounded-[12px] text-white font-bold text-[20px] flex items-center justify-center"
+          style={{ background: 'var(--color-primary)' }}
+        >
+          +
+        </button>
+      </div>
 
-      {/* Summary */}
-      {contracts.length > 0 && (
-        <div className="rounded-[14px] p-4 mb-2" style={{ background: 'var(--color-primary)', color: 'white' }}>
-          <div className="text-[12px] opacity-70">Celkové měsíční náklady</div>
-          <div className="text-[24px] font-bold">{totalMonthly.toLocaleString('cs')} Kč</div>
-          <div className="text-[12px] opacity-70 mt-0.5">{contracts.length} smluv celkem</div>
-        </div>
-      )}
-
-      {contracts.length === 0 && (
+      {items.length === 0 && (
         <div className="text-center py-16 text-[var(--text-tertiary)]">
-          <div className="text-[40px] mb-3">📄</div>
-          <div className="text-[15px] font-semibold">Zatím žádné smlouvy</div>
-          <div className="text-[13px] mt-1">Klepni na + a přidej první smlouvu</div>
+          <div className="text-[40px] mb-3">🛒</div>
+          <div className="text-[15px] font-semibold">Nákupní seznam je prázdný</div>
+          <div className="text-[13px] mt-1">Přidej první položku výše</div>
         </div>
       )}
 
-      {contracts.map(contract => {
-        const days = daysUntil(contract.renewal_date)
-        const isUrgent = days !== null && days <= 30 && days >= 0
-        const isOverdue = days !== null && days < 0
-        const typeInfo = CONTRACT_TYPES.find(t => t.id === contract.type)
-
-        return (
-          <div key={contract.id} className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] shadow-sm overflow-hidden">
-            {isUrgent && <div className="h-1 bg-orange-400" />}
-            {isOverdue && <div className="h-1 bg-red-500" />}
-            <div className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[16px]">{typeInfo?.icon}</span>
-                    <span className="text-[14px] font-semibold text-[var(--text-primary)]">{contract.name}</span>
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[var(--surface-raised)] text-[var(--text-secondary)]">{typeInfo?.label}</span>
-                  </div>
-                  {contract.provider && <div className="text-[12px] text-[var(--text-tertiary)] mb-1">{contract.provider}</div>}
-                  <div className="text-[15px] font-bold text-[var(--text-primary)]">{contract.amount_monthly.toLocaleString('cs')} Kč<span className="text-[12px] font-normal text-[var(--text-tertiary)]">/měs</span></div>
-
-                  <div className="flex items-center gap-3 mt-2 flex-wrap">
-                    {contract.renewal_date && (
-                      <span className="text-[12px] font-semibold" style={{ color: isOverdue ? '#dc2626' : isUrgent ? '#ea580c' : 'var(--text-secondary)' }}>
-                        {isOverdue ? '⚠️ Prošlé' : isUrgent ? `⏰ Za ${days} dní` : `📅 ${new Date(contract.renewal_date).toLocaleDateString('cs-CZ')}`}
-                      </span>
-                    )}
-                    {contract.auto_renew && <span className="text-[11px] text-green-600 font-semibold">↩ Auto-obnova</span>}
-                    {contract.file_url && (
-                      <a
-                        href={contract.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                        style={{ background: 'var(--color-primary)' + '18', color: 'var(--color-primary)' }}
-                        onClick={e => e.stopPropagation()}
-                      >
-                        📎 Dokument
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <button onClick={() => removeContract(contract.id)} className="text-[var(--text-tertiary)] text-[18px] px-1 flex-shrink-0">✕</button>
-              </div>
-            </div>
-          </div>
-        )
-      })}
-
-      {/* Add modal */}
-      {showAdd && (
-        <div className="fixed inset-0 bg-black/40 flex items-end z-50" onClick={() => setShowAdd(false)}>
-          <div className="w-full bg-[var(--surface)] rounded-t-[24px] p-5 space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <div className="text-[16px] font-bold">Nová smlouva</div>
-              <button onClick={() => setShowAdd(false)} className="text-[var(--text-tertiary)] text-[20px]">✕</button>
-            </div>
-
-            <input
-              type="text"
-              placeholder="Název smlouvy"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
-            />
-
-            <div className="grid grid-cols-2 gap-2">
-              {CONTRACT_TYPES.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setForm({ ...form, type: t.id as any })}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-[10px] border text-[13px] font-semibold transition-all"
-                  style={{
-                    background: form.type === t.id ? 'var(--color-primary)' : 'var(--bg)',
-                    color: form.type === t.id ? 'white' : 'var(--text-secondary)',
-                    borderColor: form.type === t.id ? 'var(--color-primary)' : 'var(--border)',
-                  }}
-                >
-                  <span>{t.icon}</span> {t.label}
-                </button>
-              ))}
-            </div>
-
-            <input
-              type="text"
-              placeholder="Poskytovatel (např. ČEZ, Kooperativa)"
-              value={form.provider}
-              onChange={e => setForm({ ...form, provider: e.target.value })}
-              className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
-            />
-
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="text-[12px] text-[var(--text-secondary)] mb-1 block">Měsíční náklad (Kč)</label>
-                <input
-                  type="number"
-                  placeholder="0"
-                  value={form.amount_monthly}
-                  onChange={e => setForm({ ...form, amount_monthly: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="text-[12px] text-[var(--text-secondary)] mb-1 block">Datum obnovení</label>
-                <input
-                  type="date"
-                  value={form.renewal_date}
-                  onChange={e => setForm({ ...form, renewal_date: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-[12px] text-[var(--text-secondary)] mb-1 block">Odkaz na dokument (Google Drive, Disk...)</label>
-              <input
-                type="url"
-                placeholder="https://..."
-                value={form.file_url}
-                onChange={e => setForm({ ...form, file_url: e.target.value })}
-                className="w-full px-4 py-2.5 border border-[var(--border-strong)] rounded-[10px] text-[14px]"
-              />
-            </div>
-
-            <label className="flex items-center gap-3">
-              <div
-                className="relative w-10 h-5 rounded-full transition-colors cursor-pointer"
-                style={{ background: form.auto_renew ? 'var(--color-primary)' : 'var(--border-strong)' }}
-                onClick={() => setForm({ ...form, auto_renew: !form.auto_renew })}
-              >
-                <div className="absolute top-0.5 w-4 h-4 bg-[var(--surface)] rounded-full shadow transition-all" style={{ left: form.auto_renew ? '22px' : '2px' }} />
-              </div>
-              <span className="text-[13px] text-[var(--text-secondary)]">Automatické obnovení</span>
-            </label>
-
-            <div className="flex gap-3 pt-2">
-              <button onClick={() => setShowAdd(false)} className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-[var(--text-secondary)] border border-[var(--border-strong)]">Zrušit</button>
+      {/* Pending items */}
+      {pending.length > 0 && (
+        <div className="space-y-1">
+          {pending.map(item => (
+            <div
+              key={item.id}
+              className="flex items-center gap-3 px-4 py-3 rounded-[12px] border border-[var(--border)] bg-[var(--surface)]"
+            >
               <button
-                onClick={addContract}
-                className="flex-1 px-4 py-2.5 rounded-[10px] text-[14px] font-semibold text-white"
+                onClick={() => toggle(item.id, item.done)}
+                className="w-5 h-5 rounded-full border-2 flex-shrink-0 transition-all"
+                style={{ borderColor: 'var(--color-primary)' }}
+              />
+              <span className="flex-1 text-[14px]" style={{ color: 'var(--text-primary)' }}>{item.title}</span>
+              <button onClick={() => removeItem(item.id)} className="text-[var(--text-tertiary)] text-[16px] px-1">✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Done items */}
+      {done.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">
+              Hotovo ({doneCount})
+            </div>
+            <button
+              onClick={clearDone}
+              className="text-[12px] font-semibold"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Vymazat hotové
+            </button>
+          </div>
+          {done.map(item => (
+            <div
+              key={item.id}
+              className="flex items-center gap-3 px-4 py-3 rounded-[12px] border border-[var(--border)] bg-[var(--surface)]"
+            >
+              <button
+                onClick={() => toggle(item.id, item.done)}
+                className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
                 style={{ background: 'var(--color-primary)' }}
               >
-                Přidat
+                <span className="text-white text-[10px]">✓</span>
               </button>
+              <span className="flex-1 text-[14px] line-through" style={{ color: 'var(--text-tertiary)' }}>{item.title}</span>
+              <button onClick={() => removeItem(item.id)} className="text-[var(--text-tertiary)] text-[16px] px-1">✕</button>
             </div>
-          </div>
+          ))}
         </div>
       )}
 
-      <button
-        onClick={() => setShowAdd(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full text-[28px] flex items-center justify-center text-white shadow-lg"
-        style={{ background: 'var(--color-primary)' }}
-      >
-        +
-      </button>
+      <Toast show={!!toast} msg={toast} />
+    </div>
+  )
+}
+
+// ── Tasks Tab ─────────────────────────────────────────────────────────
+
+function TasksTab({ userId }: { userId: string }) {
+  const [tasks, setTasks] = useState<HomeTask[]>([])
+  const [input, setInput] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [toast, setToast] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500) }
+
+  useEffect(() => {
+    fetchHomeTasks(userId)
+      .then(setTasks)
+      .catch(() => showToast('Chyba při načítání'))
+      .finally(() => setLoading(false))
+  }, [userId])
+
+  const addTask = async () => {
+    if (!input.trim()) return
+    try {
+      const task = await insertHomeTask({ user_id: userId, title: input.trim(), done: false })
+      setTasks(prev => [task, ...prev])
+      setInput('')
+      inputRef.current?.focus()
+    } catch { showToast('Chyba') }
+  }
+
+  const toggle = async (id: string, done: boolean) => {
+    try {
+      await updateHomeTask(id, { done: !done })
+      setTasks(prev => prev.map(t => t.id === id ? { ...t, done: !done } : t))
+    } catch { showToast('Chyba') }
+  }
+
+  const removeTask = async (id: string) => {
+    try {
+      await deleteHomeTask(id)
+      setTasks(prev => prev.filter(t => t.id !== id))
+    } catch { showToast('Chyba') }
+  }
+
+  const pending = tasks.filter(t => !t.done)
+  const done = tasks.filter(t => t.done)
+
+  if (loading) return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="text-[14px] text-[var(--text-tertiary)]">Načítám...</div>
+    </div>
+  )
+
+  return (
+    <div className="flex-1 overflow-y-auto px-4 py-4 pb-24 space-y-4">
+      {/* Quick add */}
+      <div className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Nový úkol..."
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addTask()}
+          className="flex-1 px-4 py-3 border border-[var(--border)] rounded-[12px] text-[14px] bg-[var(--surface)]"
+          style={{ color: 'var(--text-primary)' }}
+        />
+        <button
+          onClick={addTask}
+          className="w-12 h-12 rounded-[12px] text-white font-bold text-[20px] flex items-center justify-center"
+          style={{ background: 'var(--color-primary)' }}
+        >
+          +
+        </button>
+      </div>
+
+      {tasks.length === 0 && (
+        <div className="text-center py-16 text-[var(--text-tertiary)]">
+          <div className="text-[40px] mb-3">🔧</div>
+          <div className="text-[15px] font-semibold">Žádné úkoly</div>
+          <div className="text-[13px] mt-1">Věci k zařízení doma — servis, opravy, administrativa</div>
+        </div>
+      )}
+
+      {pending.length > 0 && (
+        <div className="space-y-1">
+          {pending.map(task => (
+            <div
+              key={task.id}
+              className="flex items-center gap-3 px-4 py-3 rounded-[12px] border border-[var(--border)] bg-[var(--surface)]"
+            >
+              <button
+                onClick={() => toggle(task.id, task.done)}
+                className="w-5 h-5 rounded-full border-2 flex-shrink-0"
+                style={{ borderColor: 'var(--color-primary)' }}
+              />
+              <span className="flex-1 text-[14px]" style={{ color: 'var(--text-primary)' }}>{task.title}</span>
+              <button onClick={() => removeTask(task.id)} className="text-[var(--text-tertiary)] text-[16px] px-1">✕</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {done.length > 0 && (
+        <div className="space-y-1 mt-2">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide px-1 mb-2">
+            Hotovo ({done.length})
+          </div>
+          {done.map(task => (
+            <div
+              key={task.id}
+              className="flex items-center gap-3 px-4 py-3 rounded-[12px] border border-[var(--border)] bg-[var(--surface)]"
+            >
+              <button
+                onClick={() => toggle(task.id, task.done)}
+                className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
+                style={{ background: 'var(--color-primary)' }}
+              >
+                <span className="text-white text-[10px]">✓</span>
+              </button>
+              <span className="flex-1 text-[14px] line-through" style={{ color: 'var(--text-tertiary)' }}>{task.title}</span>
+              <button onClick={() => removeTask(task.id)} className="text-[var(--text-tertiary)] text-[16px] px-1">✕</button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <Toast show={!!toast} msg={toast} />
     </div>
@@ -711,10 +727,11 @@ export default function BytPage() {
 
   return (
     <div className="flex flex-col h-full">
-      <Header title="Byt" />
+      <Header title="Domácnost" />
       <TabNav tab={tab} onTab={setTab} />
-      {tab === 'rooms'     && <RoomsTab userId={userId} />}
-      {tab === 'contracts' && <ContractsTab userId={userId} />}
+      {tab === 'rooms'    && <RoomsTab userId={userId} />}
+      {tab === 'shopping' && <ShoppingTab userId={userId} />}
+      {tab === 'tasks'    && <TasksTab userId={userId} />}
     </div>
   )
 }
