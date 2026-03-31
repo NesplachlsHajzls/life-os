@@ -18,11 +18,11 @@ const DRAWER_SECTIONS = [
   {
     label: 'Život',
     items: [
-      { href: '/byt',          icon: '🏠', label: 'Byt'         },
+      { href: '/byt',          icon: '🏠', label: 'Domácnost'   },
       { href: '/learning',     icon: '📚', label: 'Learning'    },
-      { href: '/places',       icon: '📍', label: 'Places'      },
-      { href: '/bucket-list',  icon: '🎯', label: 'Bucket List' },
-      { href: '/sport',        icon: '💪', label: 'Sport'       },
+      { href: '/zazitky',      icon: '🌍', label: 'Zážitky'     },
+      { href: '/navyky',       icon: '🎯', label: 'Návyky'      },
+      { href: '/sport',        icon: '💪', label: 'Tělo & Mysl'       },
       { href: '/poznamky',     icon: '📝', label: 'Poznámky'    },
     ],
   },

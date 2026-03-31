@@ -168,3 +168,37 @@ export async function fetchWorkoutStats(userId: string): Promise<WorkoutStats> {
     this_month: thisMonth,
   }
 }
+
+
+// ── MindLog ──────────────────────────────────────────────────────────
+
+export interface MindLog {
+  id: string
+  user_id: string
+  date: string   // YYYY-MM-DD
+  mood: number   // 1-5
+  energy: number // 1-5
+  notes: string | null
+  created_at: string
+}
+
+export async function fetchMindLogs(userId: string, fromDate: string): Promise<MindLog[]> {
+  const { data, error } = await supabase
+    .from('mind_logs')
+    .select('*')
+    .eq('user_id', userId)
+    .gte('date', fromDate)
+    .order('date', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as MindLog[]) ?? []
+}
+
+export async function upsertMindLog(payload: Omit<MindLog, 'id' | 'created_at'>): Promise<MindLog> {
+  const { data, error } = await supabase
+    .from('mind_logs')
+    .upsert(payload, { onConflict: 'user_id,date' })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data as MindLog
+}
