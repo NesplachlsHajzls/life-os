@@ -1,0 +1,42 @@
+Záloha Life OS — 2026-03-24
+==================================================
+
+STAV: SELHÁNÍ — Síťové připojení blokováno
+
+Záloha se nezdařila, protože sandboxové prostředí blokuje odchozí HTTPS připojení
+na externí servery (vlgsyoxedyuqypcpftco.supabase.co).
+
+Chyba: ProxyError — Tunnel connection failed: 403 Forbidden
+
+Tabulky k zálohování (celkem 21):
+- expenses: CHYBA — proxy 403
+- incomes: CHYBA — proxy 403
+- finance_settings: CHYBA — proxy 403
+- recurring_payments: CHYBA — proxy 403
+- commitments: CHYBA — proxy 403
+- clients: CHYBA — proxy 403
+- client_deals: CHYBA — proxy 403
+- client_activities: CHYBA — proxy 403
+- tasks: CHYBA — proxy 403
+- routines: CHYBA — proxy 403
+- notes: CHYBA — proxy 403
+- learning_items: CHYBA — proxy 403
+- learning_areas: CHYBA — proxy 403
+- knowledge_items: CHYBA — proxy 403
+- workouts: CHYBA — proxy 403
+- meal_logs: CHYBA — proxy 403
+- supplements: CHYBA — proxy 403
+- places: CHYBA — proxy 403
+- byt_rooms: CHYBA — proxy 403
+- byt_todos: CHYBA — proxy 403
+- bucket_items: CHYBA — proxy 403
+
+==================================================
+Celkový počet zálohovaných záznamů: 0 (záloha selhala)
+Úspěšně zálohovaných tabulek: 0/21
+
+DOPORUČENÍ:
+Zálohovací skript je funkční, ale prostředí Cowork (sandboxová VM) nemůže
+navazovat odchozí HTTPS připojení na vlgsyoxedyuqypcpftco.supabase.co.
+Pro úspěšné zálohování je potřeba spustit skript přímo na počítači,
+nebo zkontrolovat nastavení sítě v Admin settings → Capabilities.
