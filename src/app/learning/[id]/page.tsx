@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
@@ -63,7 +63,8 @@ function KnowledgeRow({ item, onStatusChange, onDelete }: {
 
 // ── Page ──────────────────────────────────────────────────────────────
 
-export default function LearningAreaPage({ params }: { params: { id: string } }) {
+export default function LearningAreaPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const { user } = useUser()
   const userId = user?.id ?? null
   const router = useRouter()
@@ -86,9 +87,9 @@ export default function LearningAreaPage({ params }: { params: { id: string } })
       try {
         const [areas, knowledge] = await Promise.all([
           fetchLearningAreas(userId),
-          fetchKnowledgeItems(userId, params.id),
+          fetchKnowledgeItems(userId, id),
         ])
-        const found = areas.find(a => a.id === params.id)
+        const found = areas.find(a => a.id === id)
         if (!found) { router.push('/learning'); return }
         setArea(found)
         setNotes((found as any).notes_content ?? '')
@@ -100,7 +101,7 @@ export default function LearningAreaPage({ params }: { params: { id: string } })
       }
     }
     load()
-  }, [userId, params.id])
+  }, [userId, id])
 
   // Autosave notes after 1s of inactivity
   const saveNotes = useCallback(async (value: string) => {
