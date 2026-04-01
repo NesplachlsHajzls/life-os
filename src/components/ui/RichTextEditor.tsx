@@ -75,8 +75,6 @@ function SlashPopup({ query, rect, suggestions, selectedIdx, onSelect, onCreateN
 
   return (
     <div
-      style={{ position: 'fixed', top, left, zIndex: 9999, width: 280 }}
-
       style={{
         position: 'fixed', top, left, zIndex: 9999, width: 280,
         background: 'var(--surface)',
