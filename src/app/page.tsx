@@ -39,27 +39,60 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
+// Local today date string YYYY-MM-DD for filtering events
+function localDateStr(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function isToday(isoDatetime: string): boolean {
+  const today = localDateStr()
+  // Handle both "2026-04-01T..." and "2026-04-01" formats
+  return isoDatetime.startsWith(today)
+}
+
 const PRIORITY_COLORS: Record<number, string> = { 3: '#ef4444', 2: '#f59e0b', 1: '#22c55e' }
 
-// ── Sub-components ────────────────────────────────────────────────
+// ── Tile component ─────────────────────────────────────────────────
 
-function Tile({ href, title, icon, children }: {
-  href: string; title: string; icon: string; children: React.ReactNode
+function Tile({ href, title, icon, accent = 'var(--color-primary)', children, badge }: {
+  href: string
+  title: string
+  icon: string
+  accent?: string
+  children: React.ReactNode
+  badge?: string | number
 }) {
   return (
-    <Link href={href} className="rounded-[14px] p-4 flex flex-col gap-2.5 active:scale-[0.97] transition-transform" style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-md)' }}
->
-      <div className="flex justify-between items-center">
-        <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--text-tertiary)' }}>{title}</span>
-        <span className="text-[18px]">{icon}</span>
+    <Link
+      href={href}
+      className="rounded-[16px] flex flex-col overflow-hidden active:scale-[0.97] transition-transform"
+      style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-md)' }}
+    >
+      {/* Card header */}
+      <div className="flex items-center gap-2.5 px-4 pt-3.5 pb-2.5"
+        style={{ borderBottom: '1px solid var(--border)' }}>
+        <span className="text-[18px] leading-none">{icon}</span>
+        <span className="text-[13px] font-bold flex-1 tracking-[-0.01em]"
+          style={{ color: 'var(--text-primary)' }}>{title}</span>
+        {badge !== undefined && (
+          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ background: accent + '22', color: accent }}>
+            {badge}
+          </span>
+        )}
+        <span className="text-[14px]" style={{ color: 'var(--text-tertiary)' }}>›</span>
       </div>
-      {children}
+      {/* Card content */}
+      <div className="px-4 py-3 flex flex-col gap-1.5 flex-1">
+        {children}
+      </div>
     </Link>
   )
 }
 
 function Empty({ label }: { label: string }) {
-  return <div className="text-[12px] italic" style={{ color: 'var(--text-tertiary)' }}>{label}</div>
+  return <div className="text-[12px] italic py-1" style={{ color: 'var(--text-tertiary)' }}>{label}</div>
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────
@@ -70,18 +103,21 @@ export default function DashboardPage() {
   const { hideAmounts } = usePrivacy()
   const amt = (n: number) => hideAmounts ? '••••' : fmtCZK(n)
 
-  const [tasks,   setTasks]   = useState<Task[]>([])
-  const [clients, setClients] = useState<Client[]>([])
+  const [tasks,     setTasks]     = useState<Task[]>([])
+  const [clients,   setClients]   = useState<Client[]>([])
   const [workTasks, setWorkTasks] = useState<Task[]>([])
-  const [events,  setEvents]  = useState<CalendarEvent[]>([])
-  const [finance, setFinance] = useState<{ monthIncome: number; monthExpenses: number; balance: number } | null>(null)
+  const [events,    setEvents]    = useState<CalendarEvent[]>([])
+  const [finance,   setFinance]   = useState<{ monthIncome: number; monthExpenses: number; balance: number } | null>(null)
   const [noteCount, setNoteCount] = useState<number | null>(null)
 
   useEffect(() => {
     if (!userId) return
-    const today = new Date()
-    const from  = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString()
-    const to    = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString()
+
+    // Use a wide window (±2 days) to avoid timezone edge cases,
+    // then filter events to today client-side using local date string
+    const now   = new Date()
+    const from  = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    const to    = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString()
 
     Promise.allSettled([
       fetchTasks(userId),
@@ -98,15 +134,14 @@ export default function DashboardPage() {
       if (rNotes.status     === 'fulfilled') setNoteCount(rNotes.value.length)
       if (rFinance.status   === 'fulfilled') {
         const { expenses, incomes, settings } = rFinance.value
-        const nowMs = Date.now()
-        const thisMonth = new Date().toISOString().slice(0, 7) // "2026-03"
+        const thisMonth = new Date().toISOString().slice(0, 7)
         const monthExp = expenses
           .filter(e => e.date.startsWith(thisMonth))
           .reduce((s, e) => s + e.amount, 0)
         const monthInc = incomes
           .filter(i => i.date.startsWith(thisMonth))
           .reduce((s, i) => s + i.amount, 0)
-        const balance  = (settings?.wallets ?? []).reduce((s, w) => s + (w.balance ?? 0), 0)
+        const balance = (settings?.wallets ?? []).reduce((s, w) => s + (w.balance ?? 0), 0)
         setFinance({ monthIncome: monthInc, monthExpenses: monthExp, balance })
       }
     })
@@ -117,8 +152,18 @@ export default function DashboardPage() {
     () => tasks.filter(t => t.status === 'open' && !t.client_id).slice(0, 3),
     [tasks]
   )
+  const openTasksTotal = useMemo(
+    () => tasks.filter(t => t.status === 'open' && !t.client_id).length,
+    [tasks]
+  )
 
-  // Clients with open task counts, top 4
+  // Filter events to LOCAL today
+  const todayEvents = useMemo(
+    () => events.filter(ev => ev.is_all_day || isToday(ev.start_datetime)),
+    [events]
+  )
+
+  // Active clients with open task counts, top 4
   const clientStats = useMemo(() => {
     const openWork = workTasks.filter(t => t.status === 'open')
     return clients
@@ -136,83 +181,108 @@ export default function DashboardPage() {
   return (
     <>
       {/* Hero header */}
-      <div className="px-5 pt-5 pb-5" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.15em] mb-1" style={{ color: 'var(--text-tertiary)' }}>{capitalize(todayLabel())}</p>
+      <div className="px-5 pt-6 pb-5" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] mb-1" style={{ color: 'var(--text-tertiary)' }}>
+          {capitalize(todayLabel())}
+        </p>
         <h2 className="text-[24px] font-bold leading-tight" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--text-primary)' }}>
           {greet()}, <span style={{ color: 'var(--color-primary)' }}>Martine</span>
         </h2>
       </div>
 
       <div className="p-4 flex flex-col gap-3">
-        {/* 2×2 grid */}
+
+        {/* 2×2 main grid */}
         <div className="grid grid-cols-2 gap-3">
 
-          {/* TODO */}
-          <Tile href="/todo" title="Úkoly" icon="✅">
+          {/* ÚKOLY */}
+          <Tile
+            href="/todo"
+            title="Úkoly"
+            icon="✅"
+            accent="#22c55e"
+            badge={openTasksTotal > 0 ? openTasksTotal : undefined}
+          >
             {openTasks.length === 0 ? (
               <Empty label="Žádné otevřené úkoly" />
             ) : (
-              <div className="flex flex-col gap-1.5">
+              <>
                 {openTasks.map(t => (
                   <div key={t.id} className="flex items-center gap-2 text-[13px]">
                     <span className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ background: PRIORITY_COLORS[t.priority] ?? '#94a3b8' }} />
-                    <span className="flex-1 truncate text-[var(--text-primary)]">{t.title}</span>
+                    <span className="flex-1 truncate" style={{ color: 'var(--text-primary)' }}>{t.title}</span>
                     {t.due_date && (
-                      <span className="text-[11px] text-[var(--text-tertiary)] flex-shrink-0">
+                      <span className="text-[11px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>
                         {new Date(t.due_date + 'T00:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'numeric' })}
                       </span>
                     )}
                   </div>
                 ))}
-                {tasks.filter(t => t.status === 'open' && !t.client_id).length > 3 && (
-                  <div className="text-[11px] text-[var(--text-tertiary)]">
-                    +{tasks.filter(t => t.status === 'open' && !t.client_id).length - 3} dalších
+                {openTasksTotal > 3 && (
+                  <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                    +{openTasksTotal - 3} dalších
                   </div>
                 )}
-              </div>
+              </>
             )}
           </Tile>
 
           {/* KALENDÁŘ */}
-          <Tile href="/kalendar" title="Dnes" icon="📅">
-            {events.length === 0 ? (
+          <Tile
+            href="/kalendar"
+            title="Dnes"
+            icon="📅"
+            accent="#6366f1"
+            badge={todayEvents.length > 0 ? todayEvents.length : undefined}
+          >
+            {todayEvents.length === 0 ? (
               <Empty label="Dnes žádné události" />
             ) : (
-              <div className="flex flex-col gap-1.5">
-                {events.slice(0, 3).map(ev => (
+              <>
+                {todayEvents.slice(0, 3).map(ev => (
                   <div key={ev.id} className="flex items-center gap-1.5 text-[13px]">
-                    <span className="text-[11px] font-bold text-[var(--color-primary)] flex-shrink-0 w-10">
+                    <span className="text-[11px] font-bold flex-shrink-0 w-10"
+                      style={{ color: 'var(--color-primary)' }}>
                       {ev.is_all_day ? 'celý' : fmtTime(ev.start_datetime)}
                     </span>
-                    <span className="truncate text-[var(--text-primary)]">{ev.emoji ? `${ev.emoji} ` : ''}{ev.title}</span>
+                    <span className="truncate" style={{ color: 'var(--text-primary)' }}>
+                      {ev.emoji ? `${ev.emoji} ` : ''}{ev.title}
+                    </span>
                   </div>
                 ))}
-                {events.length > 3 && (
-                  <div className="text-[11px] text-[var(--text-tertiary)]">+{events.length - 3} dalších</div>
+                {todayEvents.length > 3 && (
+                  <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+                    +{todayEvents.length - 3} dalších
+                  </div>
                 )}
-              </div>
+              </>
             )}
           </Tile>
 
           {/* FINANCE */}
-          <Tile href="/finance" title="Finance" icon="💰">
+          <Tile href="/finance" title="Finance" icon="💰" accent="#f59e0b">
             {finance === null ? (
               <Empty label="Načítám…" />
             ) : (
               <>
-                <div className="text-[22px] font-extrabold text-[var(--text-primary)] leading-none">
+                <div className="text-[20px] font-extrabold leading-none mt-0.5"
+                  style={{ color: 'var(--text-primary)' }}>
                   {amt(finance.balance)}
                 </div>
-                <div className="text-[11px] text-[var(--text-tertiary)]">celkový zůstatek</div>
+                <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>celkový zůstatek</div>
                 <div className="flex gap-3 mt-1">
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-green-500">↑</span>
-                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{amt(finance.monthIncome)}</span>
+                    <span className="text-[11px] font-bold text-green-500">↑</span>
+                    <span className="text-[12px] font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                      {amt(finance.monthIncome)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] font-bold text-red-400">↓</span>
-                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{amt(finance.monthExpenses)}</span>
+                    <span className="text-[11px] font-bold text-red-400">↓</span>
+                    <span className="text-[12px] font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                      {amt(finance.monthExpenses)}
+                    </span>
                   </div>
                 </div>
               </>
@@ -220,63 +290,67 @@ export default function DashboardPage() {
           </Tile>
 
           {/* PRÁCE */}
-          <Tile href="/prace" title="Práce" icon="💼">
+          <Tile
+            href="/prace"
+            title="Práce"
+            icon="💼"
+            accent="#8b5cf6"
+            badge={totalOpenWork > 0 ? totalOpenWork : undefined}
+          >
             {clientStats.length === 0 ? (
               <Empty label="Žádní aktivní klienti" />
             ) : (
-              <div className="flex flex-col gap-1.5">
+              <>
                 {clientStats.map(({ client: c, count }) => (
                   <div key={c.id} className="flex justify-between items-center text-[13px]">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <span className="text-[13px] flex-shrink-0">{c.icon}</span>
-                      <span className="truncate text-[var(--text-primary)]">{c.name}</span>
+                      <span className="truncate" style={{ color: 'var(--text-primary)' }}>{c.name}</span>
                     </div>
                     {count > 0 && (
-                      <span className="text-[11px] font-semibold text-[var(--text-tertiary)] flex-shrink-0 ml-1">
-                        {count} úkol{count === 1 ? '' : count < 5 ? 'y' : 'ů'}
+                      <span className="text-[11px] font-semibold flex-shrink-0 ml-1"
+                        style={{ color: 'var(--text-tertiary)' }}>
+                        {count}×
                       </span>
                     )}
                   </div>
                 ))}
-                {totalOpenWork > 0 && (
-                  <div className="text-[11px] text-[var(--color-primary)] font-semibold mt-0.5">
-                    {totalOpenWork} otevřených úkolů celkem
-                  </div>
-                )}
-              </div>
+              </>
             )}
           </Tile>
 
         </div>
 
-        {/* Nudle — Sport a Poznámky */}
+        {/* Bottom row — quick links */}
         <div className="grid grid-cols-2 gap-3">
           <Link href="/sport"
-            className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
-      >
-            <div className="flex items-center gap-2">
+            className="rounded-[16px] px-4 py-3.5 flex items-center justify-between active:scale-[0.97] transition-transform"
+            style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-md)' }}
+          >
+            <div className="flex items-center gap-2.5">
               <span className="text-[20px]">🏋️</span>
               <div>
-                <div className="text-[13px] font-bold text-[var(--text-primary)]">Sport</div>
-                <div className="text-[11px] text-[var(--text-tertiary)]">Přejít na deník</div>
+                <div className="text-[13px] font-bold" style={{ color: 'var(--text-primary)' }}>Tělo & Mysl</div>
+                <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>Pohyb, jídlo, nálada</div>
               </div>
             </div>
-            <span className="text-[var(--text-tertiary)] text-lg">›</span>
+            <span className="text-[18px]" style={{ color: 'var(--text-tertiary)' }}>›</span>
           </Link>
 
           <Link href="/poznamky"
-            className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center justify-between active:scale-[0.97] transition-transform"
-      >
-            <div className="flex items-center gap-2">
+            className="rounded-[16px] px-4 py-3.5 flex items-center justify-between active:scale-[0.97] transition-transform"
+            style={{ background: 'var(--surface)', boxShadow: 'var(--shadow-md)' }}
+          >
+            <div className="flex items-center gap-2.5">
               <span className="text-[20px]">💡</span>
               <div>
-                <div className="text-[13px] font-bold text-[var(--text-primary)]">Poznámky</div>
-                <div className="text-[11px] text-[var(--text-tertiary)]">
+                <div className="text-[13px] font-bold" style={{ color: 'var(--text-primary)' }}>Poznámky</div>
+                <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
                   {noteCount === null ? '…' : `${noteCount} ${noteCount === 1 ? 'poznámka' : noteCount < 5 ? 'poznámky' : 'poznámek'}`}
                 </div>
               </div>
             </div>
-            <span className="text-[var(--text-tertiary)] text-lg">›</span>
+            <span className="text-[18px]" style={{ color: 'var(--text-tertiary)' }}>›</span>
           </Link>
         </div>
 
