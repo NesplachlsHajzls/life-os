@@ -357,3 +357,53 @@ a, button { transition: opacity 0.15s ease, transform 0.12s ease; }
   .group:hover .group-hover\:opacity-100 { opacity: 1 !important; }
   .group:hover .group-hover\:scale-100   { transform: scale(1) !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE LINK CHIP — inline /page reference (Notion-style)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.page-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 6px;
+  border-radius: 6px;
+  font-size: 0.88em;
+  font-weight: 600;
+  text-decoration: none !important;
+  cursor: pointer;
+  white-space: nowrap;
+  vertical-align: baseline;
+  position: relative;
+  transition: background 0.15s ease, opacity 0.15s ease;
+  /* Use theme-aware colors */
+  background: var(--color-primary-light);
+  color: var(--color-primary-mid);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.page-link-chip:hover {
+  background: var(--color-primary-pale);
+  opacity: 0.85;
+}
+
+/* Page icon within chip */
+.page-link-chip::before {
+  content: '';
+  /* Icon handled inline in the HTML */
+}
+
+/* Light theme overrides (terracotta / ocean) */
+.theme-terracotta .page-link-chip,
+.theme-ocean .page-link-chip {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.theme-terracotta .page-link-chip:hover,
+.theme-ocean .page-link-chip:hover {
+  background: var(--color-primary-pale);
+}

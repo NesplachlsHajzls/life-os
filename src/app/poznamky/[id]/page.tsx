@@ -10,7 +10,7 @@ import {
 } from '@/features/notes/api'
 import { fetchClientById, fetchClients, Client } from '@/features/prace/api'
 import { fetchCategories, AppCategory, DEFAULT_CATEGORIES } from '@/features/categories/api'
-import { RichTextEditor } from '@/components/ui/RichTextEditor'
+import { RichTextEditor, PageSuggestion } from '@/components/ui/RichTextEditor'
 
 const DEMO_USER_ID  = '00000000-0000-0000-0000-000000000001'
 const AUTOSAVE_MS   = 800
@@ -362,10 +362,27 @@ export default function NoteDetailPage() {
           <RichTextEditor
             value={content}
             onChange={handleContentChange}
-            placeholder="Začni psát… Přidávej poznámky, myšlenky, zápisky ze schůzky…"
+            placeholder="Začni psát… Napiš /page pro vložení podstránky."
             minHeight={360}
             autoFocus={!note.content}
             className="px-3"
+            pageSuggestions={subNotes.map(s => ({ id: s.id, title: s.title, icon: s.icon }))}
+            onCreatePage={async (title: string) => {
+              if (!userId || !note) throw new Error('No context')
+              const sub = await insertNote({
+                user_id: userId,
+                title,
+                content: '',
+                parent_id: note.id,
+                client_id: note.client_id,
+                is_meeting: false,
+                meeting_date: null,
+                icon: '📝',
+                category: null,
+              })
+              setSubNotes(prev => [...prev, sub])
+              return { id: sub.id, title: sub.title, icon: sub.icon }
+            }}
           />
         </div>
 
