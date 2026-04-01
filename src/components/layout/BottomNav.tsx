@@ -11,7 +11,7 @@ const LEFT_ITEMS = [
 ]
 const RIGHT_ITEMS = [
   { href: '/kalendar', icon: '📅', label: 'Kalendář' },
-  { href: '/prace',    icon: '💼', label: 'Práce'    },
+  { href: '/prace',    icon: '💼', label: 'I.CA'     },
 ]
 
 export function BottomNav() {

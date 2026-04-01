@@ -130,7 +130,7 @@ export default function PracePage() {
 
   return (
     <>
-      <Header title="Práce" />
+      <Header title="I.CA" />
 
       <div className="p-4 lg:p-6">
 

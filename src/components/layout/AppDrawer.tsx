@@ -11,7 +11,7 @@ const DRAWER_SECTIONS = [
       { href: '/',          icon: '⊞',  label: 'Dashboard'   },
       { href: '/todo',      icon: '✅', label: 'Todo'        },
       { href: '/finance',   icon: '💰', label: 'Finance'     },
-      { href: '/prace',     icon: '💼', label: 'Práce'       },
+      { href: '/prace',     icon: '💼', label: 'I.CA'        },
       { href: '/kalendar',  icon: '📅', label: 'Kalendář'    },
     ],
   },
