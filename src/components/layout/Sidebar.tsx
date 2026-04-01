@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useTabs } from '@/contexts/TabsContext'
+import { ICAIcon } from '@/components/ui/ICAIcon'
 
 const SIDEBAR_SECTIONS = [
   {
@@ -107,7 +108,10 @@ export function Sidebar() {
                       borderLeft: active ? '2px solid var(--color-primary)' : '2px solid transparent',
                     }}
                   >
-                    <span className="text-[17px] leading-none flex-shrink-0">{item.icon}</span>
+                    {item.href === '/prace'
+                      ? <ICAIcon size={18} />
+                      : <span className="text-[17px] leading-none flex-shrink-0">{item.icon}</span>
+                    }
                     <span
                       className="text-[13px] font-semibold"
                       style={{ color: active ? 'var(--color-primary-mid)' : 'var(--text-secondary)' }}

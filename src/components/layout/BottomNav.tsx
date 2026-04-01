@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { AppDrawer } from './AppDrawer'
+import { ICAIcon } from '@/components/ui/ICAIcon'
 
 const LEFT_ITEMS = [
   { href: '/todo',    icon: '✅', label: 'Todo'    },
@@ -52,7 +53,10 @@ export function BottomNav() {
                 isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-[var(--text-tertiary)]'
               }`}
             >
-              <span className="text-[22px] leading-none">{item.icon}</span>
+              {item.href === '/prace'
+              ? <ICAIcon size={22} />
+              : <span className="text-[22px] leading-none">{item.icon}</span>
+            }
               <span className="text-[10px] font-semibold">{item.label}</span>
             </Link>
           ))}
@@ -100,7 +104,10 @@ export function BottomNav() {
                 isActive(item.href) ? 'text-[var(--color-primary)]' : 'text-[var(--text-tertiary)]'
               }`}
             >
-              <span className="text-[22px] leading-none">{item.icon}</span>
+              {item.href === '/prace'
+              ? <ICAIcon size={22} />
+              : <span className="text-[22px] leading-none">{item.icon}</span>
+            }
               <span className="text-[10px] font-semibold">{item.label}</span>
             </Link>
           ))}

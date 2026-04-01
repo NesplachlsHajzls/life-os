@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ICAIcon } from '@/components/ui/ICAIcon'
 
 const DRAWER_SECTIONS = [
   {
@@ -107,7 +108,10 @@ export function AppDrawer({ onClose }: AppDrawerProps) {
                         border: active ? '1.5px solid var(--color-primary-mid)' : '1.5px solid transparent',
                       }}
                     >
-                      <span className="text-[26px] leading-none">{item.icon}</span>
+                      {item.href === '/prace'
+                      ? <ICAIcon size={26} />
+                      : <span className="text-[26px] leading-none">{item.icon}</span>
+                    }
                       <span
                         className="text-[11px] font-semibold text-center leading-tight"
                         style={{ color: active ? 'var(--color-primary)' : 'var(--text-secondary)' }}
