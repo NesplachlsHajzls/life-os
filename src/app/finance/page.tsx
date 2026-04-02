@@ -57,11 +57,17 @@ export default function FinancePage() {
     setIncInput('')
   }
 
-  // All categories — those with expenses first (sorted by amount), then empty ones
-  const catBarData = [
-    ...Object.entries(catSums).sort((a, b) => b[1] - a[1]).map(([name, value]) => ({ name, value, color: (expCats[name] ?? { color: '#94a3b8' }).color })),
-    ...Object.entries(expCats).filter(([name]) => !catSums[name]).map(([name, cat]) => ({ name, value: 0, color: cat.color })),
-  ]
+  // Chart: only show categories that have real transactions.
+  // Color lookup is case-insensitive to handle key mismatches between expCats and transaction data.
+  function catColor(name: string): string {
+    if (expCats[name]) return expCats[name].color
+    const lower = name.toLowerCase()
+    const match = Object.entries(expCats).find(([k]) => k.toLowerCase() === lower)
+    return match ? match[1].color : '#94a3b8'
+  }
+  const catBarData = Object.entries(catSums)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value]) => ({ name, value, color: catColor(name) }))
   const maxCat = catBarData[0]?.value || 1
 
   return (

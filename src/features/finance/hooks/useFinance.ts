@@ -66,8 +66,27 @@ export function useFinance(userId: string) {
       setIncomes(data.incomes)
       setCommitments(data.commitments)
       setRecurring(data.recurring)
+
+      // Build expCats: start from saved settings, then fill in any
+      // transaction categories that aren't in the map yet (handles key mismatches).
+      const baseCats: CatMap = data.settings?.exp_cats ?? DEFAULT_EXP_CATS
+      const merged: CatMap = { ...baseCats }
+      const FALLBACK_COLORS = ['#f97316','#3b82f6','#8b5cf6','#ec4899','#22c55e','#f59e0b','#06b6d4','#ef4444','#10b981','#a855f7']
+      let colorIdx = Object.keys(merged).length % FALLBACK_COLORS.length
+      for (const exp of data.expenses) {
+        const key = exp.category
+        if (key && !merged[key]) {
+          // Case-insensitive lookup to avoid duplicates like "jídlo" vs "Jídlo"
+          const existingKey = Object.keys(merged).find(k => k.toLowerCase() === key.toLowerCase())
+          if (!existingKey) {
+            merged[key] = { icon: '📦', color: FALLBACK_COLORS[colorIdx % FALLBACK_COLORS.length] }
+            colorIdx++
+          }
+        }
+      }
+      setExpCats(merged)
+
       if (data.settings) {
-        if (data.settings.exp_cats) setExpCats(data.settings.exp_cats)
         if (data.settings.wallets)  setWallets(data.settings.wallets)
         if (data.settings.budgets)  setBudgets(data.settings.budgets)
         if (data.settings.debts)    setDebts(data.settings.debts)
