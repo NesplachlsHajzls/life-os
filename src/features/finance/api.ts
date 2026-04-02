@@ -93,12 +93,12 @@ export async function loadFinanceData(userId: string) {
     supabase.from('ft_settings').select('*').eq('user_id', userId).maybeSingle(),
   ])
 
-  // First run — seed default settings
+  // First run — seed default settings ONLY if no row exists
+  // ⚠️ NEVER use upsert here — it would overwrite custom wallets & categories on conflict
   if (!settings) {
-    await supabase.from('ft_settings').upsert(
-      { user_id: userId, exp_cats: DEFAULT_EXP_CATS, wallets: DEFAULT_WALLETS, budgets: {} },
-      { onConflict: 'user_id' }
-    )
+    await supabase.from('ft_settings')
+      .insert({ user_id: userId, exp_cats: DEFAULT_EXP_CATS, wallets: DEFAULT_WALLETS, budgets: {} })
+    // Ignore conflict error — means row exists (race condition / RLS glitch)
   }
 
   return {
