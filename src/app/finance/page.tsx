@@ -29,8 +29,14 @@ export default function FinancePage() {
     addIncomeText, addIncomeManual,
     editExpenseWithWallet, editIncome,
     removeExpense, removeIncome,
+    saveExpCats,
     allMonths,
   } = useFinance(userId)
+
+  async function handleAddCategory(name: string, icon: string, color: string) {
+    const updated = { ...expCats, [name]: { icon, color } }
+    await saveExpCats(updated)
+  }
 
   const [expInput,    setExpInput]   = useState('')
   const [incInput,    setIncInput]   = useState('')
@@ -57,17 +63,15 @@ export default function FinancePage() {
     setIncInput('')
   }
 
-  // Chart: only show categories that have real transactions.
-  // Color lookup is case-insensitive to handle key mismatches between expCats and transaction data.
-  function catColor(name: string): string {
-    if (expCats[name]) return expCats[name].color
-    const lower = name.toLowerCase()
-    const match = Object.entries(expCats).find(([k]) => k.toLowerCase() === lower)
-    return match ? match[1].color : '#94a3b8'
-  }
+  // catSums keys are already normalized to match expCats canonical keys (see useFinance)
   const catBarData = Object.entries(catSums)
     .sort((a, b) => b[1] - a[1])
-    .map(([name, value]) => ({ name, value, color: catColor(name) }))
+    .map(([name, value]) => ({
+      name,
+      value,
+      color: expCats[name]?.color ?? '#94a3b8',
+      icon:  expCats[name]?.icon  ?? '📦',
+    }))
   const maxCat = catBarData[0]?.value || 1
 
   return (
@@ -155,10 +159,10 @@ export default function FinancePage() {
           <div className="bg-[var(--surface)] rounded-[16px] shadow-card p-4">
             <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">Výdaje dle kategorie</div>
             <div className="flex flex-col gap-2.5">
-              {catBarData.map(({ name, value, color }) => (
+              {catBarData.map(({ name, value, color, icon }) => (
                 <div key={name}>
                   <div className="flex justify-between mb-1">
-                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{expCats[name]?.icon} {name}</span>
+                    <span className="text-[12px] font-semibold text-[var(--text-secondary)]">{icon} {name}</span>
                     <span className={`text-[12px] font-bold ${value > 0 ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'}`}>{value > 0 ? (hideAmounts ? '••••' : `${fmt(value)} Kč`) : '—'}</span>
                   </div>
                   <div className="h-1.5 bg-[var(--surface-raised)] rounded-full overflow-hidden">
@@ -185,7 +189,8 @@ export default function FinancePage() {
               .slice(0, 5)
               .map((item, idx, arr) => {
                 const isExp = item.kind === 'exp'
-                const cat = isExp ? (expCats[item.category] ?? { icon: '📦', color: '#94a3b8' }) : null
+                const catKey = isExp ? (Object.keys(expCats).find(k => k.toLowerCase() === item.category.toLowerCase()) ?? item.category) : ''
+                const cat = isExp ? (expCats[catKey] ?? { icon: '📦', color: '#94a3b8' }) : null
                 return (
                   <div key={item.id} className={`flex items-center gap-3 px-4 py-3 ${idx < arr.length - 1 ? 'border-b border-[var(--border)]' : ''}`}>
                     <div className="w-9 h-9 rounded-full flex items-center justify-center text-[16px] flex-shrink-0"
@@ -241,7 +246,7 @@ export default function FinancePage() {
       )}
 
       {showAddExp && (
-        <AddExpenseSheet expCats={expCats} wallets={wallets} onSave={addExpenseManual} onClose={() => setShowAddExp(false)} />
+        <AddExpenseSheet expCats={expCats} wallets={wallets} onSave={addExpenseManual} onAddCategory={handleAddCategory} onClose={() => setShowAddExp(false)} />
       )}
       {showAddInc && (
         <AddIncomeSheet incCats={incCats} onSave={addIncomeManual} onClose={() => setShowAddInc(false)} />
@@ -252,6 +257,7 @@ export default function FinancePage() {
           expCats={expCats}
           wallets={wallets}
           onSave={(newExp, oldExp) => editExpenseWithWallet(newExp, oldExp)}
+          onAddCategory={handleAddCategory}
           onClose={() => setEditingExp(null)}
         />
       )}

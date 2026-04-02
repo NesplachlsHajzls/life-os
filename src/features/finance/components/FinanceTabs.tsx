@@ -6,6 +6,7 @@ export function FinanceTabs({ active }: { active: string }) {
     { label: 'Transakce', href: '/finance/transakce' },
     { label: 'Peněženky',href: '/finance/penezenky' },
     { label: 'Opakované', href: '/finance/opakovane' },
+    { label: 'Kategorie', href: '/finance/kategorie' },
   ]
   return (
     <div className="flex gap-1 px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)] overflow-x-auto" style={{ scrollbarWidth: 'none' }}>

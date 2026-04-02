@@ -339,7 +339,9 @@ export function useFinance(userId: string) {
   const totalCom     = mCom.reduce((s, c) => s + commitAmt(c, curMonth), 0)
   const volne        = totalInc - totalCom - totalExp
   const totalWallets = wallets.reduce((s, w) => s + w.balance, 0)
-  const catSums      = filtExpenses.reduce<Record<string, number>>((a, e) => { a[e.category] = (a[e.category] || 0) + e.amount; return a }, {})
+  // Normalize category keys: map transaction key → canonical expCats key (case-insensitive)
+  const canonCatKey  = (key: string) => Object.keys(expCats).find(k => k.toLowerCase() === key.toLowerCase()) ?? key
+  const catSums      = filtExpenses.reduce<Record<string, number>>((a, e) => { const k = canonCatKey(e.category); a[k] = (a[k] || 0) + e.amount; return a }, {})
   const dueRecurring = recurDue(recurring, expenses)
 
   const allMonths = [...new Set([
