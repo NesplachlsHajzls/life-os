@@ -278,7 +278,7 @@ export default function TodoPage() {
 
       {/* ── Main scrollable content ── */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 pt-4 pb-32">
+        <div className="max-w-2xl md:max-w-5xl mx-auto px-4 pt-4 pb-32">
 
           {/* ── OPEN TASKS ── */}
           {activeTab === 'open' && (
@@ -306,10 +306,79 @@ export default function TodoPage() {
                   </p>
                 </div>
               ) : (
-                <>
-                  {/* Prošlé */}
+                /* ── Two-column layout on desktop, single column on mobile ── */
+                <div className="md:flex md:gap-5 md:items-start">
+
+                  {/* ── LEFT / MAIN column ── */}
+                  <div className="md:flex-1 min-w-0">
+                    {/* Dnes */}
+                    {sections.today.length > 0 && (
+                      <div>
+                        <SectionHead label="Dnes" count={sections.today.length} accent="var(--color-primary)" />
+                        <TaskGroup
+                          tasks={sections.today}
+                          categories={categories}
+                          onToggle={toggleTask}
+                          onEdit={setEditingTask}
+                          onDelete={removeTask}
+                          clientsMap={clientsMap}
+                          showCategory={activeCat === 'Vše'}
+                        />
+                      </div>
+                    )}
+
+                    {/* Tento týden */}
+                    {sections.week.length > 0 && (
+                      <div>
+                        <SectionHead label="Tento týden" count={sections.week.length} />
+                        <TaskGroup
+                          tasks={sections.week}
+                          categories={categories}
+                          onToggle={toggleTask}
+                          onEdit={setEditingTask}
+                          onDelete={removeTask}
+                          clientsMap={clientsMap}
+                          showCategory={activeCat === 'Vše'}
+                        />
+                      </div>
+                    )}
+
+                    {/* Ostatní / Inbox */}
+                    {sections.later.length > 0 && (
+                      <div>
+                        <SectionHead label="Ostatní" count={sections.later.length} />
+                        <TaskGroup
+                          tasks={sections.later}
+                          categories={categories}
+                          onToggle={toggleTask}
+                          onEdit={setEditingTask}
+                          onDelete={removeTask}
+                          clientsMap={clientsMap}
+                          showCategory={activeCat === 'Vše'}
+                        />
+                      </div>
+                    )}
+
+                    {/* Prošlé — pouze na mobilu (na desktopu je v pravém sloupci) */}
+                    {sections.overdue.length > 0 && (
+                      <div className="md:hidden">
+                        <SectionHead label="Prošlé" count={sections.overdue.length} accent="#ef4444" />
+                        <TaskGroup
+                          tasks={sections.overdue}
+                          categories={categories}
+                          onToggle={toggleTask}
+                          onEdit={setEditingTask}
+                          onDelete={removeTask}
+                          clientsMap={clientsMap}
+                          showCategory={activeCat === 'Vše'}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── RIGHT column — Prošlé (pouze desktop) ── */}
                   {sections.overdue.length > 0 && (
-                    <div>
+                    <div className="hidden md:block md:w-[320px] flex-shrink-0">
                       <SectionHead label="Prošlé" count={sections.overdue.length} accent="#ef4444" />
                       <TaskGroup
                         tasks={sections.overdue}
@@ -323,54 +392,7 @@ export default function TodoPage() {
                     </div>
                   )}
 
-                  {/* Dnes */}
-                  {sections.today.length > 0 && (
-                    <div>
-                      <SectionHead label="Dnes" count={sections.today.length} accent="var(--color-primary)" />
-                      <TaskGroup
-                        tasks={sections.today}
-                        categories={categories}
-                        onToggle={toggleTask}
-                        onEdit={setEditingTask}
-                        onDelete={removeTask}
-                        clientsMap={clientsMap}
-                        showCategory={activeCat === 'Vše'}
-                      />
-                    </div>
-                  )}
-
-                  {/* Tento týden */}
-                  {sections.week.length > 0 && (
-                    <div>
-                      <SectionHead label="Tento týden" count={sections.week.length} />
-                      <TaskGroup
-                        tasks={sections.week}
-                        categories={categories}
-                        onToggle={toggleTask}
-                        onEdit={setEditingTask}
-                        onDelete={removeTask}
-                        clientsMap={clientsMap}
-                        showCategory={activeCat === 'Vše'}
-                      />
-                    </div>
-                  )}
-
-                  {/* Ostatní / Inbox */}
-                  {sections.later.length > 0 && (
-                    <div>
-                      <SectionHead label="Ostatní" count={sections.later.length} />
-                      <TaskGroup
-                        tasks={sections.later}
-                        categories={categories}
-                        onToggle={toggleTask}
-                        onEdit={setEditingTask}
-                        onDelete={removeTask}
-                        clientsMap={clientsMap}
-                        showCategory={activeCat === 'Vše'}
-                      />
-                    </div>
-                  )}
-                </>
+                </div>
               )}
             </>
           )}
