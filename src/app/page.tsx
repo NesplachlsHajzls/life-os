@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useUser } from '@/hooks/useUser'
 import { fetchTasks, Task } from '@/features/todo/api'
+import { supabase } from '@/lib/supabase'
 import { fetchClients, fetchAllWorkTasks, Client } from '@/features/prace/api'
 import { fetchEventsInRange, CalendarEvent } from '@/features/calendar/api'
 import { loadFinanceData, insertExpense, insertIncome, Wallet } from '@/features/finance/api'
@@ -207,19 +208,38 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!userId) return
+    // Nejprve zobraz lokální cache pro okamžitou odezvu
     try {
-      const saved = localStorage.getItem(DASH_NOTE_KEY(userId)) ?? ''
-      setDashNote(saved)
+      const cached = localStorage.getItem(DASH_NOTE_KEY(userId))
+      if (cached !== null) setDashNote(cached)
     } catch {}
+    // Pak načti z Supabase (synchronizováno napříč zařízeními)
+    supabase
+      .from('todo_settings')
+      .select('dash_note')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.dash_note !== undefined && data.dash_note !== null) {
+          setDashNote(data.dash_note as string)
+          try { localStorage.setItem(DASH_NOTE_KEY(userId), data.dash_note as string) } catch {}
+        }
+      })
   }, [userId])
 
   function handleDashNoteChange(val: string) {
     setDashNote(val)
     setNoteSaved(false)
+    // Okamžitě ulož do localStorage (cache)
+    try { localStorage.setItem(DASH_NOTE_KEY(userId!), val) } catch {}
     clearTimeout(noteTimer.current)
     noteTimer.current = setTimeout(() => {
-      try { localStorage.setItem(DASH_NOTE_KEY(userId!), val) } catch {}
-      setNoteSaved(true)
+      if (!userId) return
+      // Po 600 ms upsertni do Supabase
+      supabase
+        .from('todo_settings')
+        .upsert({ user_id: userId, dash_note: val }, { onConflict: 'user_id' })
+        .then(() => setNoteSaved(true))
     }, 600)
   }
 
