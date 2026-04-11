@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   loadFinanceData,
+  invalidateFinanceCache,
   saveSettings,
   insertExpense,
   insertIncome,
@@ -104,20 +105,24 @@ export function useFinance(userId: string) {
     const parsed = parseEntry(text, expCats, '', 'exp', wallets)
     if (parsed.error) return 'Nezadáno číslo. Zkus: "oběd 150" nebo "benzin 800"'
     const walletId = parseWalletHint(text, wallets)
+    const payload = {
+      user_id: userId,
+      description: parsed.description,
+      amount: parsed.amount,
+      category: parsed.category,
+      date: parsed.date,
+      wallet_id: walletId,
+      recur_id: null as null,
+      note: '',
+      tags: [] as string[],
+    }
+    // Optimistic: show immediately
+    const tempId = `temp_${Date.now()}`
+    setExpenses(prev => [{ id: tempId, ...payload }, ...prev])
+    setCurMonth(mKey(parsed.date))
     try {
-      const data = await insertExpense({
-        user_id: userId,
-        description: parsed.description,
-        amount: parsed.amount,
-        category: parsed.category,
-        date: parsed.date,
-        wallet_id: walletId,
-        recur_id: null,
-        note: '',
-        tags: [],
-      })
-      setExpenses(prev => [data, ...prev])
-      setCurMonth(mKey(parsed.date))
+      const real = await insertExpense(payload)
+      setExpenses(prev => prev.map(e => e.id === tempId ? real : e))
       if (walletId) {
         const updated = wallets.map(w => w.id === walletId ? { ...w, balance: w.balance - parsed.amount } : w)
         setWallets(updated)
@@ -129,6 +134,8 @@ export function useFinance(userId: string) {
       }
       return null
     } catch (e: any) {
+      setExpenses(prev => prev.filter(x => x.id !== tempId))
+      showToast('❌ Nepodařilo se uložit — zkus znovu')
       return e.message
     }
   }, [userId, expCats, wallets])
@@ -136,17 +143,27 @@ export function useFinance(userId: string) {
   // ── Add expense (manual form) ───────────────────────────────────
 
   const addExpenseManual = useCallback(async (entry: Omit<Expense, 'id' | 'user_id'>): Promise<void> => {
-    const data = await insertExpense({ user_id: userId, ...entry })
-    setExpenses(prev => [data, ...prev])
+    const payload = { user_id: userId, ...entry }
+    // Optimistic: show immediately with temp ID
+    const tempId = `temp_${Date.now()}`
+    setExpenses(prev => [{ id: tempId, ...payload }, ...prev])
     setCurMonth(mKey(entry.date))
-    if (entry.wallet_id) {
-      const updated = wallets.map(w => w.id === entry.wallet_id ? { ...w, balance: w.balance - entry.amount } : w)
-      setWallets(updated)
-      await saveSettings(userId, { wallets: updated })
-      const wName = wallets.find(w => w.id === entry.wallet_id)?.name ?? 'peněženky'
-      showToast(`💸 ${entry.description} — ${fmt(entry.amount)} Kč (z ${wName})`)
-    } else {
-      showToast(`💸 ${entry.description} — ${fmt(entry.amount)} Kč`)
+    try {
+      const real = await insertExpense(payload)
+      setExpenses(prev => prev.map(e => e.id === tempId ? real : e))
+      if (entry.wallet_id) {
+        const updated = wallets.map(w => w.id === entry.wallet_id ? { ...w, balance: w.balance - entry.amount } : w)
+        setWallets(updated)
+        await saveSettings(userId, { wallets: updated })
+        const wName = wallets.find(w => w.id === entry.wallet_id)?.name ?? 'peněženky'
+        showToast(`💸 ${entry.description} — ${fmt(entry.amount)} Kč (z ${wName})`)
+      } else {
+        showToast(`💸 ${entry.description} — ${fmt(entry.amount)} Kč`)
+      }
+    } catch {
+      // Rollback on failure
+      setExpenses(prev => prev.filter(e => e.id !== tempId))
+      showToast('❌ Výdaj se nepodařilo uložit — zkus znovu')
     }
   }, [userId, wallets])
 
@@ -155,20 +172,25 @@ export function useFinance(userId: string) {
   const addIncomeText = useCallback(async (text: string): Promise<string | null> => {
     const parsed = parseEntry(text, incCats, '', 'inc')
     if (parsed.error) return 'Nezadáno číslo. Zkus: "výplata 45000"'
+    const payload = {
+      user_id: userId,
+      description: parsed.description,
+      amount: parsed.amount,
+      category: parsed.category,
+      date: parsed.date,
+      note: '',
+    }
+    const tempId = `temp_${Date.now()}`
+    setIncomes(prev => [{ id: tempId, ...payload }, ...prev])
+    setCurMonth(mKey(parsed.date))
     try {
-      const data = await insertIncome({
-        user_id: userId,
-        description: parsed.description,
-        amount: parsed.amount,
-        category: parsed.category,
-        date: parsed.date,
-        note: '',
-      })
-      setIncomes(prev => [data, ...prev])
-      setCurMonth(mKey(parsed.date))
+      const real = await insertIncome(payload)
+      setIncomes(prev => prev.map(i => i.id === tempId ? real : i))
       showToast(`💚 ${parsed.description} +${fmt(parsed.amount)} Kč`)
       return null
     } catch (e: any) {
+      setIncomes(prev => prev.filter(i => i.id !== tempId))
+      showToast('❌ Příjem se nepodařilo uložit — zkus znovu')
       return e.message
     }
   }, [userId, incCats])
@@ -176,23 +198,41 @@ export function useFinance(userId: string) {
   // ── Add income (manual form) ────────────────────────────────────
 
   const addIncomeManual = useCallback(async (entry: Omit<Income, 'id' | 'user_id'>): Promise<void> => {
-    const data = await insertIncome({ user_id: userId, ...entry })
-    setIncomes(prev => [data, ...prev])
+    const payload = { user_id: userId, ...entry }
+    const tempId = `temp_${Date.now()}`
+    setIncomes(prev => [{ id: tempId, ...payload }, ...prev])
     setCurMonth(mKey(entry.date))
-    showToast(`💚 ${entry.description} +${fmt(entry.amount)} Kč`)
+    try {
+      const real = await insertIncome(payload)
+      setIncomes(prev => prev.map(i => i.id === tempId ? real : i))
+      showToast(`💚 ${entry.description} +${fmt(entry.amount)} Kč`)
+    } catch {
+      setIncomes(prev => prev.filter(i => i.id !== tempId))
+      showToast('❌ Příjem se nepodařilo uložit — zkus znovu')
+    }
   }, [userId])
 
   // ── Delete ──────────────────────────────────────────────────────
 
   const removeExpense = useCallback(async (id: string) => {
-    await deleteExpense(id)
-    setExpenses(prev => prev.filter(x => x.id !== id))
-  }, [])
+    setExpenses(prev => prev.filter(x => x.id !== id)) // optimistic
+    try {
+      await deleteExpense(id)
+      invalidateFinanceCache(userId)
+    } catch {
+      showToast('❌ Smazání se nepodařilo — zkus znovu')
+    }
+  }, [userId])
 
   const removeIncome = useCallback(async (id: string) => {
-    await deleteIncome(id)
-    setIncomes(prev => prev.filter(x => x.id !== id))
-  }, [])
+    setIncomes(prev => prev.filter(x => x.id !== id)) // optimistic
+    try {
+      await deleteIncome(id)
+      invalidateFinanceCache(userId)
+    } catch {
+      showToast('❌ Smazání se nepodařilo — zkus znovu')
+    }
+  }, [userId])
 
   // ── Edit ────────────────────────────────────────────────────────
 

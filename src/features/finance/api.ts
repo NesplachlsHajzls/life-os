@@ -76,9 +76,36 @@ export interface FinanceSettings {
   debts?: Debt[]
 }
 
+// ── In-memory cache (stale-while-revalidate) ─────────────────────
+// Eliminates redundant DB fetches when navigating between finance tabs.
+
+type FinanceDataResult = {
+  expenses: Expense[]
+  incomes: Income[]
+  commitments: Commitment[]
+  recurring: Recurring[]
+  settings: FinanceSettings | null
+}
+
+const _cache = new Map<string, { data: FinanceDataResult; ts: number }>()
+const CACHE_TTL = 45_000 // 45 seconds
+
+export function invalidateFinanceCache(userId: string) {
+  _cache.delete(userId)
+}
+
 // ── Load all finance data ─────────────────────────────────────────
 
-export async function loadFinanceData(userId: string) {
+export async function loadFinanceData(userId: string): Promise<FinanceDataResult> {
+  // Return cached data immediately if fresh enough
+  const cached = _cache.get(userId)
+  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data
+
+  // Limit to last 2 years for performance — covers all practical use cases
+  const twoYearsAgo = new Date()
+  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2)
+  const cutoff = twoYearsAgo.toISOString().slice(0, 10)
+
   const [
     { data: expenses },
     { data: incomes },
@@ -86,8 +113,8 @@ export async function loadFinanceData(userId: string) {
     { data: recurring },
     { data: settings },
   ] = await Promise.all([
-    supabase.from('ft_expenses').select('*').eq('user_id', userId).order('date', { ascending: false }),
-    supabase.from('ft_incomes').select('*').eq('user_id', userId).order('date', { ascending: false }),
+    supabase.from('ft_expenses').select('*').eq('user_id', userId).gte('date', cutoff).order('date', { ascending: false }),
+    supabase.from('ft_incomes').select('*').eq('user_id', userId).gte('date', cutoff).order('date', { ascending: false }),
     supabase.from('ft_commitments').select('*').eq('user_id', userId),
     supabase.from('ft_recurring').select('*').eq('user_id', userId),
     supabase.from('ft_settings').select('*').eq('user_id', userId).maybeSingle(),
@@ -101,13 +128,15 @@ export async function loadFinanceData(userId: string) {
     // Ignore conflict error — means row exists (race condition / RLS glitch)
   }
 
-  return {
+  const result: FinanceDataResult = {
     expenses:    (expenses    as Expense[]    | null) ?? [],
     incomes:     (incomes     as Income[]     | null) ?? [],
     commitments: (commitments as Commitment[] | null) ?? [],
     recurring:   (recurring   as Recurring[]  | null) ?? [],
     settings:    settings as FinanceSettings | null,
   }
+  _cache.set(userId, { data: result, ts: Date.now() })
+  return result
 }
 
 // ── Settings ──────────────────────────────────────────────────────
@@ -126,17 +155,20 @@ export async function saveSettings(userId: string, patch: Partial<FinanceSetting
 export async function insertExpense(payload: Omit<Expense, 'id'>) {
   const { data, error } = await supabase.from('ft_expenses').insert(payload).select().single()
   if (error) throw new Error(error.message)
+  invalidateFinanceCache(payload.user_id)
   return data as Expense
 }
 
 export async function updateExpense(expense: Expense) {
   const { error } = await supabase.from('ft_expenses').update(expense).eq('id', expense.id)
   if (error) throw new Error(error.message)
+  invalidateFinanceCache(expense.user_id)
 }
 
 export async function deleteExpense(id: string) {
   const { error } = await supabase.from('ft_expenses').delete().eq('id', id)
   if (error) throw new Error(error.message)
+  // userId not available here — cache will expire via TTL
 }
 
 // ── Incomes ───────────────────────────────────────────────────────
@@ -144,12 +176,14 @@ export async function deleteExpense(id: string) {
 export async function insertIncome(payload: Omit<Income, 'id'>) {
   const { data, error } = await supabase.from('ft_incomes').insert(payload).select().single()
   if (error) throw new Error(error.message)
+  invalidateFinanceCache(payload.user_id)
   return data as Income
 }
 
 export async function updateIncome(income: Income) {
   const { error } = await supabase.from('ft_incomes').update(income).eq('id', income.id)
   if (error) throw new Error(error.message)
+  invalidateFinanceCache(income.user_id)
 }
 
 export async function deleteIncome(id: string) {
