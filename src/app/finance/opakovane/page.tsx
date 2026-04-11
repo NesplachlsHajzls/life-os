@@ -1,98 +1,418 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Header } from '@/components/layout/Header'
 import { FinanceTabs } from '@/features/finance/components/FinanceTabs'
 import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
-import { fmt } from '@/features/finance/utils'
-import { Sheet } from '@/features/finance/components/Sheet'
-import { FAB } from '@/components/ui/FAB'
+import { fmt, genId, todayStr } from '@/features/finance/utils'
+import { RecurringItem, Wallet } from '@/features/finance/api'
+import type { CatMap } from '@/features/finance/utils'
 import { usePrivacy } from '@/contexts/PrivacyContext'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
-const FREQ_LABELS: Record<string, string> = {
-  monthly:   'Každý měsíc',
-  quarterly: 'Každý čtvrtletí',
-  biannual:  'Každé půl roku',
-  annual:    'Každý rok',
+const FREQ_OPTIONS: { value: RecurringItem['frequency']; label: string }[] = [
+  { value: 'weekly',   label: 'Týdně'        },
+  { value: 'monthly',  label: 'Měsíčně'      },
+  { value: 'quarterly',label: 'Čtvrtletně'   },
+  { value: 'biannual', label: 'Pololetně'    },
+  { value: 'annual',   label: 'Ročně'        },
+]
+
+const FREQ_MONTHS: Record<RecurringItem['frequency'], number> = {
+  weekly: 0.25, monthly: 1, quarterly: 3, biannual: 6, annual: 12,
 }
 
-// ── Add recurring sheet ───────────────────────────────────────────
-function AddRecurringSheet({ onClose }: { onClose: () => void }) {
-  // Simplified — just shows a placeholder for now
+// ── Date helpers ──────────────────────────────────────────────────
+
+function nextDueDate(item: RecurringItem): string {
+  const today = new Date()
+  const todayIso = today.toISOString().slice(0, 10)
+  const day = item.day_of_month
+
+  if (item.frequency === 'weekly') {
+    const next = new Date(today)
+    next.setDate(today.getDate() + (7 - today.getDay() + 1) % 7 || 7)
+    return next.toISOString().slice(0, 10)
+  }
+
+  // Compute candidate date in current month
+  const candidate = new Date(today.getFullYear(), today.getMonth(), Math.min(day, 28))
+  const candidateIso = candidate.toISOString().slice(0, 10)
+
+  // Already paid this cycle?
+  if (item.last_paid) {
+    const lastPaid = new Date(item.last_paid)
+    const monthsSincePaid =
+      (today.getFullYear() - lastPaid.getFullYear()) * 12 +
+      (today.getMonth() - lastPaid.getMonth())
+    const freqMonths = FREQ_MONTHS[item.frequency]
+
+    if (monthsSincePaid < freqMonths) {
+      // Not due yet — advance by frequency
+      const next = new Date(lastPaid.getFullYear(), lastPaid.getMonth() + freqMonths, Math.min(day, 28))
+      return next.toISOString().slice(0, 10)
+    }
+  }
+
+  // Due: return current month's date if still upcoming, else next period
+  if (candidateIso >= todayIso) return candidateIso
+  const freqMonths = FREQ_MONTHS[item.frequency]
+  const next = new Date(today.getFullYear(), today.getMonth() + freqMonths, Math.min(day, 28))
+  return next.toISOString().slice(0, 10)
+}
+
+function isDue(item: RecurringItem): boolean {
+  const today = new Date()
+  const todayIso = today.toISOString().slice(0, 10)
+  const due = nextDueDate(item)
+  return due <= todayIso
+}
+
+function formatDueDate(iso: string): string {
+  const [y, m, d] = iso.split('-')
+  const today = todayStr()
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowIso = tomorrow.toISOString().slice(0, 10)
+  if (iso === today) return 'Dnes'
+  if (iso === tomorrowIso) return 'Zítra'
+  return `${d}. ${m}. ${y}`
+}
+
+// ── Field styles ──────────────────────────────────────────────────
+
+const fieldCls = 'w-full bg-[var(--bg)] border border-[var(--border)] rounded-[12px] px-3.5 py-2.5 text-[14px] text-[var(--text-primary)] placeholder-gray-400 outline-none focus:border-[var(--color-primary)]'
+const labelCls = 'block text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-1.5'
+
+// ── Add / Edit Sheet ──────────────────────────────────────────────
+
+interface EditSheetProps {
+  initial?: RecurringItem
+  expCats: CatMap
+  wallets: Wallet[]
+  onSave: (item: RecurringItem) => void
+  onClose: () => void
+}
+
+function EditSheet({ initial, expCats, wallets, onSave, onClose }: EditSheetProps) {
+  const [desc,    setDesc]    = useState(initial?.description ?? '')
+  const [amount,  setAmount]  = useState(initial ? String(initial.amount) : '')
+  const [catName, setCatName] = useState(initial?.category ?? Object.keys(expCats)[0] ?? 'Ostatní')
+  const [freq,    setFreq]    = useState<RecurringItem['frequency']>(initial?.frequency ?? 'monthly')
+  const [day,     setDay]     = useState(initial?.day_of_month ?? 1)
+  const [walletId,setWalletId]= useState<string>(initial?.wallet_id ?? '')
+
+  const valid = desc.trim() && +amount > 0
+
+  function handleSave() {
+    if (!valid) return
+    onSave({
+      id: initial?.id ?? genId(),
+      description: desc.trim(),
+      amount: +amount,
+      category: catName,
+      frequency: freq,
+      day_of_month: day,
+      wallet_id: walletId || null,
+      last_paid: initial?.last_paid,
+    })
+    onClose()
+  }
+
   return (
-    <Sheet title="🔄 Nová opakovaná platba" onClose={onClose}>
-      <p className="text-[13px] text-[var(--text-secondary)]">Správa opakovaných plateb bude brzy k dispozici.</p>
-      <button onClick={onClose} className="mt-4 w-full py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zavřít</button>
-    </Sheet>
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] p-5 pb-8 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
+        <h2 className="text-[16px] font-bold mb-4">{initial ? '✏️ Upravit platbu' : '➕ Nová opakovaná platba'}</h2>
+        <div className="flex flex-col gap-4">
+
+          <div>
+            <label className={labelCls}>Název</label>
+            <input className={fieldCls} value={desc} onChange={e => setDesc(e.target.value)}
+              placeholder="Netflix, Nájem, Pojištění…" autoFocus />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Částka (Kč)</label>
+              <input type="number" className={fieldCls} value={amount}
+                onChange={e => setAmount(e.target.value)} placeholder="0" />
+            </div>
+            <div>
+              <label className={labelCls}>Den splatnosti</label>
+              <input type="number" min={1} max={31} className={fieldCls} value={day}
+                onChange={e => setDay(Math.min(31, Math.max(1, +e.target.value)))} />
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>Frekvence</label>
+            <div className="flex flex-wrap gap-2">
+              {FREQ_OPTIONS.map(f => (
+                <button key={f.value} onClick={() => setFreq(f.value)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
+                    freq === f.value ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'
+                  }`}>{f.label}</button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>Kategorie</label>
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(expCats).map(([name, cat]) => (
+                <button key={name} onClick={() => setCatName(name)}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${
+                    catName === name ? 'text-white' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'
+                  }`}
+                  style={catName === name ? { background: cat.color } : {}}>
+                  {cat.icon} {name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>Strhávat z peněženky (volitelné)</label>
+            <select className={fieldCls} value={walletId} onChange={e => setWalletId(e.target.value)}>
+              <option value="">— bez odečtení —</option>
+              {wallets.map(w => (
+                <option key={w.id} value={w.id}>{w.icon} {w.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <button onClick={onClose}
+              className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">
+              Zrušit
+            </button>
+            <button onClick={handleSave} disabled={!valid}
+              className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
+              style={{ background: 'var(--color-primary)' }}>
+              {initial ? 'Uložit' : 'Přidat'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
+
+// ── Page ──────────────────────────────────────────────────────────
 
 export default function OpakovAnePage() {
   const { user } = useUser()
   const userId = user?.id ?? DEMO_USER_ID
-
-  const { loading, recurring, expCats, toast, dueRecurring, confirmRecurring } = useFinance(userId)
   const { hideAmounts } = usePrivacy()
 
-  const [showAdd,  setShowAdd]  = useState(false)
-  const [showDue,  setShowDue]  = useState(dueRecurring.length > 0)
+  const {
+    loading, toast,
+    recurringV2, monthlyIncomeBudget,
+    expCats, wallets,
+    saveRecurringV2, saveMonthlyIncomeBudget, confirmRecurringV2,
+  } = useFinance(userId)
 
-  const totalMonthly = recurring.reduce((s, r) => s + r.amount, 0)
+  const [showAdd,     setShowAdd]    = useState(false)
+  const [editing,     setEditing]    = useState<RecurringItem | null>(null)
+  const [deletingId,  setDeletingId] = useState<string | null>(null)
+  const [incomeInput, setIncomeInput]= useState('')
+  const [editIncome,  setEditIncome] = useState(false)
+
+  // Monthly-equivalent total
+  const totalMonthly = useMemo(() =>
+    recurringV2.reduce((s, r) => s + r.amount / FREQ_MONTHS[r.frequency], 0)
+  , [recurringV2])
+
+  const remaining = monthlyIncomeBudget - totalMonthly
+
+  // Sort: due items first, then by next due date
+  const sorted = useMemo(() =>
+    [...recurringV2].sort((a, b) => {
+      const aDue = isDue(a), bDue = isDue(b)
+      if (aDue !== bDue) return aDue ? -1 : 1
+      return nextDueDate(a).localeCompare(nextDueDate(b))
+    })
+  , [recurringV2])
+
+  function handleAdd(item: RecurringItem) {
+    saveRecurringV2([...recurringV2, item])
+  }
+
+  function handleEdit(item: RecurringItem) {
+    saveRecurringV2(recurringV2.map(r => r.id === item.id ? item : r))
+  }
+
+  function handleDelete(id: string) {
+    saveRecurringV2(recurringV2.filter(r => r.id !== id))
+    setDeletingId(null)
+  }
+
+  function handleSaveIncome() {
+    const n = parseFloat(incomeInput.replace(/\s/g, '').replace(',', '.'))
+    if (!isNaN(n) && n >= 0) saveMonthlyIncomeBudget(n)
+    setEditIncome(false)
+  }
 
   return (
     <>
       <Header title="Finance" />
       <FinanceTabs active="Opakované" />
 
-      <div className="p-4">
-        {dueRecurring.length > 0 && (
-          <button
-            onClick={() => setShowDue(true)}
-            className="w-full mb-4 py-3 rounded-[16px] bg-orange-50 border border-orange-200 text-[13px] font-semibold text-orange-600 flex items-center justify-center gap-2"
-          >
-            🔔 {dueRecurring.length} splatná platba tento měsíc — potvrdit
-          </button>
-        )}
+      <div className="p-4 flex flex-col gap-4">
 
-        <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
-          Celkem měsíčně: {loading ? '…' : hideAmounts ? '••••' : `${fmt(totalMonthly)} Kč`}
+        {/* Summary card */}
+        <div className="rounded-[20px] p-5 text-white" style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-mid))' }}>
+          <div className="text-[11px] font-semibold opacity-70 uppercase tracking-wide mb-3">Měsíční přehled</div>
+          <div className="flex flex-col gap-2">
+
+            {/* Income row */}
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] opacity-80">💰 Měsíční příjem</span>
+              {editIncome ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    className="w-28 bg-white/20 text-white placeholder-white/60 rounded-lg px-2 py-1 text-[13px] outline-none"
+                    value={incomeInput}
+                    onChange={e => setIncomeInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSaveIncome()}
+                    placeholder="0"
+                    autoFocus
+                  />
+                  <button onClick={handleSaveIncome} className="text-[12px] font-bold bg-white/20 px-2 py-1 rounded-lg">OK</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => { setIncomeInput(String(monthlyIncomeBudget || '')); setEditIncome(true) }}
+                  className="text-[14px] font-bold flex items-center gap-1"
+                >
+                  {hideAmounts ? '••••' : monthlyIncomeBudget ? `${fmt(monthlyIncomeBudget)} Kč` : '+ nastavit'}
+                  <span className="text-[11px] opacity-60">✏️</span>
+                </button>
+              )}
+            </div>
+
+            {/* Recurring total */}
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] opacity-80">🔄 Opakované platby</span>
+              <span className="text-[14px] font-bold text-red-300">
+                {loading ? '…' : hideAmounts ? '••••' : `−${fmt(Math.round(totalMonthly))} Kč`}
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-white/20 my-1" />
+
+            {/* Remainder */}
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] opacity-80">📊 Zůstatek po zaplacení</span>
+              <span className={`text-[18px] font-bold ${remaining < 0 ? 'text-red-300' : 'text-green-300'}`}>
+                {hideAmounts ? '••••' : monthlyIncomeBudget
+                  ? `${remaining >= 0 ? '' : '−'}${fmt(Math.abs(Math.round(remaining)))} Kč`
+                  : '—'
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* List header */}
+        <div className="flex items-center justify-between">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">
+            Platby ({recurringV2.length})
+          </div>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold text-white"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            + Přidat
+          </button>
         </div>
 
         {loading ? (
-          <div className="text-center py-6 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
-        ) : recurring.length === 0 ? (
+          <div className="text-center py-8 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
+        ) : sorted.length === 0 ? (
           <div className="text-center py-8 text-[var(--text-tertiary)] text-[13px]">
             Žádné opakované platby.<br />
-            <span className="text-[12px]">Přidej první kliknutím na +</span>
+            <span className="text-[12px]">Přidej první kliknutím na + Přidat</span>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            {recurring.map(r => {
-              const cat = expCats[r.category] ?? { icon: '📦', color: '#94a3b8' }
-              const isDue = dueRecurring.some(d => d.id === r.id)
+            {sorted.map(item => {
+              const catKey = Object.keys(expCats).find(k => k.toLowerCase() === item.category.toLowerCase()) ?? item.category
+              const cat  = expCats[catKey] ?? { icon: '📦', color: '#94a3b8' }
+              const due  = isDue(item)
+              const next = nextDueDate(item)
+              const wallet = wallets.find(w => w.id === item.wallet_id)
+              const freqLabel = FREQ_OPTIONS.find(f => f.value === item.frequency)?.label ?? 'Měsíčně'
+
               return (
-                <div key={r.id} className="bg-[var(--surface)] rounded-[16px] px-4 py-3.5 flex items-center gap-3 shadow-card">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-[18px]"
-                    style={{ background: cat.color + '22' }}
-                  >
-                    {cat.icon}
+                <div key={item.id}
+                  className={`bg-[var(--surface)] rounded-[16px] px-4 py-3.5 shadow-card ${due ? 'ring-1 ring-orange-400/50' : ''}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[18px] flex-shrink-0"
+                      style={{ background: cat.color + '22' }}>
+                      {cat.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[14px] font-semibold">{item.description}</div>
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span className="text-[11px] text-[var(--text-tertiary)]">{freqLabel} · den {item.day_of_month}.</span>
+                        {wallet && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={{ background: (wallet.color ?? '#94a3b8') + '22', color: wallet.color ?? '#94a3b8' }}>
+                            {wallet.icon} {wallet.name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                      <span className="text-[14px] font-bold text-red-500">
+                        {hideAmounts ? '••••' : `−${fmt(item.amount)} Kč`}
+                      </span>
+                      {due ? (
+                        <button
+                          onClick={() => confirmRecurringV2(item)}
+                          className="px-3 py-1 rounded-lg text-[11px] font-bold text-white bg-orange-500 active:scale-95 transition-transform"
+                        >
+                          Zaplatit
+                        </button>
+                      ) : (
+                        <span className="text-[11px] text-[var(--text-tertiary)]">
+                          📅 {formatDueDate(next)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-semibold">{r.description}</div>
-                    <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{FREQ_LABELS[r.category] ?? 'Každý měsíc'} · {r.category}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-bold text-red-500">−{hideAmounts ? '••••' : `${fmt(r.amount)} Kč`}</span>
-                    {isDue && (
-                      <button
-                        onClick={() => confirmRecurring(r)}
-                        className="px-2 py-1 rounded-lg bg-green-500 text-white text-[11px] font-bold"
-                      >✓</button>
-                    )}
+
+                  {/* Due indicator */}
+                  {due && (
+                    <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-orange-500">
+                      <span>🔔</span>
+                      <span>Splatné {formatDueDate(next)}</span>
+                      {item.last_paid && (
+                        <span className="text-[var(--text-tertiary)] font-normal ml-1">
+                          · naposledy {item.last_paid.slice(8, 10)}.{item.last_paid.slice(5, 7)}.
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-2 mt-2.5">
+                    <button onClick={() => setEditing(item)}
+                      className="flex-1 py-1.5 rounded-[10px] bg-[var(--surface-raised)] text-[11px] font-semibold text-[var(--text-secondary)]">
+                      ✏️ Upravit
+                    </button>
+                    <button onClick={() => setDeletingId(item.id)}
+                      className="px-3 py-1.5 rounded-[10px] bg-[var(--surface-raised)] text-[11px] font-semibold text-red-400">
+                      🗑️
+                    </button>
                   </div>
                 </div>
               )
@@ -108,9 +428,55 @@ export default function OpakovAnePage() {
         </div>
       )}
 
-      <FAB onClick={() => setShowAdd(true)} />
+      {/* Add sheet */}
+      {showAdd && (
+        <EditSheet
+          expCats={expCats}
+          wallets={wallets}
+          onSave={handleAdd}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
 
-      {showAdd && <AddRecurringSheet onClose={() => setShowAdd(false)} />}
+      {/* Edit sheet */}
+      {editing && (
+        <EditSheet
+          initial={editing}
+          expCats={expCats}
+          wallets={wallets}
+          onSave={handleEdit}
+          onClose={() => setEditing(null)}
+        />
+      )}
+
+      {/* Delete confirm */}
+      {deletingId && (() => {
+        const item = recurringV2.find(r => r.id === deletingId)
+        if (!item) return null
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+            onClick={() => setDeletingId(null)}>
+            <div className="w-full max-w-sm bg-[var(--surface)] rounded-[20px] p-5"
+              onClick={e => e.stopPropagation()}>
+              <div className="text-[16px] font-bold mb-2">Smazat platbu?</div>
+              <div className="text-[13px] text-[var(--text-secondary)] mb-4">
+                <span className="font-semibold">{item.description}</span> bude odstraněna ze seznamu.
+                Již zaznamenané platby v historii zůstanou.
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setDeletingId(null)}
+                  className="flex-1 py-2.5 rounded-[12px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">
+                  Zrušit
+                </button>
+                <button onClick={() => handleDelete(deletingId)}
+                  className="flex-1 py-2.5 rounded-[12px] bg-red-500 text-white text-[14px] font-bold">
+                  Smazat
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 }

@@ -68,12 +68,27 @@ export interface Debt {
   type: 'liability' | 'receivable'   // závazek | pohledávka
 }
 
+// ── RecurringItem (stored in settings.recurring_v2) ──────────────
+
+export interface RecurringItem {
+  id: string
+  description: string
+  amount: number
+  category: string
+  frequency: 'weekly' | 'monthly' | 'quarterly' | 'biannual' | 'annual'
+  day_of_month: number       // 1–31: day the payment is due
+  wallet_id: string | null   // wallet to deduct from
+  last_paid?: string         // ISO date of last confirmed payment
+}
+
 export interface FinanceSettings {
   user_id: string
   exp_cats: CatMap
   wallets: Wallet[]
   budgets: Record<string, number>
   debts?: Debt[]
+  recurring_v2?: RecurringItem[]
+  monthly_income_budget?: number
 }
 
 // ── In-memory cache (stale-while-revalidate) ─────────────────────

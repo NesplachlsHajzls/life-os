@@ -16,6 +16,7 @@ import {
   Income,
   Commitment,
   Recurring,
+  RecurringItem,
   Wallet,
   Debt,
 } from '../api'
@@ -45,7 +46,9 @@ export function useFinance(userId: string) {
   const [incCats]                     = useState<CatMap>(DEFAULT_INC_CATS)
   const [wallets,     setWallets]     = useState<Wallet[]>(DEFAULT_WALLETS)
   const [budgets,     setBudgets]     = useState<Record<string, number>>({})
-  const [debts,       setDebts]       = useState<Debt[]>([])
+  const [debts,           setDebts]           = useState<Debt[]>([])
+  const [recurringV2,     setRecurringV2]     = useState<RecurringItem[]>([])
+  const [monthlyIncomeBudget, setMonthlyIncomeBudget] = useState<number>(0)
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState<string | null>(null)
   const [curMonth,    setCurMonth]    = useState(() => mKey(todayStr()))
@@ -88,9 +91,11 @@ export function useFinance(userId: string) {
       setExpCats(merged)
 
       if (data.settings) {
-        if (data.settings.wallets)  setWallets(data.settings.wallets)
-        if (data.settings.budgets)  setBudgets(data.settings.budgets)
-        if (data.settings.debts)    setDebts(data.settings.debts)
+        if (data.settings.wallets)               setWallets(data.settings.wallets)
+        if (data.settings.budgets)               setBudgets(data.settings.budgets)
+        if (data.settings.debts)                 setDebts(data.settings.debts)
+        if (data.settings.recurring_v2)          setRecurringV2(data.settings.recurring_v2)
+        if (data.settings.monthly_income_budget) setMonthlyIncomeBudget(data.settings.monthly_income_budget)
       }
       setLoading(false)
     }).catch(err => {
@@ -351,7 +356,7 @@ export function useFinance(userId: string) {
     showToast('✅ Limity uloženy')
   }, [userId])
 
-  // ── Confirm recurring payment ───────────────────────────────────
+  // ── Confirm recurring payment (legacy) ─────────────────────────
 
   const confirmRecurring = useCallback(async (r: Recurring) => {
     const data = await insertExpense({
@@ -368,6 +373,62 @@ export function useFinance(userId: string) {
     setExpenses(prev => [data, ...prev])
     showToast(`✅ ${r.description} zaznamenáno`)
   }, [userId])
+
+  // ── Recurring V2 ────────────────────────────────────────────────
+
+  const saveRecurringV2 = useCallback(async (items: RecurringItem[]) => {
+    setRecurringV2(items)
+    await saveSettings(userId, { recurring_v2: items })
+  }, [userId])
+
+  const saveMonthlyIncomeBudget = useCallback(async (amount: number) => {
+    setMonthlyIncomeBudget(amount)
+    await saveSettings(userId, { monthly_income_budget: amount })
+  }, [userId])
+
+  const confirmRecurringV2 = useCallback(async (item: RecurringItem) => {
+    const today = todayStr()
+    const walletId = item.wallet_id
+
+    // Optimistically add expense
+    const tempId = `temp_${Date.now()}`
+    const optimistic: Expense = {
+      id: tempId, user_id: userId, description: item.description,
+      amount: item.amount, category: item.category, date: today,
+      wallet_id: walletId, recur_id: null, note: '', tags: [],
+    }
+    setExpenses(prev => [optimistic, ...prev])
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, ...payload } = optimistic
+      const real = await insertExpense(payload)
+      setExpenses(prev => prev.map(e => e.id === tempId ? real : e))
+    } catch {
+      setExpenses(prev => prev.filter(e => e.id !== tempId))
+      showToast('❌ Platbu se nepodařilo uložit')
+      return
+    }
+
+    // Deduct from wallet
+    if (walletId) {
+      const updated = wallets.map(w =>
+        w.id === walletId ? { ...w, balance: w.balance - item.amount } : w
+      )
+      setWallets(updated)
+      await saveSettings(userId, { wallets: updated })
+    }
+
+    // Update last_paid
+    const updatedItems = recurringV2.map(r =>
+      r.id === item.id ? { ...r, last_paid: today } : r
+    )
+    setRecurringV2(updatedItems)
+    await saveSettings(userId, { recurring_v2: updatedItems })
+
+    const wName = walletId ? wallets.find(w => w.id === walletId)?.name : null
+    showToast(`✅ ${item.description} zaplaceno${wName ? ` z ${wName}` : ''}`)
+  }, [userId, wallets, recurringV2])
 
   // ── Derived data ─────────────────────────────────────────────────
 
@@ -394,6 +455,7 @@ export function useFinance(userId: string) {
     // State
     loading, error, toast, curMonth, setCurMonth,
     expenses, incomes, commitments, recurring, wallets, budgets, expCats, incCats, debts,
+    recurringV2, monthlyIncomeBudget,
     // Derived
     filtExpenses, filtIncomes, totalInc, totalExp, totalCom, volne, totalWallets, catSums, dueRecurring, allMonths,
     // Actions
@@ -401,5 +463,6 @@ export function useFinance(userId: string) {
     removeExpense, removeIncome, editExpense, editIncome, editExpenseWithWallet,
     saveWallets, handleTransfer, saveCommitmentsData, saveExpCats, saveBudgets, confirmRecurring,
     addDebt, removeDebt, editDebt, saveDebts,
+    saveRecurringV2, saveMonthlyIncomeBudget, confirmRecurringV2,
   }
 }
