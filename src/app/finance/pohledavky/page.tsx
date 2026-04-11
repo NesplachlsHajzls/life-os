@@ -178,7 +178,7 @@ export default function PohledavkyPage() {
   }
 
   function formatDate(d: string) {
-    return d.slice(5).replace('-', '. ') + '. ' + d.slice(0, 4)
+    return d.slice(8, 10) + '. ' + d.slice(5, 7) + '. ' + d.slice(0, 4)
   }
 
   return (

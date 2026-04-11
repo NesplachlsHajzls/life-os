@@ -95,7 +95,7 @@ export default function TransakcePage() {
             <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">
               {date === todayStr()
                 ? '📍 Dnes'
-                : date.slice(5).replace('-', '. ') + '. ' + date.slice(0, 4)}
+                : date.slice(8, 10) + '. ' + date.slice(5, 7) + '. ' + date.slice(0, 4)}
             </div>
             <div className="bg-[var(--surface)] rounded-[16px] shadow-card overflow-hidden">
               {items.map((item, idx) => {

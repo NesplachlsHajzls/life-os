@@ -199,7 +199,7 @@ export default function FinancePage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-[13px] font-semibold truncate">{item.description}</div>
-                      <div className="text-[11px] text-[var(--text-tertiary)]">{item.category} · {item.date.slice(5).replace('-', '.')}</div>
+                      <div className="text-[11px] text-[var(--text-tertiary)]">{item.category} · {item.date.slice(8, 10)}.{item.date.slice(5, 7)}.</div>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className={`text-[14px] font-bold ${isExp ? 'text-[var(--text-secondary)]' : 'text-green-600'}`}>
