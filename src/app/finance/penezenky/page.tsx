@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/Header'
 import { FinanceTabs } from '@/features/finance/components/FinanceTabs'
 import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
-import { fmt } from '@/features/finance/utils'
+import { fmt, genId } from '@/features/finance/utils'
 import { Wallet } from '@/features/finance/api'
 import { usePrivacy } from '@/contexts/PrivacyContext'
 
@@ -115,6 +115,99 @@ function EditWalletSheet({ wallet, onSave, onClose }: { wallet: Wallet; onSave: 
   )
 }
 
+// ── AddWalletSheet ────────────────────────────────────────────────
+function AddWalletSheet({ onSave, onClose }: { onSave: (w: Wallet) => void; onClose: () => void }) {
+  const [name,    setName]    = useState('')
+  const [icon,    setIcon]    = useState('💵')
+  const [color,   setColor]   = useState(WALLET_COLORS[0])
+  const [balance, setBalance] = useState('0')
+  const [type,    setType]    = useState('běžná')
+
+  const valid = name.trim() && !isNaN(+balance)
+
+  function handleSave() {
+    if (!valid) return
+    onSave({ id: genId(), name: name.trim(), icon, color, balance: +balance, type })
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-[390px] bg-[var(--surface)] rounded-t-[24px] p-5 pb-8 max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-center mb-4"><div className="w-10 h-1 rounded-full bg-gray-300" /></div>
+        <h2 className="text-[16px] font-bold mb-4">➕ Nová peněženka</h2>
+        <div className="flex flex-col gap-4">
+
+          <div>
+            <label className={labelCls}>Název</label>
+            <input className={fieldCls} value={name} onChange={e => setName(e.target.value)} placeholder="Např. Spořicí účet…" autoFocus />
+          </div>
+
+          <div>
+            <label className={labelCls}>Ikonka</label>
+            <div className="flex flex-wrap gap-2">
+              {WALLET_ICONS.map(ic => (
+                <button
+                  key={ic}
+                  onClick={() => setIcon(ic)}
+                  className={`w-9 h-9 rounded-xl text-[18px] flex items-center justify-center transition-all ${icon === ic ? 'ring-2 ring-[var(--color-primary)] bg-[var(--color-primary-light)]' : 'bg-[var(--surface-raised)]'}`}
+                >
+                  {ic}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>Barva</label>
+            <div className="flex flex-wrap gap-2">
+              {WALLET_COLORS.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setColor(c)}
+                  className={`w-8 h-8 rounded-full transition-all ${color === c ? 'ring-2 ring-offset-1 ring-gray-400 scale-110' : ''}`}
+                  style={{ background: c }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>Počáteční zůstatek (Kč)</label>
+            <input type="number" className={fieldCls} value={balance} onChange={e => setBalance(e.target.value)} placeholder="0" />
+          </div>
+
+          <div>
+            <label className={labelCls}>Typ</label>
+            <div className="flex flex-wrap gap-2">
+              {WALLET_TYPES.map(t => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={`px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all ${type === t ? 'bg-[var(--color-primary)] text-white' : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-1">
+            <button onClick={onClose} className="flex-1 py-3 rounded-[14px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
+            <button
+              onClick={handleSave}
+              disabled={!valid}
+              className="flex-1 py-3 rounded-[14px] text-[14px] font-bold text-white disabled:opacity-40"
+              style={{ background: 'var(--color-primary)' }}
+            >Přidat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── WalletTransfer sheet (inline) ─────────────────────────────────
 function TransferSheet({ wallets, onTransfer, onClose }: { wallets: Wallet[]; onTransfer: (f: string, t: string, amt: number) => void; onClose: () => void }) {
   const [from, setFrom] = useState(wallets[0]?.id ?? '')
@@ -163,12 +256,23 @@ export default function PenezenkyPage() {
 
   const { loading, wallets, totalWallets, handleTransfer, saveWallets, toast } = useFinance(userId)
 
-  const [showTransfer, setShowTransfer]         = useState(false)
-  const [editingWallet, setEditingWallet]       = useState<Wallet | null>(null)
+  const [showTransfer, setShowTransfer]   = useState(false)
+  const [showAdd,      setShowAdd]        = useState(false)
+  const [editingWallet, setEditingWallet] = useState<Wallet | null>(null)
+  const [deletingId,   setDeletingId]    = useState<string | null>(null)
 
   function handleSaveWallet(updated: Wallet) {
     const newList = wallets.map(w => w.id === updated.id ? updated : w)
     saveWallets(newList)
+  }
+
+  function handleAddWallet(w: Wallet) {
+    saveWallets([...wallets, w])
+  }
+
+  function handleDeleteWallet(id: string) {
+    saveWallets(wallets.filter(w => w.id !== id))
+    setDeletingId(null)
   }
 
   // Split wallets by rough type
@@ -199,7 +303,16 @@ export default function PenezenkyPage() {
         </div>
 
         {/* Wallets list */}
-        <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-2">💵 Peněženky</div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide">💵 Peněženky</div>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-bold text-white"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            + Přidat
+          </button>
+        </div>
 
         {loading ? (
           <div className="text-center py-6 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
@@ -223,8 +336,11 @@ export default function PenezenkyPage() {
                 <button
                   onClick={() => setEditingWallet(w)}
                   className="w-7 h-7 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-[var(--color-primary)] hover:bg-indigo-50 text-[14px] transition-colors flex-shrink-0"
-                  title="Upravit peněženku"
                 >✏️</button>
+                <button
+                  onClick={() => setDeletingId(w.id)}
+                  className="w-7 h-7 flex items-center justify-center rounded-full text-[var(--text-tertiary)] hover:text-red-500 hover:bg-red-50 text-[14px] transition-colors flex-shrink-0"
+                >🗑️</button>
               </div>
             ))}
 
@@ -257,6 +373,32 @@ export default function PenezenkyPage() {
           onClose={() => setEditingWallet(null)}
         />
       )}
+
+      {showAdd && (
+        <AddWalletSheet
+          onSave={handleAddWallet}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
+
+      {deletingId && (() => {
+        const w = wallets.find(x => x.id === deletingId)
+        if (!w) return null
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setDeletingId(null)}>
+            <div className="w-full max-w-sm bg-[var(--surface)] rounded-[20px] p-5" onClick={e => e.stopPropagation()}>
+              <div className="text-[16px] font-bold mb-2">Smazat peněženku?</div>
+              <div className="text-[13px] text-[var(--text-secondary)] mb-4">
+                Peněženka <span className="font-semibold">{w.icon} {w.name}</span> bude odstraněna. Transakce zůstanou.
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setDeletingId(null)} className="flex-1 py-2.5 rounded-[12px] border border-[var(--border)] text-[14px] font-semibold text-[var(--text-secondary)]">Zrušit</button>
+                <button onClick={() => handleDeleteWallet(deletingId)} className="flex-1 py-2.5 rounded-[12px] bg-red-500 text-white text-[14px] font-bold">Smazat</button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 }
