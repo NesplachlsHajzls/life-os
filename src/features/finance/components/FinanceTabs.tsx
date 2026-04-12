@@ -2,9 +2,10 @@
 
 export function FinanceTabs({ active }: { active: string }) {
   const tabs = [
-    { label: 'Přehled',   href: '/finance' },
+    { label: 'Hlavní',    href: '/finance' },
+    { label: 'Přehled',   href: '/finance/prehled' },
     { label: 'Transakce', href: '/finance/transakce' },
-    { label: 'Peněženky',href: '/finance/penezenky' },
+    { label: 'Peněženky', href: '/finance/penezenky' },
     { label: 'Opakované', href: '/finance/opakovane' },
     { label: 'Kategorie', href: '/finance/kategorie' },
   ]

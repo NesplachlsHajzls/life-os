@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Header } from '@/components/layout/Header'
 import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
@@ -31,7 +31,11 @@ export default function FinancePage() {
     removeExpense, removeIncome,
     saveExpCats,
     allMonths,
+    payPeriodStart, periodStart, periodIncome, periodExpenses,
+    setPayPeriod,
   } = useFinance(userId)
+
+  const dateInputRef = useRef<HTMLInputElement>(null)
 
   async function handleAddCategory(name: string, icon: string, color: string) {
     const updated = { ...expCats, [name]: { icon, color } }
@@ -77,7 +81,7 @@ export default function FinancePage() {
   return (
     <>
       <Header title="Finance" />
-      <FinanceTabs active="Přehled" />
+      <FinanceTabs active="Hlavní" />
 
       {/* Month selector */}
       <div className="flex items-center justify-between px-4 py-2 bg-[var(--surface)] border-b border-[var(--border)]">
@@ -96,15 +100,40 @@ export default function FinancePage() {
 
         {/* Hero card */}
         <div className="rounded-[20px] p-5 text-white" style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-mid))' }}>
+          {/* Period indicator */}
+          <div className="flex items-center justify-between mb-3">
+            <button
+              onClick={() => dateInputRef.current?.showPicker?.() ?? dateInputRef.current?.click()}
+              className="flex items-center gap-1.5 text-white/70 text-[11px] font-semibold hover:text-white transition-colors"
+            >
+              <span>📅</span>
+              <span>
+                {payPeriodStart
+                  ? `Od ${periodStart.slice(8, 10)}. ${periodStart.slice(5, 7)}. ${periodStart.slice(0, 4)}`
+                  : 'Nastavit výplatní den'}
+              </span>
+              <span className="opacity-60">✎</span>
+            </button>
+            <input
+              ref={dateInputRef}
+              type="date"
+              className="absolute opacity-0 w-0 h-0"
+              value={payPeriodStart ?? ''}
+              onChange={e => { if (e.target.value) setPayPeriod(e.target.value) }}
+            />
+          </div>
+
           <div className="text-[11px] font-semibold opacity-70 uppercase tracking-wide mb-1">Volné prostředky</div>
           {loading
             ? <div className="text-[28px] font-bold animate-pulse">…</div>
-            : <div className="text-[32px] font-bold">{hideAmounts ? '••••' : <>{fmt(volne)} <span className="text-[18px] opacity-70">Kč</span></>}</div>
+            : <div className={`text-[32px] font-bold ${volne < 0 ? 'text-red-300' : ''}`}>
+                {hideAmounts ? '••••' : <>{fmt(volne)} <span className="text-[18px] opacity-70">Kč</span></>}
+              </div>
           }
           <div className="flex gap-5 mt-4 text-sm">
             <div>
               <div className="text-[10px] opacity-60 uppercase tracking-wide">Příjmy</div>
-              <div className="text-[14px] font-bold text-green-300">+{h(totalInc)}</div>
+              <div className="text-[14px] font-bold text-green-300">+{h(periodIncome)}</div>
             </div>
             <div>
               <div className="text-[10px] opacity-60 uppercase tracking-wide">Závazky</div>
@@ -112,7 +141,7 @@ export default function FinancePage() {
             </div>
             <div>
               <div className="text-[10px] opacity-60 uppercase tracking-wide">Výdaje</div>
-              <div className="text-[14px] font-bold text-red-300">−{h(totalExp)}</div>
+              <div className="text-[14px] font-bold text-red-300">−{h(periodExpenses)}</div>
             </div>
           </div>
         </div>

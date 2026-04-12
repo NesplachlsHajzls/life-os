@@ -81,6 +81,15 @@ export interface RecurringItem {
   last_paid?: string         // ISO date of last confirmed payment
 }
 
+/** Uzavřené výplatní období — automaticky zapisováno při nastavení nového dne */
+export interface PeriodRecord {
+  start: string    // ISO date — první den období
+  end: string      // ISO date — poslední den (den před novým obdobím)
+  income: number   // součet příjmů v období
+  expenses: number // součet výdajů v období
+  saved: number    // income - expenses (kladné = uspořeno, záporné = přečerpáno)
+}
+
 export interface FinanceSettings {
   user_id: string
   exp_cats: CatMap
@@ -89,6 +98,8 @@ export interface FinanceSettings {
   debts?: Debt[]
   recurring_v2?: RecurringItem[]
   monthly_income_budget?: number
+  pay_period_start?: string      // ISO date — začátek aktuálního výplatního období
+  period_history?: PeriodRecord[] // uzavřená období (nejnovější první)
 }
 
 // ── In-memory cache (stale-while-revalidate) ─────────────────────

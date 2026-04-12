@@ -19,6 +19,7 @@ import {
   RecurringItem,
   Wallet,
   Debt,
+  PeriodRecord,
 } from '../api'
 import {
   DEFAULT_EXP_CATS,
@@ -49,6 +50,8 @@ export function useFinance(userId: string) {
   const [debts,           setDebts]           = useState<Debt[]>([])
   const [recurringV2,     setRecurringV2]     = useState<RecurringItem[]>([])
   const [monthlyIncomeBudget, setMonthlyIncomeBudget] = useState<number>(0)
+  const [payPeriodStart,  setPayPeriodStart]  = useState<string | null>(null)   // ISO date
+  const [periodHistory,   setPeriodHistory]   = useState<PeriodRecord[]>([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState<string | null>(null)
   const [curMonth,    setCurMonth]    = useState(() => mKey(todayStr()))
@@ -96,6 +99,8 @@ export function useFinance(userId: string) {
         if (data.settings.debts)                 setDebts(data.settings.debts)
         if (data.settings.recurring_v2)          setRecurringV2(data.settings.recurring_v2)
         if (data.settings.monthly_income_budget) setMonthlyIncomeBudget(data.settings.monthly_income_budget)
+        if (data.settings.pay_period_start)      setPayPeriodStart(data.settings.pay_period_start)
+        if (data.settings.period_history)        setPeriodHistory(data.settings.period_history)
       }
       setLoading(false)
     }).catch(err => {
@@ -386,6 +391,47 @@ export function useFinance(userId: string) {
     await saveSettings(userId, { monthly_income_budget: amount })
   }, [userId])
 
+  /**
+   * Nastaví nový začátek výplatního období.
+   * Pokud existuje předchozí období, automaticky ho uzavře a uloží do historie.
+   */
+  const setPayPeriod = useCallback(async (newStart: string) => {
+    const prevStart = payPeriodStart
+    let newHistory = [...periodHistory]
+
+    if (prevStart && prevStart < newStart) {
+      // Vypočítej výsledek předchozího období z transakcí
+      const periodEnd = new Date(newStart)
+      periodEnd.setDate(periodEnd.getDate() - 1)
+      const endStr = periodEnd.toISOString().split('T')[0]
+
+      const periodInc = incomes
+        .filter(i => i.date >= prevStart && i.date <= endStr)
+        .reduce((s, i) => s + i.amount, 0)
+      const periodExp = expenses
+        .filter(e => e.date >= prevStart && e.date <= endStr)
+        .reduce((s, e) => s + e.amount, 0)
+
+      const record: PeriodRecord = {
+        start: prevStart,
+        end: endStr,
+        income: periodInc,
+        expenses: periodExp,
+        saved: periodInc - periodExp,
+      }
+      // Nejnovější první
+      newHistory = [record, ...periodHistory]
+      setPeriodHistory(newHistory)
+    }
+
+    setPayPeriodStart(newStart)
+    await saveSettings(userId, {
+      pay_period_start: newStart,
+      period_history: newHistory,
+    })
+    showToast('✅ Výplatní den nastaven')
+  }, [userId, payPeriodStart, periodHistory, incomes, expenses])
+
   const confirmRecurringV2 = useCallback(async (item: RecurringItem) => {
     const today = todayStr()
     const walletId = item.wallet_id
@@ -438,7 +484,13 @@ export function useFinance(userId: string) {
   const totalExp     = filtExpenses.reduce((s, e) => s + e.amount, 0)
   const mCom         = monthCommitments(commitments, curMonth)
   const totalCom     = mCom.reduce((s, c) => s + commitAmt(c, curMonth), 0)
-  const volne        = totalInc - totalCom - totalExp
+
+  // Volné prostředky — pokud je nastaven výplatní den, počítáme od něj, jinak od začátku měsíce
+  const today = todayStr()
+  const periodStart  = payPeriodStart ?? (curMonth + '-01')
+  const periodIncome  = incomes.filter(i => i.date >= periodStart && i.date <= today).reduce((s, i) => s + i.amount, 0)
+  const periodExpenses = expenses.filter(e => e.date >= periodStart && e.date <= today).reduce((s, e) => s + e.amount, 0)
+  const volne        = periodIncome - periodExpenses
   const totalWallets = wallets.reduce((s, w) => s + w.balance, 0)
   // Normalize category keys: map transaction key → canonical expCats key (case-insensitive)
   const canonCatKey  = (key: string) => Object.keys(expCats).find(k => k.toLowerCase() === key.toLowerCase()) ?? key
@@ -456,6 +508,7 @@ export function useFinance(userId: string) {
     loading, error, toast, curMonth, setCurMonth,
     expenses, incomes, commitments, recurring, wallets, budgets, expCats, incCats, debts,
     recurringV2, monthlyIncomeBudget,
+    payPeriodStart, periodHistory, periodStart, periodIncome, periodExpenses,
     // Derived
     filtExpenses, filtIncomes, totalInc, totalExp, totalCom, volne, totalWallets, catSums, dueRecurring, allMonths,
     // Actions
@@ -464,5 +517,6 @@ export function useFinance(userId: string) {
     saveWallets, handleTransfer, saveCommitmentsData, saveExpCats, saveBudgets, confirmRecurring,
     addDebt, removeDebt, editDebt, saveDebts,
     saveRecurringV2, saveMonthlyIncomeBudget, confirmRecurringV2,
+    setPayPeriod,
   }
 }
