@@ -8,7 +8,7 @@ import {
   HABIT_EMOJIS, HABIT_COLORS,
   fetchHabits, insertHabit, deleteHabit,
   fetchHabitLogs, toggleHabitLog,
-  getStreak, getDoneCount, getLast7Days, isTodayDone,
+  getStreak, getDoneCount, getLastNDays, isTodayDone,
 } from '@/features/navyky/api'
 
 function Toast({ msg, show }: { msg: string; show: boolean }) {
@@ -125,30 +125,73 @@ function AddHabitModal({ onSave, onClose }: {
 
 // ── Habit Card ────────────────────────────────────────────────────────
 
-function HabitCard({ habit, logs, userId, onToggle, onDelete }: {
+const DAY_LABELS = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So']
+
+function HabitCard({ habit, logs, onToggle, onDelete }: {
   habit: Habit
   logs: HabitLog[]
-  userId: string
-  onToggle: (habitId: string, today: string, currentlyDone: boolean) => void
+  onToggle: (habitId: string, date: string, currentState: boolean | null) => void
   onDelete: (habitId: string) => void
 }) {
   const today = new Date().toISOString().split('T')[0]
-  const todayDone = isTodayDone(habit.id, logs)
   const streak = getStreak(habit.id, logs)
   const doneCount = getDoneCount(habit.id, logs)
   const progress = Math.min(doneCount / habit.goal_days, 1)
-  const last7 = getLast7Days(habit.id, logs)
+  const last14 = getLastNDays(habit.id, logs, 14)
   const [showDelete, setShowDelete] = useState(false)
 
-  const DAY_LABELS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']
+  // Split into 2 rows of 7
+  const week1 = last14.slice(0, 7)
+  const week2 = last14.slice(7, 14)
+
+  function DayGrid({ days }: { days: typeof last14 }) {
+    return (
+      <div className="grid grid-cols-7 gap-1">
+        {days.map(day => {
+          const isToday = day.date === today
+          const d = new Date(day.date + 'T12:00:00')
+          const label = DAY_LABELS[d.getDay()]
+
+          let bg = 'var(--surface-raised)'
+          let textColor = 'var(--text-tertiary)'
+          let symbol = ''
+          if (day.done === true)  { bg = '#16a34a'; textColor = 'white'; symbol = '✓' }
+          if (day.done === false) { bg = '#ef4444'; textColor = 'white'; symbol = '✗' }
+
+          return (
+            <button
+              key={day.date}
+              onClick={() => onToggle(habit.id, day.date, day.done)}
+              className="flex flex-col items-center gap-0.5 active:scale-90 transition-transform"
+              title={day.date}
+            >
+              <div
+                className="w-full aspect-square rounded-[6px] flex items-center justify-center text-[11px] font-bold transition-colors"
+                style={{
+                  background: bg,
+                  color: textColor,
+                  outline: isToday ? `2px solid ${habit.color}` : 'none',
+                  outlineOffset: 1,
+                }}
+              >
+                {symbol}
+              </div>
+              <span className="text-[8px] font-semibold" style={{ color: isToday ? habit.color : 'var(--text-tertiary)' }}>
+                {label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-[16px] border border-[var(--border)] bg-[var(--surface)] overflow-hidden">
-      {/* Top bar color accent */}
       <div className="h-1 w-full" style={{ background: habit.color }} />
 
       <div className="p-4">
-        {/* Header row */}
+        {/* Header */}
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-[12px] flex items-center justify-center text-[20px] flex-shrink-0"
             style={{ background: habit.color + '22' }}>
@@ -162,16 +205,6 @@ function HabitCard({ habit, logs, userId, onToggle, onDelete }: {
               {doneCount}/{habit.goal_days} dní
             </div>
           </div>
-          {/* Today checkbox */}
-          <button
-            onClick={() => onToggle(habit.id, today, todayDone)}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-[18px] transition-all active:scale-90 flex-shrink-0"
-            style={{
-              background: todayDone ? habit.color : 'var(--bg)',
-              border: `2px solid ${todayDone ? habit.color : 'var(--border-strong)'}`,
-            }}>
-            {todayDone ? <span className="text-white text-[16px]">✓</span> : ''}
-          </button>
         </div>
 
         {/* Progress bar */}
@@ -186,30 +219,26 @@ function HabitCard({ habit, logs, userId, onToggle, onDelete }: {
           </div>
         </div>
 
-        {/* Last 7 days */}
-        <div className="flex justify-between">
-          {last7.map((day, i) => {
-            const d = new Date(day.date)
-            const dayLabel = DAY_LABELS[d.getDay() === 0 ? 6 : d.getDay() - 1]
-            const isToday = day.date === today
-            return (
-              <div key={day.date} className="flex flex-col items-center gap-1">
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all"
-                  style={{
-                    background: day.done ? habit.color : 'var(--surface-raised)',
-                    color: day.done ? 'white' : 'var(--text-tertiary)',
-                    outline: isToday ? `2px solid ${habit.color}` : 'none',
-                    outlineOffset: 1,
-                  }}>
-                  {day.done ? '✓' : ''}
-                </div>
-                <span className="text-[9px] font-semibold" style={{ color: isToday ? habit.color : 'var(--text-tertiary)' }}>
-                  {dayLabel}
-                </span>
-              </div>
-            )
-          })}
+        {/* 14-day grid — klikatelné, 3 stavy */}
+        <div className="space-y-1 mb-1">
+          <DayGrid days={week1} />
+          <DayGrid days={week2} />
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-3 mt-2 mb-1">
+          <div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+            <div className="w-3 h-3 rounded-[3px] bg-[#16a34a]" /> splnil
+          </div>
+          <div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+            <div className="w-3 h-3 rounded-[3px] bg-[#ef4444]" /> nesplnil
+          </div>
+          <div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+            <div className="w-3 h-3 rounded-[3px]" style={{ background: 'var(--surface-raised)' }} /> neoznačeno
+          </div>
+          <span className="text-[10px] ml-auto" style={{ color: 'var(--text-tertiary)' }}>
+            kliknutím změníš
+          </span>
         </div>
 
         {/* Delete */}
@@ -226,7 +255,7 @@ function HabitCard({ habit, logs, userId, onToggle, onDelete }: {
           </div>
         ) : (
           <button onClick={() => setShowDelete(true)}
-            className="mt-3 text-[11px] text-[var(--text-tertiary)] w-full text-right">
+            className="mt-2 text-[11px] text-[var(--text-tertiary)] w-full text-right">
             ··· možnosti
           </button>
         )}
@@ -278,17 +307,28 @@ export default function NavykyPage() {
     } catch { showToast('Chyba') }
   }
 
-  const handleToggle = async (habitId: string, date: string, currentlyDone: boolean) => {
+  const handleToggle = async (habitId: string, date: string, currentState: boolean | null) => {
     if (!userId) return
+    // Optimistická aktualizace
+    setLogs(prev => {
+      const filtered = prev.filter(l => !(l.habit_id === habitId && l.date === date))
+      const next = currentState === null ? true : currentState === true ? false : null
+      if (next === null) return filtered
+      return [...filtered, {
+        id: `temp_${Date.now()}`, user_id: userId,
+        habit_id: habitId, date, done: next, created_at: new Date().toISOString(),
+      }]
+    })
     try {
-      await toggleHabitLog(userId, habitId, date, currentlyDone)
-      // Refresh logs
-      const from = new Date()
-      from.setDate(from.getDate() - 90)
-      const fromStr = from.toISOString().split('T')[0]
-      const updated = await fetchHabitLogs(userId, fromStr)
+      await toggleHabitLog(userId, habitId, date, currentState)
+      // Refresh po uložení
+      const from = new Date(); from.setDate(from.getDate() - 90)
+      const updated = await fetchHabitLogs(userId, from.toISOString().split('T')[0])
       setLogs(updated)
-    } catch { showToast('Chyba') }
+    } catch {
+      showToast('Chyba při ukládání')
+      load() // rollback
+    }
   }
 
   const handleDelete = async (habitId: string) => {
@@ -299,7 +339,6 @@ export default function NavykyPage() {
     } catch { showToast('Chyba') }
   }
 
-  const today = new Date().toISOString().split('T')[0]
   const todayDoneCount = habits.filter(h => isTodayDone(h.id, logs)).length
 
   if (!userId) return null
@@ -356,7 +395,6 @@ export default function NavykyPage() {
                 key={habit.id}
                 habit={habit}
                 logs={logs}
-                userId={userId}
                 onToggle={handleToggle}
                 onDelete={handleDelete}
               />

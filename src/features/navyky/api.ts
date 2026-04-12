@@ -77,20 +77,35 @@ export async function fetchHabitLogs(userId: string, fromDate: string): Promise<
   return (data as HabitLog[]) ?? []
 }
 
-export async function toggleHabitLog(userId: string, habitId: string, date: string, currentlyDone: boolean): Promise<void> {
-  if (currentlyDone) {
-    // Delete the log
+/**
+ * Tří-stavový toggle pro den:
+ *   null (neoznačeno) → true (splnil ✅) → false (nesplnil ❌) → null
+ */
+export async function toggleHabitLog(
+  userId: string,
+  habitId: string,
+  date: string,
+  currentState: boolean | null,
+): Promise<void> {
+  if (currentState === null) {
+    // neoznačeno → splnil (done=true)
+    const { error } = await supabase
+      .from('habit_logs')
+      .upsert({ user_id: userId, habit_id: habitId, date, done: true }, { onConflict: 'habit_id,date' })
+    if (error) throw new Error(error.message)
+  } else if (currentState === true) {
+    // splnil → nesplnil (done=false)
+    const { error } = await supabase
+      .from('habit_logs')
+      .upsert({ user_id: userId, habit_id: habitId, date, done: false }, { onConflict: 'habit_id,date' })
+    if (error) throw new Error(error.message)
+  } else {
+    // nesplnil → neoznačeno (smazat záznam)
     await supabase
       .from('habit_logs')
       .delete()
       .eq('habit_id', habitId)
       .eq('date', date)
-  } else {
-    // Insert log (upsert to handle race conditions)
-    const { error } = await supabase
-      .from('habit_logs')
-      .upsert({ user_id: userId, habit_id: habitId, date, done: true }, { onConflict: 'habit_id,date' })
-    if (error) throw new Error(error.message)
   }
 }
 
@@ -119,22 +134,30 @@ export function getDoneCount(habitId: string, logs: HabitLog[]): number {
   return logs.filter(l => l.habit_id === habitId && l.done).length
 }
 
-export function getLast7Days(habitId: string, logs: HabitLog[]): { date: string; done: boolean }[] {
-  const doneDates = new Set(
-    logs.filter(l => l.habit_id === habitId && l.done).map(l => l.date)
-  )
+/** Vrátí posledních N dní s tří-stavovým výsledkem: true=splnil, false=nesplnil, null=neoznačeno */
+export function getLastNDays(habitId: string, logs: HabitLog[], n = 14): { date: string; done: boolean | null }[] {
+  const logMap = new Map<string, boolean>()
+  logs
+    .filter(l => l.habit_id === habitId)
+    .forEach(l => logMap.set(l.date, l.done))
+
   const result = []
   const today = new Date()
-  for (let i = 6; i >= 0; i--) {
+  for (let i = n - 1; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
     const dateStr = d.toISOString().split('T')[0]
-    result.push({ date: dateStr, done: doneDates.has(dateStr) })
+    result.push({ date: dateStr, done: logMap.has(dateStr) ? logMap.get(dateStr)! : null })
   }
   return result
 }
 
+/** @deprecated use getLastNDays */
+export function getLast7Days(habitId: string, logs: HabitLog[]): { date: string; done: boolean }[] {
+  return getLastNDays(habitId, logs, 7).map(d => ({ ...d, done: d.done === true }))
+}
+
 export function isTodayDone(habitId: string, logs: HabitLog[]): boolean {
   const today = new Date().toISOString().split('T')[0]
-  return logs.some(l => l.habit_id === habitId && l.date === today && l.done)
+  return logs.some(l => l.habit_id === habitId && l.date === today && l.done === true)
 }
