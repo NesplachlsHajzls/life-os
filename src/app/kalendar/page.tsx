@@ -423,12 +423,11 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
 
 // ── MonthView ─────────────────────────────────────────────────────
 
-function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCategories = DEFAULT_CATEGORIES }: {
+function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_CATEGORIES }: {
   month: Date
   events: CalendarEvent[]
   tasks: Task[]
-  onNavigateToDay: (d: Date) => void
-  onEventClick: (ev: CalendarEvent) => void
+  onDayClick: (d: Date) => void
   appCategories?: AppCategory[]
 }) {
   const today = new Date()
@@ -464,13 +463,14 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCat
   const dayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']
 
   return (
-    <div className="p-3">
+    <div className="p-2">
+      {/* Day-of-week header */}
       <div className="grid grid-cols-7 mb-1">
         {dayLabels.map(d => (
           <div key={d} className="text-center text-[10px] font-bold text-[var(--text-tertiary)] uppercase py-1">{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-px">
         {grid.map(day => {
           const isCurrentMonth = day.getMonth() === month.getMonth()
           const isToday = isSameDay(day, today)
@@ -478,60 +478,220 @@ function MonthView({ month, events, tasks, onNavigateToDay, onEventClick, appCat
           const tks = tasksByDay[day.toDateString()] ?? []
           const totalItems = evs.length + tks.length
 
-          // Show up to 2 items total (events first, then tasks)
-          const shownEvs = evs.slice(0, 2)
-          const remainingSlots = 2 - shownEvs.length
-          const shownTks = tks.slice(0, remainingSlots)
-          const overflow = totalItems - shownEvs.length - shownTks.length
+          // Show max 3 mini chips: events first, then tasks
+          const MAX_CHIPS = 3
+          type AnyItem = { type: 'event'; ev: CalendarEvent } | { type: 'task'; t: Task }
+          const allItems: AnyItem[] = [
+            ...evs.map(ev => ({ type: 'event' as const, ev })),
+            ...tks.map(t  => ({ type: 'task'  as const, t  })),
+          ]
+          const shown = allItems.slice(0, MAX_CHIPS)
+          const overflow = totalItems - shown.length
 
           return (
             <div
               key={day.toDateString()}
-              onClick={() => isCurrentMonth && onNavigateToDay(day)}
-              className={`min-h-[64px] rounded-xl p-1.5 transition-colors ${
-                isCurrentMonth ? 'cursor-pointer hover:bg-[var(--bg)]' : 'opacity-25 pointer-events-none'
+              onClick={() => isCurrentMonth && onDayClick(day)}
+              className={`min-h-[72px] p-1 rounded-[8px] transition-colors border border-transparent ${
+                isCurrentMonth
+                  ? 'cursor-pointer hover:border-[var(--border)] hover:bg-[var(--surface-raised)]'
+                  : 'opacity-20 pointer-events-none'
               }`}
             >
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[13px] font-bold mb-1 mx-auto ${
-                isToday ? 'bg-[var(--color-primary)] text-white' : 'text-[var(--text-secondary)]'
+              {/* Date number */}
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold mb-0.5 mx-auto ${
+                isToday
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'text-[var(--text-secondary)]'
               }`}>
                 {day.getDate()}
               </div>
-              <div className="flex flex-col gap-0.5">
-                {shownEvs.map(ev => {
-                  const catStyle = getCategoryInlineStyle(ev.category, appCategories)
-                  return (
-                    <div
-                      key={ev.id}
-                      onClick={e => { e.stopPropagation(); onEventClick(ev) }}
-                      className="text-[9px] font-semibold px-1 py-0.5 rounded truncate"
-                      style={{ background: catStyle.background, color: catStyle.color }}
-                    >
-                      {ev.emoji} {ev.title}
-                    </div>
-                  )
+
+              {/* Mini chips */}
+              <div className="flex flex-col gap-[2px]">
+                {shown.map((item: AnyItem, idx: number) => {
+                  if (item.type === 'event') {
+                    const s = getCategoryInlineStyle(item.ev.category, appCategories)
+                    return (
+                      <div
+                        key={item.ev.id}
+                        className="flex items-center gap-[3px] rounded-[4px] px-[3px] py-[1px] overflow-hidden"
+                        style={{ background: s.background }}
+                      >
+                        <span
+                          className="w-[3px] h-[3px] rounded-full flex-shrink-0"
+                          style={{ background: s.color }}
+                        />
+                        <span
+                          className="text-[9px] font-semibold leading-tight truncate"
+                          style={{ color: s.color }}
+                        >
+                          {item.ev.emoji ? `${item.ev.emoji} ` : ''}{item.ev.title}
+                        </span>
+                      </div>
+                    )
+                  } else {
+                    const s = getCategoryInlineStyle(item.t.category ?? 'osobni', appCategories)
+                    return (
+                      <div
+                        key={item.t.id}
+                        className="flex items-center gap-[3px] rounded-[4px] px-[3px] py-[1px] overflow-hidden"
+                        style={{ background: s.background }}
+                      >
+                        <span
+                          className="w-[3px] h-[3px] rounded-full flex-shrink-0"
+                          style={{ background: s.color }}
+                        />
+                        <span
+                          className="text-[9px] font-semibold leading-tight truncate"
+                          style={{ color: s.color }}
+                        >
+                          {item.t.title}
+                        </span>
+                      </div>
+                    )
+                  }
                 })}
-                {shownTks.map(t => (
-                  <div
-                    key={t.id}
-                    onClick={e => e.stopPropagation()}
-                    className="text-[9px] font-semibold px-1 py-0.5 rounded truncate bg-indigo-50 text-indigo-500"
-                  >
-                    ✅ {t.title}
-                  </div>
-                ))}
                 {overflow > 0 && (
-                  <button
-                    onClick={e => { e.stopPropagation(); onNavigateToDay(day) }}
-                    className="text-[9px] text-[var(--color-primary)] font-bold text-center w-full hover:underline"
-                  >
-                    +{overflow} další
-                  </button>
+                  <div className="text-[8px] font-bold text-center leading-tight" style={{ color: 'var(--text-tertiary)' }}>
+                    +{overflow}
+                  </div>
                 )}
               </div>
             </div>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+// ── DayPanel — bottom sheet pro jeden den ─────────────────────────
+
+function DayPanel({ day, events, tasks, onClose, onEventClick, onTaskClick, onEventComplete, onTaskComplete, completedIds, onAddEvent, onAddTask, appCategories = DEFAULT_CATEGORIES, clientsMap = {} }: {
+  day: Date
+  events: CalendarEvent[]
+  tasks: Task[]
+  onClose: () => void
+  onEventClick: (ev: CalendarEvent) => void
+  onTaskClick?: (t: Task) => void
+  onEventComplete?: (ev: CalendarEvent) => void
+  onTaskComplete?: (t: Task) => void
+  completedIds?: Set<string>
+  onAddEvent: () => void
+  onAddTask: () => void
+  appCategories?: AppCategory[]
+  clientsMap?: Record<string, string>
+}) {
+  const dayIso  = day.toISOString().split('T')[0]
+  const isToday = isSameDay(day, new Date())
+
+  const dayEvs = events.filter(ev => new Date(ev.start_datetime).toDateString() === day.toDateString())
+  const dayTks = tasks.filter(t => t.due_date === dayIso)
+
+  const dayLabel = `${CZ_DAYS_FULL[day.getDay()]} ${day.getDate()}. ${CZ_MONTHS[day.getMonth()]} ${day.getFullYear()}`
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* Sheet */}
+      <div
+        className="relative w-full max-h-[82vh] flex flex-col rounded-t-[24px] overflow-hidden"
+        style={{ background: 'var(--surface)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Handle */}
+        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border-strong)' }} />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pb-3 flex-shrink-0 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div>
+            <div className={`text-[17px] font-bold ${isToday ? 'text-[var(--color-primary)]' : 'text-[var(--text-primary)]'}`}>
+              {isToday ? '📍 ' : ''}{dayLabel}
+            </div>
+            <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-tertiary)' }}>
+              {dayEvs.length + dayTks.length === 0
+                ? 'Nic naplánováno'
+                : `${dayEvs.length} ${dayEvs.length === 1 ? 'událost' : dayEvs.length < 5 ? 'události' : 'událostí'} · ${dayTks.length} ${dayTks.length === 1 ? 'úkol' : dayTks.length < 5 ? 'úkoly' : 'úkolů'}`}
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-[16px]" style={{ background: 'var(--surface-raised)', color: 'var(--text-tertiary)' }}>✕</button>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+
+          {/* Události */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
+                Události · {dayEvs.length}
+              </span>
+              <button
+                onClick={onAddEvent}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                style={{ background: 'var(--color-primary)' + '18', color: 'var(--color-primary)' }}
+              >
+                + přidat
+              </button>
+            </div>
+            {dayEvs.length === 0
+              ? <div className="text-[12px] italic py-2" style={{ color: 'var(--text-tertiary)' }}>Žádné události</div>
+              : <div className="flex flex-col gap-2">
+                  {dayEvs.map(ev => (
+                    <EventChip
+                      key={ev.id}
+                      event={ev}
+                      onClick={() => onEventClick(ev)}
+                      onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
+                      isCompleted={completedIds?.has(ev.id)}
+                      appCategories={appCategories}
+                      clientsMap={clientsMap}
+                    />
+                  ))}
+                </div>
+            }
+          </div>
+
+          {/* Úkoly */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-tertiary)' }}>
+                Úkoly · {dayTks.length}
+              </span>
+              <button
+                onClick={onAddTask}
+                className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                style={{ background: 'var(--color-primary)' + '18', color: 'var(--color-primary)' }}
+              >
+                + přidat
+              </button>
+            </div>
+            {dayTks.length === 0
+              ? <div className="text-[12px] italic py-2" style={{ color: 'var(--text-tertiary)' }}>Žádné úkoly</div>
+              : <div className="flex flex-col gap-2">
+                  {dayTks.map(t => (
+                    <TaskChip
+                      key={t.id}
+                      task={t}
+                      onClick={onTaskClick ? () => onTaskClick(t) : undefined}
+                      onComplete={onTaskComplete ? () => onTaskComplete(t) : undefined}
+                      isCompleted={completedIds?.has(t.id)}
+                      appCategories={appCategories}
+                      clientsMap={clientsMap}
+                    />
+                  ))}
+                </div>
+            }
+          </div>
+
+          {/* Spacer for safe area */}
+          <div className="h-4" />
+        </div>
       </div>
     </div>
   )
@@ -545,17 +705,19 @@ export default function KalendarPage() {
   const { user } = useUser()
   const userId = user?.id ?? null
 
-  const [view, setView]         = useState<CalView>('week')
+  const [view, setView]         = useState<CalView>('month')
   const [currentDate, setCurrent] = useState(new Date())
   const [events, setEvents]     = useState<CalendarEvent[]>([])
   const [tasks, setTasks]       = useState<Task[]>([])
   const [loading, setLoading]   = useState(true)
   const [showAdd, setShowAdd]         = useState(false)
+  const [showAddTask, setShowAddTask] = useState(false)
   const [addDate, setAddDate]         = useState(new Date())
   const [editEvent, setEditEvent]     = useState<CalendarEvent | null>(null)
   const [dupEvent, setDupEvent]       = useState<CalendarEvent | null>(null)
   const [detailEvent, setDetail]      = useState<CalendarEvent | null>(null)
   const [editingCalTask, setEditingCalTask] = useState<Task | null>(null)
+  const [selectedDay, setSelectedDay]      = useState<Date | null>(null)
   const [appCategories, setAppCategories]  = useState<AppCategory[]>(DEFAULT_CATEGORIES)
   const [calClients, setCalClients]        = useState<{ id: string; name: string }[]>([])
   const [highlightDay, setHighlightDay]    = useState<string | null>(null)
@@ -664,12 +826,8 @@ export default function KalendarPage() {
   }
 
   function handleMonthDayClick(day: Date) {
-    // Switch to week view, navigate to the clicked day, then flash highlight
-    setView('week')
-    setCurrent(day)
-    const dayIso = day.toISOString().split('T')[0]
-    setHighlightDay(dayIso)
-    setTimeout(() => setHighlightDay(null), 1600)
+    setSelectedDay(day)
+    setAddDate(day)
   }
 
   async function handleDeleteEvent(id: string) {
@@ -841,8 +999,7 @@ export default function KalendarPage() {
             month={currentDate}
             events={events}
             tasks={tasks}
-            onNavigateToDay={handleMonthDayClick}
-            onEventClick={setDetail}
+            onDayClick={handleMonthDayClick}
             appCategories={appCategories}
           />
         )}
@@ -855,6 +1012,25 @@ export default function KalendarPage() {
       >
         +
       </button>
+
+      {/* DayPanel */}
+      {selectedDay && (
+        <DayPanel
+          day={selectedDay}
+          events={events}
+          tasks={tasks}
+          onClose={() => setSelectedDay(null)}
+          onEventClick={ev => { setDetail(ev) }}
+          onTaskClick={t => { setEditingCalTask(t) }}
+          onEventComplete={handleCompleteEvent}
+          onTaskComplete={handleCompleteTask}
+          completedIds={completedIds}
+          onAddEvent={() => { setAddDate(selectedDay); setShowAdd(true) }}
+          onAddTask={() => { setAddDate(selectedDay); setShowAddTask(true) }}
+          appCategories={appCategories}
+          clientsMap={Object.fromEntries(calClients.map(c => [c.id, c.name]))}
+        />
+      )}
 
       {/* Modals */}
       {showAdd && userId && (
@@ -924,6 +1100,23 @@ export default function KalendarPage() {
             load(true)
           }}
           onClose={() => setEditingCalTask(null)}
+        />
+      )}
+
+      {/* Add task modal — opened from DayPanel */}
+      {showAddTask && userId && (
+        <AddTaskSheet
+          categories={appCategories}
+          clients={calClients}
+          defaultDueDate={addDate.toISOString().split('T')[0]}
+          onSave={async payload => {
+            const { insertTask } = await import('@/features/todo/api')
+            await insertTask({ user_id: userId, status: 'open', done_at: null, ...payload })
+            lastSaveRef.current = Date.now()
+            setShowAddTask(false)
+            load(true)
+          }}
+          onClose={() => setShowAddTask(false)}
         />
       )}
     </>

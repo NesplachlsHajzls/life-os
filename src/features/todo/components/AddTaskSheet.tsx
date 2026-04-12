@@ -18,6 +18,7 @@ interface ClientOption { id: string; name: string }
 interface AddTaskSheetProps {
   categories: TodoCategory[]
   defaultCategory?: string
+  defaultDueDate?: string        // pre-fill due date (YYYY-MM-DD)
   clients?: ClientOption[]
   existingTask?: Task            // pre-fill for editing
   onSave: (payload: {
@@ -35,6 +36,7 @@ interface AddTaskSheetProps {
 export function AddTaskSheet({
   categories,
   defaultCategory,
+  defaultDueDate,
   clients = [],
   existingTask,
   onSave,
@@ -54,7 +56,7 @@ export function AddTaskSheet({
     )
     return matched?.name ?? raw
   })
-  const [dueDate,      setDueDate]     = useState(existingTask?.due_date ?? '')
+  const [dueDate,      setDueDate]     = useState(existingTask?.due_date ?? defaultDueDate ?? '')
   const [note,         setNote]        = useState(existingTask?.note ?? '')
   const [url,          setUrl]         = useState(existingTask?.url ?? '')
   const [isPC,         setIsPC]        = useState(false)
