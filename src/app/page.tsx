@@ -216,13 +216,13 @@ export default function DashboardPage() {
     // Pak načti z Supabase (synchronizováno napříč zařízeními)
     supabase
       .from('todo_settings')
-      .select('dash_note')
+      .select('dashboard_note')
       .eq('user_id', userId)
       .maybeSingle()
       .then(({ data }) => {
-        if (data?.dash_note !== undefined && data.dash_note !== null) {
-          setDashNote(data.dash_note as string)
-          try { localStorage.setItem(DASH_NOTE_KEY(userId), data.dash_note as string) } catch {}
+        if (data?.dashboard_note !== undefined && data.dashboard_note !== null) {
+          setDashNote(data.dashboard_note as string)
+          try { localStorage.setItem(DASH_NOTE_KEY(userId), data.dashboard_note as string) } catch {}
         }
       })
   }, [userId])
@@ -238,7 +238,7 @@ export default function DashboardPage() {
       // Po 600 ms upsertni do Supabase
       supabase
         .from('todo_settings')
-        .upsert({ user_id: userId, dash_note: val }, { onConflict: 'user_id' })
+        .upsert({ user_id: userId, dashboard_note: val }, { onConflict: 'user_id' })
         .then(() => setNoteSaved(true))
     }, 600)
   }
