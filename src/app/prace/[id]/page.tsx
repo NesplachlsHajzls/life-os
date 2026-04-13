@@ -616,17 +616,29 @@ export default function ClientPage() {
                         </div>
                       )}
                       {[
-                        { label: 'Email',             value: client?.email,         icon: '✉️' },
-                        { label: 'Fakturační email',  value: client?.billing_email, icon: '🧾' },
-                        { label: 'Telefon',           value: client?.phone,         icon: '📞' },
-                        { label: 'Web',               value: client?.website,       icon: '🌐' },
-                        { label: 'Adresa',            value: client?.address,       icon: '📍' },
+                        { label: 'Email',             value: client?.email,         icon: '✉️', copy: true },
+                        { label: 'Fakturační email',  value: client?.billing_email, icon: '🧾', copy: true },
+                        { label: 'Telefon',           value: client?.phone,         icon: '📞', copy: false },
+                        { label: 'Web',               value: client?.website,       icon: '🌐', copy: false },
+                        { label: 'Adresa',            value: client?.address,       icon: '📍', copy: false },
                       ].map(row => row.value && (
                         <div key={row.label} className="flex items-start gap-3">
                           <span className="text-[16px] mt-0.5">{row.icon}</span>
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase">{row.label}</div>
-                            <div className="text-[14px] text-[var(--text-primary)]">{row.value}</div>
+                            <div className="flex items-center gap-2">
+                              <div className="text-[14px] text-[var(--text-primary)] truncate">{row.value}</div>
+                              {row.copy && (
+                                <button
+                                  onClick={() => navigator.clipboard.writeText(row.value!).then(() => setToast('📋 Zkopírováno'))}
+                                  className="flex-shrink-0 w-6 h-6 rounded-[6px] flex items-center justify-center text-[11px] transition-colors hover:bg-[var(--surface-raised)]"
+                                  style={{ color: 'var(--text-tertiary)' }}
+                                  title="Zkopírovat"
+                                >
+                                  ⎘
+                                </button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
