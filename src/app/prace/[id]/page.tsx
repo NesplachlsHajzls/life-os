@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import Link from 'next/link'
 import { useUser } from '@/hooks/useUser'
 import { TaskItem } from '@/features/todo/components/TaskItem'
@@ -112,6 +113,8 @@ export default function ClientPage() {
   const [loading,    setLoading]    = useState(true)
   const [toast,      setToast]      = useState<string | null>(null)
   const [tab,        setTab]        = useState<Tab>('prehled')
+
+  useScrollRestoration(`klient_${clientId}`, !loading)
   const [taskTab,    setTaskTab]    = useState<'open' | 'done'>('open')
 
   const [showQuickAdd, setShowQuickAdd] = useState(false)

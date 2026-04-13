@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { Header } from '@/components/layout/Header'
 import { useTodo } from '@/features/todo/hooks/useTodo'
 import { useUser } from '@/hooks/useUser'
@@ -214,6 +215,8 @@ function TodoPageInner() {
     openTasks, doneTasks, routines, categories,
     addTaskText, addTask, toggleTask, editTask, removeTask,
   } = useTodo(userId)
+
+  useScrollRestoration('todo', !loading)
 
   const [activeTab,    setActiveTab]    = useState<TabId>('open')
   const [activeCat,    setActiveCat]    = useState('Vše')

@@ -35,6 +35,25 @@ export interface TodoSettings {
   categories: TodoCategory[]
 }
 
+// ── Module-level cache ────────────────────────────────────────────
+
+const CACHE_TTL = 60_000
+
+interface TodoCache { tasks: Task[]; ts: number }
+const _todoCache = new Map<string, TodoCache>()
+
+export function getTodoCache(userId: string): Task[] | null {
+  const c = _todoCache.get(userId)
+  if (!c || Date.now() - c.ts > CACHE_TTL) { _todoCache.delete(userId); return null }
+  return c.tasks
+}
+export function setTodoCache(userId: string, tasks: Task[]) {
+  _todoCache.set(userId, { tasks, ts: Date.now() })
+}
+export function invalidateTodoCache(userId: string) {
+  _todoCache.delete(userId)
+}
+
 // ── Tasks ─────────────────────────────────────────────────────────
 
 export async function fetchTasks(userId: string): Promise<Task[]> {

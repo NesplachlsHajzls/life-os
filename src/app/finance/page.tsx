@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { Header } from '@/components/layout/Header'
 import { useFinance } from '@/features/finance/hooks/useFinance'
 import { useUser } from '@/hooks/useUser'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import { AddExpenseSheet, AddIncomeSheet, EditExpenseSheet, EditIncomeSheet } from '@/features/finance/components/AddTransactionSheet'
 import { fmt, mLabel } from '@/features/finance/utils'
 import { FinanceTabs } from '@/features/finance/components/FinanceTabs'
@@ -34,6 +35,8 @@ export default function FinancePage() {
     payPeriodStart, periodStart, periodIncome, periodExpenses,
     setPayPeriod,
   } = useFinance(userId)
+
+  useScrollRestoration('finance', !loading)
 
   const dateInputRef = useRef<HTMLInputElement>(null)
 

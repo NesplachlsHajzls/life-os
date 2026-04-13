@@ -578,7 +578,7 @@ function DayPanel({ day, events, tasks, onClose, onEventClick, onTaskClick, onEv
   appCategories?: AppCategory[]
   clientsMap?: Record<string, string>
 }) {
-  const dayIso  = day.toISOString().split('T')[0]
+  const dayIso  = `${day.getFullYear()}-${String(day.getMonth()+1).padStart(2,'0')}-${String(day.getDate()).padStart(2,'0')}`
   const isToday = isSameDay(day, new Date())
 
   const dayEvs = events.filter(ev => new Date(ev.start_datetime).toDateString() === day.toDateString())

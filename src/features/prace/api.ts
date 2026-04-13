@@ -181,6 +181,32 @@ export async function fetchClientById(id: string): Promise<Client | null> {
   return data as Client
 }
 
+// ── Module-level cache (survives navigation, resets on tab close) ──
+const CACHE_TTL = 60_000 // 60s
+
+interface PraceCache {
+  clients: Client[]
+  tasks: Task[]
+  deals: Deal[]
+  ts: number
+}
+const _praceCache = new Map<string, PraceCache>()
+
+export function getPraceCache(userId: string): PraceCache | null {
+  const c = _praceCache.get(userId)
+  if (!c) return null
+  if (Date.now() - c.ts > CACHE_TTL) { _praceCache.delete(userId); return null }
+  return c
+}
+
+export function setPraceCache(userId: string, data: Omit<PraceCache, 'ts'>) {
+  _praceCache.set(userId, { ...data, ts: Date.now() })
+}
+
+export function invalidatePraceCache(userId: string) {
+  _praceCache.delete(userId)
+}
+
 export async function fetchClients(userId: string): Promise<Client[]> {
   const { data, error } = await supabase
     .from('clients')

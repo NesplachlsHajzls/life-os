@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Header } from '@/components/layout/Header'
 import { useUser } from '@/hooks/useUser'
+import { useScrollRestoration } from '@/hooks/useScrollRestoration'
 import {
   Habit, HabitLog,
   HABIT_EMOJIS, HABIT_COLORS,
@@ -274,6 +275,8 @@ export default function NavykyPage() {
   const [showAdd, setShowAdd] = useState(false)
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState('')
+
+  useScrollRestoration('navyky', !loading)
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500) }
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   fetchTasks, insertTask, updateTask, deleteTask,
   fetchRoutines, insertRoutine, deleteRoutine,
+  getTodoCache, setTodoCache, invalidateTodoCache,
   Task, Routine, TodoCategory,
 } from '../api'
 import { parseTaskInput } from '../utils'
@@ -26,7 +27,16 @@ export function useTodo(userId: string) {
   // ── Load ────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+
+    // Zobraz cache okamžitě
+    const cached = getTodoCache(userId)
+    if (cached) {
+      setTasks(cached)
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+
     Promise.all([
       fetchTasks(userId),
       fetchRoutines(userId),
@@ -34,10 +44,11 @@ export function useTodo(userId: string) {
     ]).then(([t, r, cats]) => {
       if (cancelled) return
       setTasks(t)
+      setTodoCache(userId, t)
       setRoutines(r)
       if (cats.length) setCategories(cats)
       setLoading(false)
-    }).catch(() => setLoading(false))
+    }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [userId])
 
@@ -61,7 +72,7 @@ export function useTodo(userId: string) {
         status: 'open',
         done_at: null,
       })
-      setTasks(prev => [data, ...prev].sort(sortTasks))
+      setTasks(prev => { const n = [data, ...prev].sort(sortTasks); invalidateTodoCache(userId); return n })
       showToast(`✅ ${parsed.title}`)
       return null
     } catch (e: any) {
@@ -74,32 +85,36 @@ export function useTodo(userId: string) {
     payload: Omit<Task, 'id' | 'created_at'>
   ): Promise<void> => {
     const data = await insertTask(payload)
+    invalidateTodoCache(userId)
     setTasks(prev => [data, ...prev].sort(sortTasks))
     showToast(`✅ ${payload.title}`)
-  }, [])
+  }, [userId])
 
   // ── Toggle done ─────────────────────────────────────────────────
   const toggleTask = useCallback(async (task: Task) => {
     const newStatus: 'open' | 'done' = task.status === 'done' ? 'open' : 'done'
     const done_at = newStatus === 'done' ? new Date().toISOString() : null
     await updateTask({ id: task.id, status: newStatus, done_at })
+    invalidateTodoCache(userId)
     setTasks(prev => prev.map(t =>
       t.id === task.id ? { ...t, status: newStatus, done_at } : t
     ).sort(sortTasks))
-  }, [])
+  }, [userId])
 
   // ── Edit task ───────────────────────────────────────────────────
   const editTask = useCallback(async (task: Task) => {
     await updateTask(task)
+    invalidateTodoCache(userId)
     setTasks(prev => prev.map(t => t.id === task.id ? task : t).sort(sortTasks))
     showToast('✏️ Úkol upraven')
-  }, [])
+  }, [userId])
 
   // ── Delete task ─────────────────────────────────────────────────
   const removeTask = useCallback(async (id: string) => {
     await deleteTask(id)
+    invalidateTodoCache(userId)
     setTasks(prev => prev.filter(t => t.id !== id))
-  }, [])
+  }, [userId])
 
   // ── Routines ────────────────────────────────────────────────────
   const addRoutine = useCallback(async (
