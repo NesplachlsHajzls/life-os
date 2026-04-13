@@ -102,10 +102,7 @@ export default function FinancePage() {
         <div className="rounded-[20px] p-5 text-white" style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-mid))' }}>
           {/* Period indicator */}
           <div className="flex items-center justify-between mb-3">
-            <button
-              onClick={() => dateInputRef.current?.showPicker?.() ?? dateInputRef.current?.click()}
-              className="flex items-center gap-1.5 text-white/70 text-[11px] font-semibold hover:text-white transition-colors"
-            >
+            <label className="relative flex items-center gap-1.5 text-white/70 text-[11px] font-semibold hover:text-white transition-colors cursor-pointer">
               <span>📅</span>
               <span>
                 {payPeriodStart
@@ -113,14 +110,18 @@ export default function FinancePage() {
                   : 'Nastavit výplatní den'}
               </span>
               <span className="opacity-60">✎</span>
-            </button>
-            <input
-              ref={dateInputRef}
-              type="date"
-              className="absolute opacity-0 w-0 h-0"
-              value={payPeriodStart ?? ''}
-              onChange={e => { if (e.target.value) setPayPeriod(e.target.value) }}
-            />
+              <input
+                ref={dateInputRef}
+                type="date"
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                value={payPeriodStart ?? ''}
+                onChange={e => { if (e.target.value) setPayPeriod(e.target.value) }}
+                onInput={e => {
+                  const val = (e.target as HTMLInputElement).value
+                  if (val) setPayPeriod(val)
+                }}
+              />
+            </label>
           </div>
 
           <div className="text-[11px] font-semibold opacity-70 uppercase tracking-wide mb-1">Volné prostředky</div>

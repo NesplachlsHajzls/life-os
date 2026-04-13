@@ -137,19 +137,32 @@ export default function PracePage() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
           {[
-            { label: 'Klienti',       value: clients.length,      icon: '👥' },
-            { label: 'Otevřené úkoly',value: openTasks.length,    icon: '📋' },
-            { label: 'Aktivní obchody',value: activeDeals.length, icon: '💰' },
-            { label: 'Tento týden',   value: dueThisWeek.length,  icon: '📅' },
-          ].map(s => (
-            <div key={s.label} className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <span className="text-[22px]">{s.icon}</span>
-              <div>
-                <div className="text-[20px] font-extrabold text-[var(--text-primary)] leading-tight">{s.value}</div>
-                <div className="text-[11px] text-[var(--text-tertiary)]">{s.label}</div>
+            { label: 'Klienti',        value: clients.length,      icon: '👥',  href: null },
+            { label: 'Otevřené úkoly', value: openTasks.length,    icon: '📋',  href: '/todo?cat=ica' },
+            { label: 'Aktivní obchody',value: activeDeals.length,  icon: '💰',  href: null },
+            { label: 'Tento týden',    value: dueThisWeek.length,  icon: '📅',  href: '/todo?cat=ica' },
+          ].map(s => {
+            const inner = (
+              <>
+                <span className="text-[22px]">{s.icon}</span>
+                <div>
+                  <div className="text-[20px] font-extrabold text-[var(--text-primary)] leading-tight">{s.value}</div>
+                  <div className="text-[11px] text-[var(--text-tertiary)]">{s.label}</div>
+                </div>
+              </>
+            )
+            return s.href ? (
+              <Link key={s.label} href={s.href}
+                className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3 hover:bg-[var(--surface-raised)] transition-colors"
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                {inner}
+              </Link>
+            ) : (
+              <div key={s.label} className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                {inner}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Toolbar */}

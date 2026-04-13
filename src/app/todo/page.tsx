@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/Header'
 import { useTodo } from '@/features/todo/hooks/useTodo'
 import { useUser } from '@/hooks/useUser'
@@ -135,10 +136,67 @@ function QuickAddBar({ defaultCat, onAdd, onClose }: {
   )
 }
 
-// ── Main page ─────────────────────────────────────────────────────
-export default function TodoPage() {
+// ── ICA grouped view ──────────────────────────────────────────────
+function IcaGroups({ tasks, categories, onToggle, onEdit, onDelete, clientsMap }: {
+  tasks: Task[]
+  categories: ReturnType<typeof useTodo>['categories']
+  onToggle: (t: Task) => void
+  onEdit: (t: Task) => void
+  onDelete: (id: string) => void
+  clientsMap: Record<string, string>
+}) {
+  const grouped = useMemo(() => {
+    const map = new Map<string, { name: string; tasks: Task[] }>()
+    for (const t of tasks) {
+      const key = t.client_id ?? '__none__'
+      const name = t.client_id ? (clientsMap[t.client_id] ?? 'Neznámý klient') : 'Bez klienta'
+      if (!map.has(key)) map.set(key, { name, tasks: [] })
+      map.get(key)!.tasks.push(t)
+    }
+    // Sort: clients with most tasks first, "Bez klienta" last
+    return Array.from(map.entries())
+      .sort(([ka], [kb]) => {
+        if (ka === '__none__') return 1
+        if (kb === '__none__') return -1
+        return map.get(kb)!.tasks.length - map.get(ka)!.tasks.length
+      })
+      .map(([, v]) => v)
+  }, [tasks, clientsMap])
+
+  if (grouped.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <div className="text-[44px] mb-3">💼</div>
+        <p className="text-[15px] font-semibold" style={{ color: 'var(--text-secondary)' }}>Žádné klientské úkoly</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {grouped.map(group => (
+        <div key={group.name} className="mb-5">
+          <SectionHead label={group.name} count={group.tasks.length} accent="var(--color-primary)" />
+          <TaskGroup
+            tasks={group.tasks}
+            categories={categories}
+            onToggle={onToggle}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            clientsMap={clientsMap}
+            showCategory={false}
+          />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── Inner page (needs useSearchParams) ────────────────────────────
+function TodoPageInner() {
   const { user } = useUser()
   const userId = user?.id ?? DEMO_USER_ID
+  const searchParams = useSearchParams()
 
   const [clientsList, setClientsList] = useState<{ id: string; name: string }[]>([])
   useEffect(() => {
@@ -163,20 +221,37 @@ export default function TodoPage() {
   const [showAddSheet, setShowAddSheet] = useState(false)
   const [editingTask,  setEditingTask]  = useState<Task | null>(null)
 
+  // Read ?cat=ica from URL on mount
+  useEffect(() => {
+    if (searchParams.get('cat') === 'ica') {
+      setActiveCat('I.CA')
+    }
+  }, [searchParams])
+
   const today = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const weekEnd = useMemo(() => {
     const d = new Date(); d.setDate(d.getDate() + 6)
     return d.toISOString().slice(0, 10)
   }, [])
 
+  const isIca = activeCat === 'I.CA'
+
   // Category-filtered tasks
   const filteredOpen = useMemo(
-    () => openTasks.filter(t => activeCat === 'Vše' || t.category === activeCat),
-    [openTasks, activeCat]
+    () => openTasks.filter(t =>
+      activeCat === 'Vše' ? true
+      : isIca ? t.client_id !== null
+      : t.category === activeCat
+    ),
+    [openTasks, activeCat, isIca]
   )
   const filteredDone = useMemo(
-    () => doneTasks.filter(t => activeCat === 'Vše' || t.category === activeCat).slice(0, 60),
-    [doneTasks, activeCat]
+    () => doneTasks.filter(t =>
+      activeCat === 'Vše' ? true
+      : isIca ? t.client_id !== null
+      : t.category === activeCat
+    ).slice(0, 60),
+    [doneTasks, activeCat, isIca]
   )
 
   // Time-based sections
@@ -197,9 +272,9 @@ export default function TodoPage() {
 
   const noOpenTasks = filteredOpen.length === 0
 
-  // Category chips
+  // Category chips — "I.CA" is a special synthetic filter for client tasks
   const catChips = useMemo(
-    () => ['Vše', ...categories.map(c => c.name)],
+    () => ['Vše', 'I.CA', ...categories.map(c => c.name)],
     [categories]
   )
 
@@ -257,18 +332,19 @@ export default function TodoPage() {
           {catChips.map(cat => {
             const catObj = categories.find(c => c.name === cat)
             const isActive = activeCat === cat
+            const isIcaChip = cat === 'I.CA'
             return (
               <button
                 key={cat}
                 onClick={() => setActiveCat(cat)}
                 className="flex-shrink-0 flex items-center gap-1 px-3 py-[6px] rounded-full text-[12px] font-semibold transition-all"
                 style={{
-                  background:  isActive ? (catObj?.color ?? 'var(--color-primary)') : 'var(--surface-raised)',
+                  background:  isActive ? (isIcaChip ? '#8b5cf6' : catObj?.color ?? 'var(--color-primary)') : 'var(--surface-raised)',
                   color:       isActive ? '#fff' : 'var(--text-secondary)',
                   border:     `1px solid ${isActive ? 'transparent' : 'var(--border)'}`,
                 }}
               >
-                {catObj?.icon && <span className="text-[13px]">{catObj.icon}</span>}
+                {isIcaChip ? <span className="text-[13px]">💼</span> : catObj?.icon && <span className="text-[13px]">{catObj.icon}</span>}
                 {cat}
               </button>
             )
@@ -295,6 +371,16 @@ export default function TodoPage() {
                 <div className="text-center py-16 text-[13px]" style={{ color: 'var(--text-tertiary)' }}>
                   Načítám…
                 </div>
+              ) : isIca ? (
+                /* ── I.CA: skupiny per klient ── */
+                <IcaGroups
+                  tasks={filteredOpen}
+                  categories={categories}
+                  onToggle={toggleTask}
+                  onEdit={setEditingTask}
+                  onDelete={removeTask}
+                  clientsMap={clientsMap}
+                />
               ) : noOpenTasks ? (
                 <div className="text-center py-16">
                   <div className="text-[44px] mb-3">✅</div>
@@ -531,7 +617,7 @@ export default function TodoPage() {
       {showAddSheet && (
         <AddTaskSheet
           categories={categories}
-          defaultCategory={activeCat !== 'Vše' ? activeCat : undefined}
+          defaultCategory={activeCat !== 'Vše' && activeCat !== 'I.CA' ? activeCat : undefined}
           clients={clientsList}
           onSave={payload => addTask({ user_id: userId, status: 'open', done_at: null, ...payload })}
           onClose={() => setShowAddSheet(false)}
@@ -549,5 +635,14 @@ export default function TodoPage() {
         />
       )}
     </>
+  )
+}
+
+// ── Default export wrapped in Suspense (useSearchParams requirement) ──
+export default function TodoPage() {
+  return (
+    <Suspense>
+      <TodoPageInner />
+    </Suspense>
   )
 }

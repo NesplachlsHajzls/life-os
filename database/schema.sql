@@ -134,10 +134,14 @@ CREATE TABLE IF NOT EXISTS ft_recurring (
 -- ⚠️ exp_cats jsou JSONB objekt {klíč: {icon, color}} — klíče MUSÍ odpovídat category v ft_expenses
 CREATE TABLE IF NOT EXISTS ft_settings (
   user_id     UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  exp_cats    JSONB NOT NULL DEFAULT '{}',      -- CatMap: Record<string, {icon, color}>
-  wallets     JSONB NOT NULL DEFAULT '[]',      -- Wallet[]: [{id,name,icon,color,balance,type}]
-  budgets     JSONB NOT NULL DEFAULT '{}',      -- Record<category, limitKc>
-  debts       JSONB DEFAULT '[]'               -- Debt[]: [{id,person,amount,note,date_from,date_to,type}]
+  exp_cats               JSONB NOT NULL DEFAULT '{}',   -- CatMap: Record<string, {icon, color}>
+  wallets                JSONB NOT NULL DEFAULT '[]',   -- Wallet[]: [{id,name,icon,color,balance,type}]
+  budgets                JSONB NOT NULL DEFAULT '{}',   -- Record<category, limitKc>
+  debts                  JSONB DEFAULT '[]',            -- Debt[]
+  recurring_v2           JSONB DEFAULT '[]',            -- RecurringItem[]
+  monthly_income_budget  NUMERIC DEFAULT 0,
+  pay_period_start       TEXT DEFAULT NULL,             -- ISO date — začátek aktuálního výplatního období
+  period_history         JSONB DEFAULT '[]'             -- PeriodRecord[] (nejnovější první)
 );
 
 -- ── I.CA / PRÁCE ──────────────────────────────────────────────
