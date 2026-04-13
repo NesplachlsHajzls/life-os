@@ -394,3 +394,41 @@ export async function deleteOrder(id: string): Promise<void> {
   const { error } = await supabase.from('client_orders').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }
+
+// ── Client Invoice Months ─────────────────────────────────────────
+
+export interface InvoiceMonth {
+  id:         string
+  client_id:  string
+  user_id:    string
+  month:      string    // YYYY-MM
+  amount:     number
+  note:       string
+  created_at: string
+}
+
+export async function fetchInvoiceMonths(clientId: string): Promise<InvoiceMonth[]> {
+  const { data, error } = await supabase
+    .from('client_invoice_months')
+    .select('*')
+    .eq('client_id', clientId)
+    .order('month', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data as InvoiceMonth[]) ?? []
+}
+
+export async function upsertInvoiceMonth(
+  payload: Omit<InvoiceMonth, 'id' | 'created_at'>
+): Promise<InvoiceMonth> {
+  const { data, error } = await supabase
+    .from('client_invoice_months')
+    .upsert(payload, { onConflict: 'client_id,month' })
+    .select().single()
+  if (error) throw new Error(error.message)
+  return data as InvoiceMonth
+}
+
+export async function deleteInvoiceMonth(id: string): Promise<void> {
+  const { error } = await supabase.from('client_invoice_months').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}

@@ -11,7 +11,8 @@ import {
   insertContact, updateContact, deleteContact, insertActivity, deleteActivity, insertDeal, updateDeal, deleteDeal,
   updateClient, deleteClient,
   fetchOrders, insertOrder, updateOrder, deleteOrder,
-  Client, ClientContact, ClientActivity, Deal, ClientOrder,
+  fetchInvoiceMonths, upsertInvoiceMonth, deleteInvoiceMonth,
+  Client, ClientContact, ClientActivity, Deal, ClientOrder, InvoiceMonth,
   DEAL_STAGES, DEAL_STAGE_COLORS, DealStage,
   ACTIVITY_TYPES, ACTIVITY_ICONS, ACTIVITY_LABELS, ActivityType,
   CLIENT_STATUSES, CLIENT_COLORS, CLIENT_ICONS,
@@ -91,7 +92,7 @@ function OrderRow({ order, clientColor, onEdit, onToggle }: {
   )
 }
 
-type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky' | 'poznamky' | 'emaily'
+type Tab = 'prehled' | 'ukoly' | 'aktivity' | 'obchody' | 'objednavky' | 'kontakty' | 'schuzky' | 'poznamky' | 'emaily' | 'fakturace'
 
 export default function ClientPage() {
   const params = useParams()
@@ -110,6 +111,12 @@ export default function ClientPage() {
   const [orders,         setOrders]         = useState<ClientOrder[]>([])
   const [clientNotes,    setClientNotes]    = useState<Note[]>([])
   const [creatingCNote,  setCreatingCNote]  = useState(false)
+  const [invoiceMonths,  setInvoiceMonths]  = useState<InvoiceMonth[]>([])
+  const [showInvForm,    setShowInvForm]    = useState(false)
+  const [invMonth,       setInvMonth]       = useState('')
+  const [invAmount,      setInvAmount]      = useState('')
+  const [invNote,        setInvNote]        = useState('')
+  const [invYear,        setInvYear]        = useState<string>(() => String(new Date().getFullYear()))
   const [loading,    setLoading]    = useState(true)
   const [toast,      setToast]      = useState<string | null>(null)
   const [tab,        setTab]        = useState<Tab>('prehled')
@@ -277,7 +284,8 @@ export default function ClientPage() {
       fetchOrders(clientId),
       fetchAllClientNotes(clientId),
       fetchClientEmails(clientId),
-    ]).then(([cls, t, co, ac, d, evs, ord, cn, em]) => {
+      fetchInvoiceMonths(clientId),
+    ]).then(([cls, t, co, ac, d, evs, ord, cn, em, inv]) => {
       if (cancelled) return
       const foundClient = cls.find(c => c.id === clientId) ?? null
       setClient(foundClient)
@@ -285,6 +293,7 @@ export default function ClientPage() {
       setOrders(ord as ClientOrder[])
       setClientNotes(cn)
       setClientEmails(em)
+      setInvoiceMonths(inv as InvoiceMonth[])
       setLoading(false)
     }).catch(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -528,6 +537,33 @@ export default function ClientPage() {
 
   const pendingOrders = orders.filter(o => !o.invoiced)
 
+  // ── Invoice months helpers ────────────────────────────────────
+  async function handleSaveInvoice() {
+    if (!userId || !invMonth || !invAmount) return
+    const amount = parseFloat(invAmount.replace(/\s/g, '').replace(',', '.'))
+    if (isNaN(amount) || amount <= 0) return
+    const saved = await upsertInvoiceMonth({ client_id: clientId, user_id: userId, month: invMonth, amount, note: invNote })
+    setInvoiceMonths(prev => {
+      const filtered = prev.filter(m => m.month !== invMonth)
+      return [...filtered, saved].sort((a, b) => b.month.localeCompare(a.month))
+    })
+    setShowInvForm(false); setInvMonth(''); setInvAmount(''); setInvNote('')
+    showToast('✅ Fakturace uložena')
+  }
+
+  async function handleDeleteInvoice(id: string) {
+    await deleteInvoiceMonth(id)
+    setInvoiceMonths(prev => prev.filter(m => m.id !== id))
+    showToast('🗑️ Smazáno')
+  }
+
+  function openEditInvoice(m: InvoiceMonth) {
+    setInvMonth(m.month)
+    setInvAmount(String(m.amount))
+    setInvNote(m.note ?? '')
+    setShowInvForm(true)
+  }
+
   const TABS: { id: Tab; label: string; count?: number }[] = [
     { id: 'prehled',     label: 'Přehled' },
     { id: 'ukoly',       label: 'Úkoly',       count: openTasks.length },
@@ -538,6 +574,7 @@ export default function ClientPage() {
     { id: 'schuzky',     label: 'Schůzky',     count: clientEvents.length },
     { id: 'poznamky',    label: 'Poznámky',    count: clientNotes.length },
     { id: 'emaily',      label: 'Emaily',      count: clientEmails.filter(e => e.status === 'pending').length || undefined },
+    { id: 'fakturace',   label: 'Fakturace',   count: invoiceMonths.length || undefined },
   ]
 
   return (
@@ -1230,6 +1267,165 @@ export default function ClientPage() {
                         {done.map(em => <EmailRow key={em.id} em={em} />)}
                       </>
                     )}
+                  </div>
+                )}
+              </>
+            )
+          })()}
+
+          {/* ══ FAKTURACE ══ */}
+          {tab === 'fakturace' && (() => {
+            const fmt = (n: number) => n.toLocaleString('cs-CZ')
+            const yearMonths = invoiceMonths.filter(m => m.month.startsWith(invYear))
+            const allAmounts = invoiceMonths.map(m => m.amount)
+            const total   = allAmounts.reduce((s, a) => s + a, 0)
+            const avg     = allAmounts.length ? total / allAmounts.length : 0
+            const best    = allAmounts.length ? Math.max(...allAmounts) : 0
+            const ytd     = yearMonths.reduce((s, m) => s + m.amount, 0)
+            const lastMonth = invoiceMonths[0]?.amount ?? null
+            const trend   = lastMonth !== null && avg > 0 ? (lastMonth >= avg ? '↑' : '↓') : null
+            const trendColor = trend === '↑' ? '#10b981' : '#ef4444'
+            const chartMax = best || 1
+            // Roky pro filter
+            const years = Array.from(new Set(invoiceMonths.map(m => m.month.slice(0, 4)))).sort((a, b) => b.localeCompare(a))
+            if (!years.includes(invYear) && years.length > 0) { /* noop */ }
+            const CZ_MONTHS_SHORT = ['Led','Úno','Bře','Dub','Kvě','Čer','Čvc','Srp','Zář','Říj','Lis','Pro']
+            function fmtMonth(ym: string) {
+              const [y, m] = ym.split('-')
+              return `${CZ_MONTHS_SHORT[parseInt(m) - 1]} ${y}`
+            }
+            return (
+              <>
+                {/* Stats row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                  {[
+                    { label: 'Celkem',         value: `${fmt(total)} Kč`,          icon: '💰' },
+                    { label: 'Průměr/měsíc',   value: `${fmt(Math.round(avg))} Kč`, icon: '📊', extra: trend ? <span style={{ color: trendColor, fontWeight: 700 }}>{trend}</span> : null },
+                    { label: 'Nejlepší měsíc', value: `${fmt(best)} Kč`,           icon: '🏆' },
+                    { label: `YTD ${invYear}`, value: `${fmt(ytd)} Kč`,            icon: '📅' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                      <span className="text-[22px]">{s.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-[17px] font-extrabold text-[var(--text-primary)] leading-tight flex items-center gap-1">
+                          {s.value}
+                          {'extra' in s && s.extra}
+                        </div>
+                        <div className="text-[11px] text-[var(--text-tertiary)]">{s.label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Toolbar */}
+                <div className="flex items-center justify-between mb-4 gap-3">
+                  {/* Rok filter */}
+                  <div className="flex gap-2 overflow-x-auto">
+                    {[String(new Date().getFullYear()), ...years.filter(y => y !== String(new Date().getFullYear()))].slice(0, 5).map(y => (
+                      <button key={y} onClick={() => setInvYear(y)}
+                        className="px-3 py-1.5 rounded-[10px] text-[12px] font-semibold flex-shrink-0 transition-all"
+                        style={{ background: invYear === y ? clientColor : 'var(--surface-raised)', color: invYear === y ? '#fff' : 'var(--text-secondary)' }}>
+                        {y}
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={() => { setInvMonth(''); setInvAmount(''); setInvNote(''); setShowInvForm(true) }}
+                    className="px-4 py-2 rounded-[12px] text-[13px] font-bold text-white flex-shrink-0"
+                    style={{ background: clientColor }}>
+                    + Přidat měsíc
+                  </button>
+                </div>
+
+                {/* Add / Edit form */}
+                {showInvForm && (
+                  <div className="bg-[var(--surface)] rounded-[16px] p-4 mb-4 flex flex-col gap-3" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.08)' }}>
+                    <div className="text-[13px] font-bold text-[var(--text-primary)]">
+                      {invMonth ? `Upravit ${fmtMonth(invMonth)}` : 'Nový záznam'}
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase mb-1">Měsíc</div>
+                        <input type="month" className="w-full rounded-[10px] px-3 py-2 text-[13px] outline-none border"
+                          style={{ background: 'var(--bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                          value={invMonth} onChange={e => setInvMonth(e.target.value)} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase mb-1">Částka (Kč)</div>
+                        <input type="text" inputMode="numeric" className="w-full rounded-[10px] px-3 py-2 text-[13px] outline-none border"
+                          style={{ background: 'var(--bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                          placeholder="25 000" value={invAmount} onChange={e => setInvAmount(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleSaveInvoice()} />
+                      </div>
+                    </div>
+                    <input type="text" className="w-full rounded-[10px] px-3 py-2 text-[13px] outline-none border"
+                      style={{ background: 'var(--bg)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                      placeholder="Poznámka (volitelná)…" value={invNote} onChange={e => setInvNote(e.target.value)} />
+                    <div className="flex gap-2">
+                      <button onClick={() => setShowInvForm(false)}
+                        className="flex-1 py-2.5 rounded-[10px] text-[13px] font-semibold border border-[var(--border)] text-[var(--text-secondary)]">
+                        Zrušit
+                      </button>
+                      <button onClick={handleSaveInvoice} disabled={!invMonth || !invAmount}
+                        className="flex-1 py-2.5 rounded-[10px] text-[13px] font-bold text-white disabled:opacity-40"
+                        style={{ background: clientColor }}>
+                        Uložit
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bar chart — zobrazí vybraný rok */}
+                {yearMonths.length > 0 && (
+                  <div className="bg-[var(--surface)] rounded-[16px] p-4 mb-4" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                    <div className="text-[10px] font-bold text-[var(--text-tertiary)] uppercase tracking-wide mb-3">Graf {invYear}</div>
+                    <div className="flex items-end gap-1.5 h-[80px]">
+                      {yearMonths.slice().reverse().map(m => {
+                        const h = Math.max(4, Math.round((m.amount / chartMax) * 80))
+                        return (
+                          <div key={m.month} className="flex-1 flex flex-col items-center gap-1 group relative">
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[var(--surface-raised)] text-[10px] font-semibold px-1.5 py-0.5 rounded-[5px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                              {fmt(m.amount)} Kč
+                            </div>
+                            <div className="w-full rounded-t-[4px] transition-all"
+                              style={{ height: h, background: m.amount === best ? clientColor : clientColor + '60' }} />
+                            <div className="text-[8px] text-[var(--text-tertiary)]">{CZ_MONTHS_SHORT[parseInt(m.month.slice(5)) - 1]}</div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Seznam */}
+                {invoiceMonths.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-[48px] mb-3">🧾</div>
+                    <p className="text-[14px] font-semibold text-[var(--text-secondary)] mb-1">Zatím žádná fakturace</p>
+                    <p className="text-[12px] text-[var(--text-tertiary)]">Přidej záznamy a sleduj, kolik jsi klientovi fakturoval</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {invoiceMonths.map(m => (
+                      <div key={m.id} className="bg-[var(--surface)] rounded-[14px] px-4 py-3 flex items-center gap-3 group"
+                        style={{ boxShadow: '0 1px 6px rgba(0,0,0,0.05)' }}>
+                        <div className="w-10 h-10 rounded-[10px] flex items-center justify-center text-[18px] flex-shrink-0"
+                          style={{ background: clientColor + '18' }}>🧾</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[14px] font-bold text-[var(--text-primary)]">{fmtMonth(m.month)}</div>
+                          {m.note && <div className="text-[11px] text-[var(--text-tertiary)] mt-0.5">{m.note}</div>}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="text-[15px] font-extrabold" style={{ color: clientColor }}>{fmt(m.amount)} Kč</div>
+                          {m.amount === best && <div className="text-[10px] font-bold text-yellow-500">🏆 Nejlepší</div>}
+                        </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => openEditInvoice(m)}
+                            className="w-7 h-7 rounded-[8px] flex items-center justify-center text-[13px] hover:bg-[var(--surface-raised)] text-[var(--text-tertiary)]">✏️</button>
+                          <button onClick={() => handleDeleteInvoice(m.id)}
+                            className="w-7 h-7 rounded-[8px] flex items-center justify-center text-[13px] hover:bg-red-50 text-red-400">🗑️</button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </>
