@@ -462,15 +462,22 @@ function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_C
 
   const dayLabels = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']
 
+  const numRows = totalCells / 7
+
   return (
-    <div className="p-2">
+    <div className="flex flex-col h-full">
       {/* Day-of-week header */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 border-b flex-shrink-0" style={{ borderColor: 'var(--border)' }}>
         {dayLabels.map(d => (
-          <div key={d} className="text-center text-[10px] font-bold text-[var(--text-tertiary)] uppercase py-1">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold text-[var(--text-tertiary)] uppercase py-1.5 border-r last:border-r-0" style={{ borderColor: 'var(--border)' }}>{d}</div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-px">
+
+      {/* Calendar grid — fills all remaining height */}
+      <div
+        className="flex-1 grid grid-cols-7"
+        style={{ gridTemplateRows: `repeat(${numRows}, 1fr)` }}
+      >
         {grid.map(day => {
           const isCurrentMonth = day.getMonth() === month.getMonth()
           const isToday = isSameDay(day, today)
@@ -478,8 +485,7 @@ function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_C
           const tks = tasksByDay[day.toDateString()] ?? []
           const totalItems = evs.length + tks.length
 
-          // Show max 3 mini chips: events first, then tasks
-          const MAX_CHIPS = 3
+          const MAX_CHIPS = 4
           type AnyItem = { type: 'event'; ev: CalendarEvent } | { type: 'task'; t: Task }
           const allItems: AnyItem[] = [
             ...evs.map(ev => ({ type: 'event' as const, ev })),
@@ -492,14 +498,15 @@ function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_C
             <div
               key={day.toDateString()}
               onClick={() => isCurrentMonth && onDayClick(day)}
-              className={`min-h-[72px] p-1 rounded-[8px] transition-colors border border-transparent ${
+              className={`p-1 border-r border-b last:border-r-0 flex flex-col transition-colors ${
                 isCurrentMonth
-                  ? 'cursor-pointer hover:border-[var(--border)] hover:bg-[var(--surface-raised)]'
-                  : 'opacity-20 pointer-events-none'
+                  ? 'cursor-pointer hover:bg-[var(--surface-raised)]'
+                  : 'opacity-25 pointer-events-none'
               }`}
+              style={{ borderColor: 'var(--border)' }}
             >
               {/* Date number */}
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold mb-0.5 mx-auto ${
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[12px] font-bold mb-1 flex-shrink-0 ${
                 isToday
                   ? 'bg-[var(--color-primary)] text-white'
                   : 'text-[var(--text-secondary)]'
@@ -508,24 +515,18 @@ function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_C
               </div>
 
               {/* Mini chips */}
-              <div className="flex flex-col gap-[2px]">
+              <div className="flex flex-col gap-[2px] flex-1 overflow-hidden">
                 {shown.map((item: AnyItem, idx: number) => {
                   if (item.type === 'event') {
                     const s = getCategoryInlineStyle(item.ev.category, appCategories)
                     return (
                       <div
                         key={item.ev.id}
-                        className="flex items-center gap-[3px] rounded-[4px] px-[3px] py-[1px] overflow-hidden"
+                        className="flex items-center gap-[3px] rounded-[4px] px-[3px] py-[1px]"
                         style={{ background: s.background }}
                       >
-                        <span
-                          className="w-[3px] h-[3px] rounded-full flex-shrink-0"
-                          style={{ background: s.color }}
-                        />
-                        <span
-                          className="text-[9px] font-semibold leading-tight truncate"
-                          style={{ color: s.color }}
-                        >
+                        <span className="w-[3px] h-[3px] rounded-full flex-shrink-0" style={{ background: s.color }} />
+                        <span className="text-[9px] font-semibold leading-tight truncate" style={{ color: s.color }}>
                           {item.ev.emoji ? `${item.ev.emoji} ` : ''}{item.ev.title}
                         </span>
                       </div>
@@ -535,17 +536,11 @@ function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_C
                     return (
                       <div
                         key={item.t.id}
-                        className="flex items-center gap-[3px] rounded-[4px] px-[3px] py-[1px] overflow-hidden"
+                        className="flex items-center gap-[3px] rounded-[4px] px-[3px] py-[1px]"
                         style={{ background: s.background }}
                       >
-                        <span
-                          className="w-[3px] h-[3px] rounded-full flex-shrink-0"
-                          style={{ background: s.color }}
-                        />
-                        <span
-                          className="text-[9px] font-semibold leading-tight truncate"
-                          style={{ color: s.color }}
-                        >
+                        <span className="w-[3px] h-[3px] rounded-full flex-shrink-0" style={{ background: s.color }} />
+                        <span className="text-[9px] font-semibold leading-tight truncate" style={{ color: s.color }}>
                           {item.t.title}
                         </span>
                       </div>
@@ -553,8 +548,8 @@ function MonthView({ month, events, tasks, onDayClick, appCategories = DEFAULT_C
                   }
                 })}
                 {overflow > 0 && (
-                  <div className="text-[8px] font-bold text-center leading-tight" style={{ color: 'var(--text-tertiary)' }}>
-                    +{overflow}
+                  <div className="text-[8px] font-bold leading-tight px-1" style={{ color: 'var(--text-tertiary)' }}>
+                    +{overflow} další
                   </div>
                 )}
               </div>
@@ -592,20 +587,26 @@ function DayPanel({ day, events, tasks, onClose, onEventClick, onTaskClick, onEv
   const dayLabel = `${CZ_DAYS_FULL[day.getDay()]} ${day.getDate()}. ${CZ_MONTHS[day.getMonth()]} ${day.getFullYear()}`
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end lg:left-[220px] lg:items-center lg:justify-center"
+      onClick={onClose}
+    >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" />
 
-      {/* Sheet */}
+      {/* Sheet — bottom sheet on mobile, centered modal on desktop */}
       <div
-        className="relative w-full max-h-[82vh] flex flex-col rounded-t-[24px] overflow-hidden"
+        className="relative w-full max-h-[82vh] flex flex-col rounded-t-[24px] overflow-hidden
+          lg:rounded-[20px] lg:w-full lg:max-w-[520px] lg:max-h-[85vh] lg:mx-auto lg:my-auto"
         style={{ background: 'var(--surface)' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Handle */}
-        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+        {/* Handle — mobile only */}
+        <div className="flex justify-center pt-3 pb-1 flex-shrink-0 lg:hidden">
           <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border-strong)' }} />
         </div>
+        {/* Desktop top padding */}
+        <div className="hidden lg:block pt-5" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pb-3 flex-shrink-0 border-b" style={{ borderColor: 'var(--border)' }}>
@@ -937,7 +938,7 @@ export default function KalendarPage() {
   }
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen lg:min-h-0 lg:h-full">
       <Header
         title="Kalendář"
         action={
@@ -974,7 +975,7 @@ export default function KalendarPage() {
       )}
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className={`flex-1 ${view === 'month' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
         {loading ? (
           <div className="flex items-center justify-center py-16 text-[var(--text-tertiary)] text-[13px]">Načítám…</div>
         ) : view === 'week' ? (
@@ -1108,7 +1109,7 @@ export default function KalendarPage() {
         <AddTaskSheet
           categories={appCategories}
           clients={calClients}
-          defaultDueDate={addDate.toISOString().split('T')[0]}
+          defaultDueDate={`${addDate.getFullYear()}-${String(addDate.getMonth()+1).padStart(2,'0')}-${String(addDate.getDate()).padStart(2,'0')}`}
           onSave={async payload => {
             const { insertTask } = await import('@/features/todo/api')
             await insertTask({ user_id: userId, status: 'open', done_at: null, ...payload })
@@ -1119,6 +1120,6 @@ export default function KalendarPage() {
           onClose={() => setShowAddTask(false)}
         />
       )}
-    </>
+    </div>
   )
 }
