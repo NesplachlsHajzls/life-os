@@ -273,8 +273,9 @@ function TodoPageInner() {
   const noOpenTasks = filteredOpen.length === 0
 
   // Category chips — "I.CA" is a special synthetic filter for client tasks
+  // Filter it out from DB categories to avoid duplicates if user has a real "I.CA" category
   const catChips = useMemo(
-    () => ['Vše', 'I.CA', ...categories.map(c => c.name)],
+    () => ['Vše', 'I.CA', ...categories.map(c => c.name).filter(n => n !== 'I.CA')],
     [categories]
   )
 
