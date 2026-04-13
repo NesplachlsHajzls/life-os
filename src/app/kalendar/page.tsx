@@ -386,7 +386,7 @@ function WeekView({ weekStart, events, tasks, onDayClick, onEventClick, onTaskCl
                             event={ev}
                             onClick={() => onEventClick(ev)}
                             onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
-                            isCompleted={completedIds?.has(ev.id)}
+                            isCompleted={completedIds?.has(ev.id.includes('_') ? ev.id.split('_')[0] : ev.id)}
                             appCategories={appCategories}
                             clientsMap={clientsMap}
                           />
@@ -649,7 +649,7 @@ function DayPanel({ day, events, tasks, onClose, onEventClick, onTaskClick, onEv
                       event={ev}
                       onClick={() => onEventClick(ev)}
                       onComplete={onEventComplete ? () => onEventComplete(ev) : undefined}
-                      isCompleted={completedIds?.has(ev.id)}
+                      isCompleted={completedIds?.has(ev.id.includes('_') ? ev.id.split('_')[0] : ev.id)}
                       appCategories={appCategories}
                       clientsMap={clientsMap}
                     />
@@ -868,21 +868,23 @@ export default function KalendarPage() {
   // Event toggle — persists to DB for cross-device sync
   function handleCompleteEvent(event: CalendarEvent) {
     if (!userId) return
-    const willComplete = !completedIds.has(event.id)
-    // Optimistic update
+    // Always use base ID (recurring events have suffix "uuid_2026-03-17")
+    const baseId = event.id.includes('_') ? event.id.split('_')[0] : event.id
+    const willComplete = !completedIds.has(baseId)
+    // Optimistic update — store base ID so it matches what DB returns on reload
     setCompletedIds(prev => {
       const next = new Set(prev)
-      if (willComplete) next.add(event.id)
-      else next.delete(event.id)
+      if (willComplete) next.add(baseId)
+      else next.delete(baseId)
       return next
     })
-    // Persist to DB (baseId strips recurring suffix)
-    setEventCompleted(userId, event.id, willComplete).catch(() => {
+    // Persist to DB
+    setEventCompleted(userId, baseId, willComplete).catch(() => {
       // Revert on error
       setCompletedIds(prev => {
         const next = new Set(prev)
-        if (willComplete) next.delete(event.id)
-        else next.add(event.id)
+        if (willComplete) next.delete(baseId)
+        else next.add(baseId)
         return next
       })
     })

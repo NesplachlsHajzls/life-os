@@ -70,12 +70,12 @@ CREATE TABLE IF NOT EXISTS calendar_events (
   created_at     TIMESTAMPTZ DEFAULT now()
 );
 
--- cal_completed_events (splněné opakující se události)
+-- cal_completed_events (splněné události v kalendáři — cross-device sync)
+-- event_id je TEXT (ne UUID) protože recurring events mají synthetic suffix
 CREATE TABLE IF NOT EXISTS cal_completed_events (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  event_id   UUID REFERENCES calendar_events(id) ON DELETE CASCADE,
-  date       DATE NOT NULL
+  event_id   TEXT NOT NULL,
+  PRIMARY KEY (user_id, event_id)
 );
 
 -- ── FINANCE ───────────────────────────────────────────────────
