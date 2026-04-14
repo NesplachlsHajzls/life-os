@@ -79,6 +79,7 @@ export interface RecurringItem {
   day_of_month: number       // 1–31: day the payment is due
   wallet_id: string | null   // wallet to deduct from
   last_paid?: string         // ISO date of last confirmed payment
+  cal_event_id?: string      // linked calendar event ID (set on create)
 }
 
 /** Uzavřené výplatní období — automaticky zapisováno při nastavení nového dne */

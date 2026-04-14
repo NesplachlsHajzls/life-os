@@ -9,6 +9,8 @@ import { fmt, genId, todayStr } from '@/features/finance/utils'
 import { RecurringItem, Wallet } from '@/features/finance/api'
 import type { CatMap } from '@/features/finance/utils'
 import { usePrivacy } from '@/contexts/PrivacyContext'
+import { insertEvent, updateEvent, deleteEvent } from '@/features/calendar/api'
+import type { RecurrenceType } from '@/features/calendar/api'
 
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
@@ -201,6 +203,60 @@ function EditSheet({ initial, expCats, wallets, onSave, onClose }: EditSheetProp
   )
 }
 
+// ── Calendar event helpers ────────────────────────────────────────
+
+/** Maps recurring frequency to calendar recurrence type + interval */
+function freqToCalRecurrence(freq: RecurringItem['frequency']): { type: RecurrenceType; interval: number } {
+  switch (freq) {
+    case 'weekly':    return { type: 'weekly',  interval: 1 }
+    case 'monthly':   return { type: 'monthly', interval: 1 }
+    case 'quarterly': return { type: 'monthly', interval: 3 }
+    case 'biannual':  return { type: 'monthly', interval: 6 }
+    case 'annual':    return { type: 'yearly',  interval: 1 }
+  }
+}
+
+/** Returns the ISO date of the next (or current) occurrence of day_of_month */
+function firstOccurrence(item: RecurringItem): string {
+  const today = new Date()
+  const yr = today.getFullYear()
+  const mo = today.getMonth()
+  const maxDay = new Date(yr, mo + 1, 0).getDate()
+  const day = Math.min(item.day_of_month, maxDay)
+  const candidate = new Date(yr, mo, day)
+  const todayMid  = new Date(yr, mo, today.getDate())
+  if (candidate >= todayMid) {
+    return `${yr}-${String(mo + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+  // Advance by one period
+  const freqMonths = FREQ_MONTHS[item.frequency]
+  const nextMo = Math.floor(freqMonths)
+  const next = new Date(yr, mo + nextMo, Math.min(item.day_of_month, 28))
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`
+}
+
+/** Build the calendar event payload for a recurring finance item */
+function buildCalPayload(item: RecurringItem, userId: string) {
+  const dateIso = firstOccurrence(item)
+  const { type, interval } = freqToCalRecurrence(item.frequency)
+  return {
+    user_id: userId,
+    title: `💸 ${item.description}`,
+    description: `Opakovaná platba – ${fmt(item.amount)} Kč`,
+    start_datetime: `${dateIso}T00:00:00`,
+    end_datetime:   `${dateIso}T00:00:00`,
+    is_all_day: true,
+    category: 'finance',
+    emoji: '💸',
+    is_work: false,
+    client_id: null,
+    is_recurring: true,
+    recurrence_type: type,
+    recurrence_interval: interval,
+    recurrence_end_date: null,
+  }
+}
+
 // ── Page ──────────────────────────────────────────────────────────
 
 export default function OpakovAnePage() {
@@ -237,15 +293,37 @@ export default function OpakovAnePage() {
     })
   , [recurringV2])
 
-  function handleAdd(item: RecurringItem) {
+  async function handleAdd(item: RecurringItem) {
+    try {
+      const ev = await insertEvent(buildCalPayload(item, userId))
+      item = { ...item, cal_event_id: ev.id }
+    } catch { /* calendar creation optional — don't block */ }
     saveRecurringV2([...recurringV2, item])
   }
 
-  function handleEdit(item: RecurringItem) {
+  async function handleEdit(item: RecurringItem) {
+    const prev = recurringV2.find(r => r.id === item.id)
+    // Update calendar event if title or day changed
+    if (prev?.cal_event_id && (
+      prev.description !== item.description ||
+      prev.day_of_month !== item.day_of_month ||
+      prev.frequency !== item.frequency
+    )) {
+      try {
+        await updateEvent({ id: prev.cal_event_id, ...buildCalPayload(item, userId) })
+        item = { ...item, cal_event_id: prev.cal_event_id }
+      } catch { item = { ...item, cal_event_id: prev.cal_event_id } }
+    } else if (prev?.cal_event_id) {
+      item = { ...item, cal_event_id: prev.cal_event_id }
+    }
     saveRecurringV2(recurringV2.map(r => r.id === item.id ? item : r))
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
+    const item = recurringV2.find(r => r.id === id)
+    if (item?.cal_event_id) {
+      try { await deleteEvent(item.cal_event_id) } catch { /* ignore */ }
+    }
     saveRecurringV2(recurringV2.filter(r => r.id !== id))
     setDeletingId(null)
   }
@@ -371,22 +449,13 @@ export default function OpakovAnePage() {
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       <span className="text-[14px] font-bold text-red-500">
                         {hideAmounts ? '••••' : `−${fmt(item.amount)} Kč`}
                       </span>
-                      {due ? (
-                        <button
-                          onClick={() => confirmRecurringV2(item)}
-                          className="px-3 py-1 rounded-lg text-[11px] font-bold text-white bg-orange-500 active:scale-95 transition-transform"
-                        >
-                          Zaplatit
-                        </button>
-                      ) : (
-                        <span className="text-[11px] text-[var(--text-tertiary)]">
-                          📅 {formatDueDate(next)}
-                        </span>
-                      )}
+                      <span className="text-[10px] text-[var(--text-tertiary)]">
+                        📅 {formatDueDate(next)}
+                      </span>
                     </div>
                   </div>
 
@@ -405,9 +474,19 @@ export default function OpakovAnePage() {
 
                   {/* Actions */}
                   <div className="flex gap-2 mt-2.5">
+                    <button
+                      onClick={() => confirmRecurringV2(item)}
+                      className={`flex-1 py-1.5 rounded-[10px] text-[11px] font-bold transition-all active:scale-95 ${
+                        due
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-[var(--surface-raised)] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      💸 Zaplatit
+                    </button>
                     <button onClick={() => setEditing(item)}
-                      className="flex-1 py-1.5 rounded-[10px] bg-[var(--surface-raised)] text-[11px] font-semibold text-[var(--text-secondary)]">
-                      ✏️ Upravit
+                      className="px-3 py-1.5 rounded-[10px] bg-[var(--surface-raised)] text-[11px] font-semibold text-[var(--text-secondary)]">
+                      ✏️
                     </button>
                     <button onClick={() => setDeletingId(item.id)}
                       className="px-3 py-1.5 rounded-[10px] bg-[var(--surface-raised)] text-[11px] font-semibold text-red-400">
