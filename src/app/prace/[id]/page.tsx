@@ -284,7 +284,7 @@ export default function ClientPage() {
       fetchOrders(clientId),
       fetchAllClientNotes(clientId),
       fetchClientEmails(clientId),
-      fetchInvoiceMonths(clientId),
+      fetchInvoiceMonths(clientId).catch(() => [] as InvoiceMonth[]),
     ]).then(([cls, t, co, ac, d, evs, ord, cn, em, inv]) => {
       if (cancelled) return
       const foundClient = cls.find(c => c.id === clientId) ?? null
