@@ -17,6 +17,7 @@ const SIDEBAR_SECTIONS = [
       { href: '/prace',     icon: '💼', label: 'I.CA'        },
       { href: '/kalendar',  icon: '📅', label: 'Kalendář'    },
       { href: '/emaily',    icon: '✉️', label: 'Emaily'      },
+      { href: '/jizdy',     icon: '🚗', label: 'Kniha jízd'  },
     ],
   },
   {
